@@ -75,20 +75,18 @@ polyclient/
 │   ├── storage/
 │   │   ├── cache/                      # Query caching
 │   │   └── settings/                   # User preferences storage
-│   ├── ui/
-│   │   ├── state/                      # UI state management
-│   │   └── bridge/                     # Wails integration layer
 │   └── test/
 │      ├── integration/                 # DB integration tests
 │      ├── perf/                        # Performance benchmarks
 │      └── mocks/                       # Auto-generated mocks
 ├── pkg/                                # MIT-licensed reusable libraries
 │   ├── plugins/                        # Plugin API interfaces
-│   ├── db/                             # DB adapter interfaces
 │   ├── ai/                             # AI provider interfaces
+│   ├── app/                            # Wails integration layer
+│   ├── db/                             # DB adapter interfaces
 │   ├── config/                         # Plugin-friendly config structures
 │   ├── utils/                          # Generic utilities
-│   └── devtools/                       # Development helpers, mocks, and testing stubs
+│   ├── devtools/                       # Development helpers, mocks, and testing stubs
 ├── plugins/                            # MIT-licensed built-in plugins
 │   ├── db_postgresql/                  # PostgreSQL plugin
 │   ├── db_mysql/                       # MySQL plugin

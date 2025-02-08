@@ -20,7 +20,7 @@ PolyClient is a cross-platform, open-source, and extensible client designed for 
 
 ## Plugin Support
 
-PolyClient's powerful plugin architecture decouples core functionality, enabling third parties to extend it (like adding support for a new database or AI provider). Learn how to author plugins [here](https://polyclient.pages.dev/en/plugins/).
+PolyClient's powerful plugin architecture decouples core functionality, enabling third parties to extend it (like adding support for a new database or AI provider). Learn how to author plugins [here](https://polyclient.pages.dev/en/plugins).
 
 **Legend**:
 
@@ -34,25 +34,25 @@ PolyClient's powerful plugin architecture decouples core functionality, enabling
 
 | Database                                                 | Status     | First supported version | Plugin                                                                                                  |
 | -------------------------------------------------------- | ---------- | ----------------------- | ------------------------------------------------------------------------------------------------------- |
-| [MariaDB](https://mariadb.org/)                          | 🔴 Planned | TBD                     | [Source](plugins/db_mariadb) · [Documentation](https://polyclient.pages.dev/en/databases/mariadb)       |
-| [MongoDB](https://www.mongodb.com/)                      | 🔴 Planned | TBD                     | [Source](plugins/db_mongodb) · [Documentation](https://polyclient.pages.dev/en/databases/mongodb)       |
-| [MySQL](https://www.mysql.com/)                          | 🔴 Planned | TBD                     | [Source](plugins/db_mysql) · [Documentation](https://polyclient.pages.dev/en/databases/mysql)           |
-| [PostgreSQL](https://postgresql.org/)                    | 🔴 Planned | TBD                     | [Source](plugins/db_postgresql) · [Documentation](https://polyclient.pages.dev/en/databases/postgresql) |
-| [Redis](https://redis.io/)                               | 🔴 Planned | TBD                     | [Source](plugins/db_redis) · [Documentation](https://polyclient.pages.dev/en/databases/redis)           |
+| [MariaDB](https://mariadb.org)                           | 🔴 Planned | TBD                     | [Source](plugins/db_mariadb) · [Documentation](https://polyclient.pages.dev/en/databases/mariadb)       |
+| [MongoDB](https://www.mongodb.com)                       | 🔴 Planned | TBD                     | [Source](plugins/db_mongodb) · [Documentation](https://polyclient.pages.dev/en/databases/mongodb)       |
+| [MySQL](https://www.mysql.com)                           | 🔴 Planned | TBD                     | [Source](plugins/db_mysql) · [Documentation](https://polyclient.pages.dev/en/databases/mysql)           |
+| [PostgreSQL](https://postgresql.org)                     | 🔴 Planned | TBD                     | [Source](plugins/db_postgresql) · [Documentation](https://polyclient.pages.dev/en/databases/postgresql) |
+| [Redis](https://redis.io)                                | 🔴 Planned | TBD                     | [Source](plugins/db_redis) · [Documentation](https://polyclient.pages.dev/en/databases/redis)           |
 | [SQL Server](https://www.microsoft.com/en-us/sql-server) | 🔴 Planned | TBD                     | [Source](plugins/db_mssql) · [Documentation](https://polyclient.pages.dev/en/databases/mssql)           |
-| [SQLite](https://www.sqlite.org/)                        | 🔴 Planned | TBD                     | [Source](plugins/db_sqlite) · [Documentation](https://polyclient.pages.dev/en/databases/sqlite)         |
+| [SQLite](https://www.sqlite.org)                         | 🔴 Planned | TBD                     | [Source](plugins/db_sqlite) · [Documentation](https://polyclient.pages.dev/en/databases/sqlite)         |
 
 ### AI Providers
 
 | AI provider                            | Status     | First supported version | Plugin                                                                                         |
 | -------------------------------------- | ---------- | ----------------------- | ---------------------------------------------------------------------------------------------- |
 | [Anthropic](https://www.anthropic.com) | 🔴 Planned | TBD                     | [Source](plugins/ai_anthropic) · [Documentation](https://polyclient.pages.dev/en/ai/anthropic) |
-| [DeepSeek](https://deepseek.ai/)       | 🔴 Planned | TBD                     | [Source](plugins/ai_deepseek) • [Documentation](https://polyclient.pages.dev/en/ai/deepseek)   |
+| [DeepSeek](https://www.deepseek.com)   | 🔴 Planned | TBD                     | [Source](plugins/ai_deepseek) • [Documentation](https://polyclient.pages.dev/en/ai/deepseek)   |
 | [Google AI](https://ai.google.com)     | 🔴 Planned | TBD                     | [Source](plugins/ai_google) • [Documentation](https://polyclient.pages.dev/en/ai/google)       |
-| [LM Studio](https://lmstudio.ai/)      | 🔴 Planned | TBD                     | [Source](plugins/ai_lmstudio) • [Documentation](https://polyclient.pages.dev/en/ai/lmstudio)   |
-| [Mistral](https://mistral.ai/)         | 🔴 Planned | TBD                     | [Source](plugins/ai_mistral) • [Documentation](https://polyclient.pages.dev/en/ai/mistral)     |
-| [Ollama](https://ollama.ai/)           | 🔴 Planned | TBD                     | [Source](plugins/ai_ollama) • [Documentation](https://polyclient.pages.dev/en/ai/ollama)       |
-| [OpenAI](https://openai.com/)          | 🔴 Planned | TBD                     | [Source](plugins/ai_openai) • [Documentation](https://polyclient.pages.dev/en/ai/openai)       |
+| [LM Studio](https://lmstudio.ai)       | 🔴 Planned | TBD                     | [Source](plugins/ai_lmstudio) • [Documentation](https://polyclient.pages.dev/en/ai/lmstudio)   |
+| [Mistral](https://mistral.ai)          | 🔴 Planned | TBD                     | [Source](plugins/ai_mistral) • [Documentation](https://polyclient.pages.dev/en/ai/mistral)     |
+| [Ollama](https://ollama.ai)            | 🔴 Planned | TBD                     | [Source](plugins/ai_ollama) • [Documentation](https://polyclient.pages.dev/en/ai/ollama)       |
+| [OpenAI](https://openai.com)           | 🔴 Planned | TBD                     | [Source](plugins/ai_openai) • [Documentation](https://polyclient.pages.dev/en/ai/openai)       |
 
 ## Third-party plugins
 
@@ -70,9 +70,9 @@ To be added
 
 - Clone this repository.
 - Install:
-  - [Go](https://go.dev/)
-  - [Task](https://taskfile.dev/)
-  - [Bun](https://bun.sh/)
+  - [Go](https://go.dev)
+  - [Task](https://taskfile.dev)
+  - [Bun](https://bun.sh)
 - Run `task install` to install the project dependencies.
 - Run `task --list` to list the available commands.
 

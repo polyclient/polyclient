@@ -5,12 +5,12 @@ version: '3'
 
 # This information is used to generate the build assets.
 info:
-  companyName: "My Company" # The name of the company
-  productName: "My Product" # The name of the application
-  productIdentifier: "com.mycompany.myproduct" # The unique product identifier
-  description: "A program that does X" # The application description
-  copyright: "(c) 2024, My Company" # Copyright text
-  comments: "Some Product Comments" # Comments
+  companyName: "PolyClient" # The name of the company
+  productName: "PolyClient" # The name of the application
+  productIdentifier: "com.polyclient.app" # The unique product identifier
+  description: "An extensible client for managing and querying SQL and NoSQL databases." # The application description
+  copyright: "(c) 2025, PolyClient Project" # Copyright text
+  comments: "PolyClient provides support for multiple databases with a plugin-driven architecture." # Comments
   version: "v0.0.1" # The application version
 
 # Dev mode configuration
@@ -59,4 +59,13 @@ fileAssociations:
 
 # Other data
 other:
-  - name: My Other Data
+  - name: Source
+    url: https://github.com/polyclient/polyclient
+  - name: Changelog
+    url: https://github.com/polyclient/polyclient/blob/main/CHANGELOG.md
+  - name: Website
+    url: https://polyclient.pages.dev
+  - name: Documentation
+    url: https://polyclient.pages.dev/en/docs
+  - name: Plugin Guidelines
+    url: https://polyclient.pages.dev/en/docs/plugins
