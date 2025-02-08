@@ -1,0 +1,58 @@
+version: "3"
+
+includes:
+    common: ./build/Taskfile.yml
+    windows: ./build/windows/Taskfile.yml
+    darwin: ./build/darwin/Taskfile.yml
+    linux: ./build/linux/Taskfile.yml
+
+vars:
+    APP_NAME: "polyclient"
+    BIN_DIR: "bin"
+    VITE_PORT: "{{.WAILS_VITE_PORT | default 9245}}"
+
+tasks:
+    install:
+        summary: Installs the project dependencies and devtools
+        cmds:
+            - go mod tidy
+            - go mod download
+            - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+            - go install -v github.com/wailsapp/wails/v3/cmd/wails3@latest
+
+    build:
+        summary: Builds the application
+        cmds:
+            - task: "{{OS}}:build"
+
+    package:
+        summary: Packages a production build of the application
+        cmds:
+            - task: "{{OS}}:package"
+
+    run:
+        summary: Runs the application
+        cmds:
+            - task: "{{OS}}:run"
+
+    dev:
+        summary: Runs the application in development mode
+        cmds:
+            - wails3 dev -config ./build/config.yml -port {{.VITE_PORT}}
+            
+    test:
+        desc: "Runs unit tests"
+        cmds:
+        - go test ./...      
+    
+    lint:
+        desc: "Lints the project"
+        cmds:
+        - golangci-lint run ./... --fix
+        - bun run --cwd ui lint
+
+    format:
+        desc: "Formats the project"
+        cmds:
+        - go fmt ./...
+        - bun run --cwd ui format
