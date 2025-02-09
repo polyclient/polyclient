@@ -72,13 +72,9 @@ polyclient/
 │   ├── api/
 │   │   ├── rest/                       # REST API handlers
 │   │   └── websocket/                  # Real-time communication
-│   ├── storage/
+│   └── storage/
 │   │   ├── cache/                      # Query caching
 │   │   └── settings/                   # User preferences storage
-│   └── test/
-│      ├── integration/                 # DB integration tests
-│      ├── perf/                        # Performance benchmarks
-│      └── mocks/                       # Auto-generated mocks
 ├── pkg/                                # MIT-licensed reusable libraries
 │   ├── plugins/                        # Plugin API interfaces
 │   ├── ai/                             # AI provider interfaces
@@ -88,6 +84,7 @@ polyclient/
 │   ├── utils/                          # Generic utilities
 │   ├── devtools/                       # Development helpers, mocks, and testing stubs
 ├── plugins/                            # MIT-licensed built-in plugins
+│   ├── db_sqlite/                      # SQLite plugin
 │   ├── db_postgresql/                  # PostgreSQL plugin
 │   ├── db_mysql/                       # MySQL plugin
 │   ├── db_mariadb/                     # MariaDB plugin
