@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Plugin Manifest Schema",
+  "description": "JSON Schema for validating a plugin manifest file.",
+  "required": ["name", "version", "entryPoint"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Pointer to the schema against which this document should be validated."
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+$",
+      "description": "The unique name of the plugin, which will be used as the plugin's identifier."
+    },
+    "version": {
+      "type": "string",
+      "description": "The version of the plugin, following the semantic versioning spec.",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "displayName": {
+      "type": "string",
+      "description": "The name of the plugin, which will be used to describe the plugin in the plugin list."
+    },
+    "description": {
+      "type": "string",
+      "description": "A short description of the plugin, which will be used to describe the plugin in the plugin list."
+    },
+    "author": {
+      "type": "string",
+      "description": "The name and optionally contact information of the person or organization that created the plugin."
+    },
+    "license": {
+      "type": "string",
+      "description": "The license under which the plugin is released. This should be a short name, such as 'MIT' or 'Apache-2.0'."
+    },
+    "repository": {
+      "type": "string",
+      "description": "URL of the repository where the source code of the plugin lives. This should be a url that points to a public git repository.",
+      "format": "uri"
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "The category of the plugin, which will be used to group plugins in the plugin list.",
+        "enum": [
+          "Database", 
+          "Data Transformation", 
+          "Data Visualization", 
+          "Data Analysis", 
+          "AI Assistant", 
+          "Theme", 
+          "Cloud", 
+          "Service", 
+          "Storage", 
+          "Security", 
+          "Development", 
+          "Testing",
+          "Logger",
+          "Other"
+        ]
+      },
+      "description": "The categories of the plugin, which will be used to group plugins in the plugin list."
+    },
+    "entryPoint": {
+      "type": "string",
+      "description": "Path to the binary that will be executed when the plugin is run. This should be a relative path to the plugin directory.",
+      "default": "plugin.bin"
+    }
+  }
+}

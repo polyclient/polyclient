@@ -1,0 +1,17 @@
+syntax = "proto3";
+package plugin;
+option go_package = "./proto";
+
+message PluginExecuteRequest {
+  string action = 1;
+  bytes payload = 2;
+}
+
+message PluginExecuteResponse {
+  bytes payload = 1;
+  string error = 2;
+}
+
+service Plugin {
+  rpc Execute(PluginExecuteRequest) returns (PluginExecuteResponse) {}
+}

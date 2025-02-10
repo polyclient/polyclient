@@ -1,58 +1,58 @@
 version: "3"
 
-includes:
-    common: ./build/Taskfile.yml
-    windows: ./build/windows/Taskfile.yml
-    darwin: ./build/darwin/Taskfile.yml
-    linux: ./build/linux/Taskfile.yml
-
 vars:
-    APP_NAME: "polyclient"
-    BIN_DIR: "bin"
-    VITE_PORT: "{{.WAILS_VITE_PORT | default 9245}}"
+  APP_NAME: polyclient
 
 tasks:
-    install:
-        summary: Installs the project dependencies and devtools
-        cmds:
-            - go mod tidy
-            - go mod download
-            - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-            - go install -v github.com/wailsapp/wails/v3/cmd/wails3@latest
+  install:
+    summary: Installs the project dependencies and devtools
+    cmds:
+      - go mod tidy
+      - go mod download
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      - go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+      - go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
-    build:
-        summary: Builds the application
-        cmds:
-            - task: "{{OS}}:build"
+  build:
+    summary: Builds the application
+    cmd: go build -o ./bin/{{ .APP_NAME }}
 
-    package:
-        summary: Packages a production build of the application
-        cmds:
-            - task: "{{OS}}:package"
+  build:plugins:
+    summary: Builds the plugins
+    cmds:
+      - go build -o ./plugins/db_sqlite/bin/{{ .APP_NAME }}-db-sqlite ./plugins/db_sqlite/...
 
-    run:
-        summary: Runs the application
-        cmds:
-            - task: "{{OS}}:run"
+  dev:
+    summary: Runs the application
+    deps: [build:plugins]
+    cmd: go run main.go
 
-    dev:
-        summary: Runs the application in development mode
-        cmds:
-            - wails3 dev -config ./build/config.yml -port {{.VITE_PORT}}
-            
-    test:
-        desc: "Runs unit tests"
-        cmds:
-        - go test ./...      
-    
-    lint:
-        desc: "Lints the project"
-        cmds:
-        - golangci-lint run ./... --fix
-        - bun run --cwd ui lint
+  test:
+    desc: "Run unit tests"
+    cmd: go test ./...
 
-    format:
-        desc: "Formats the project"
-        cmds:
-        - go fmt ./...
-        - bun run --cwd ui format
+  test:coverage:
+    desc: "Run unit tests and generate coverage report"
+    cmds:
+      - go test ./... -v -race -cover -coverprofile=coverage.out
+      - go tool cover -html=coverage.out -o coverage.html
+
+  lint:
+    desc: "Lints the project"
+    cmds:
+      - golangci-lint run ./...
+
+  lint:fix:
+    desc: "Lint the project using golangci-lint and fix any fixable issues"
+    cmds:
+      - golangci-lint run ./... --fix
+
+  format:
+    desc: "Formats the project"
+    cmds:
+      - go fmt ./...
+
+  proto:
+    desc: "Generates proto files"
+    cmds:
+      - protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative ./proto/*.proto

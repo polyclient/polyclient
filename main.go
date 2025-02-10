@@ -1,57 +1,53 @@
 package main
 
 import (
-	"embed"
+	"fmt"
 	"log"
 	"os"
-	"os/exec"
+	"path"
 
-	"github.com/polyclient/polyclient/pkg/app/services"
-	"github.com/polyclient/polyclient/pkg/sysinfo"
-	"github.com/wailsapp/wails/v3/pkg/application"
+	"github.com/polyclient/polyclient/internal/config"
+	"github.com/polyclient/polyclient/internal/plugin"
 )
 
-//go:embed all:frontend/dist
-var assets embed.FS
-
 func main() {
-	app := application.New(application.Options{
-		Name:        "polyclient",
-		Description: "A demo of using raw HTML & CSS",
-		Services: []application.Service{
-			application.NewService(services.NewGreetService()),
-		},
-		Assets: application.AssetOptions{
-			Handler: application.AssetFileServerFS(assets),
-		},
-		Mac: application.MacOptions{
-			ApplicationShouldTerminateAfterLastWindowClosed: true,
-		},
-	})
+	pluginsDirs := []string{"plugins"}
+	externalPluginsDirs := []string{}
 
-	app.NewWebviewWindowWithOptions(application.WebviewWindowOptions{
-		Title: "Window 1",
-		Linux: application.LinuxWindow{
-			WebviewGpuPolicy: func() application.WebviewGpuPolicy {
-				if sysinfo.HasNvidiaGPU(exec.Command) {
-					return application.WebviewGpuPolicyNever // Workaround for https://github.com/wailsapp/wails/issues/2977
-				}
+	userConfigDir, err := os.UserConfigDir()
+	if err == nil {
+		configPlugins := path.Join(userConfigDir, config.PolyClientConfigDir, config.PolyClientPluginsDir)
+		if _, err := os.Stat(configPlugins); err != nil && os.IsNotExist(err) {
+			os.MkdirAll(configPlugins, 0755)
+		}
 
-				return application.WebviewGpuPolicyAlways
-			}(),
-		},
-		Mac: application.MacWindow{
-			InvisibleTitleBarHeight: 50,
-			Backdrop:                application.MacBackdropTranslucent,
-			TitleBar:                application.MacTitleBarHiddenInset,
-		},
-		Windows:          application.WindowsWindow{},
-		BackgroundColour: application.NewRGB(27, 38, 54),
-		URL:              "/",
-	})
-
-	if err := app.Run(); err != nil {
-		log.Fatalf("Failed to start polyclient: %v", err)
-		os.Exit(1)
+		externalPluginsDirs = append(externalPluginsDirs, configPlugins)
 	}
+
+	pluginsDirs = append(pluginsDirs, externalPluginsDirs...)
+
+	pm := plugin.NewPluginManager(plugin.NewPluginManagerOptions{
+		PluginsDirs: pluginsDirs,
+	})
+
+	loadCount, err := pm.LoadPlugins()
+	if err != nil {
+		log.Fatal(fmt.Errorf("failed to load plugins: %w", err))
+	}
+
+	if loadCount == 0 {
+		log.Default().Println("No plugins found")
+	}
+
+	plugins := pm.GetPlugins()
+	fmt.Println(plugins)
+
+	result, err := pm.Execute("polyclient-db-sqlite", "query", []byte("SELECT * FROM users"), map[string]string{})
+	if err != nil {
+		log.Fatal(fmt.Errorf("failed to execute action: %w", err))
+	}
+
+	fmt.Println(string(result))
+
+	pm.Shutdown()
 }
