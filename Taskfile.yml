@@ -19,10 +19,12 @@ tasks:
 
   build:plugins:
     summary: Builds the plugins
-    cmd: go build ./plugins/...
+    cmds:
+      - go build -o ./plugins/db_sqlite/bin/{{ .APP_NAME }}-db-sqlite ./plugins/db_sqlite/...
 
   dev:
     summary: Runs the application
+    deps: [build:plugins]
     cmd: go run main.go
 
   test:

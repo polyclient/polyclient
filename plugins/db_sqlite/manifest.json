@@ -1,10 +1,13 @@
 {
   "$schema": "../../schemas/plugin-manifest.v1.json",
-  "name": "sqlite",
+  "name": "polyclient-db-sqlite",
   "version": "0.0.1",
+  "displayName": "SQLite",
   "description": "SQLite database adapter for PolyClient",
   "author": "Juan Mesa <ju4n97@proton.me>",
   "license": "MIT",
   "repository": "https://github.com/polyclient/polyclient/plugins/db_sqlite",
-  "entryPoint": "polyclient-sqlite"
+  "categories": ["Database"],
+  "entryPoint": "./bin/polyclient-db-sqlite"
 }
+

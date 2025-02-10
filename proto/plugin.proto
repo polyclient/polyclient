@@ -2,26 +2,16 @@ syntax = "proto3";
 package plugin;
 option go_package = "./proto";
 
-message PluginRequest {
+message PluginExecuteRequest {
   string action = 1;
   bytes payload = 2;
-  map<string, string> metadata = 3;
 }
 
-message PluginResponse {
+message PluginExecuteResponse {
   bytes payload = 1;
   string error = 2;
-  map<string, string> metadata = 3;
-}
-
-message PluginInfo {
-  string name = 1;
-  string version = 2;
-  repeated string actions = 3;
-  map<string, string> metadata = 4;
 }
 
 service Plugin {
-  rpc Register(PluginInfo) returns (PluginInfo) {}
-  rpc Execute(PluginRequest) returns (PluginResponse) {}
+  rpc Execute(PluginExecuteRequest) returns (PluginExecuteResponse) {}
 }

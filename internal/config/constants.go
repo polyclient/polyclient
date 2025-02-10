@@ -1,7 +1,7 @@
 package config
 
 const (
-	PolyClientConfigDir  string = ".polyclient"
+	PolyClientConfigDir  string = "polyclient"
 	PolyClientPluginsDir string = "plugins"
 )
 

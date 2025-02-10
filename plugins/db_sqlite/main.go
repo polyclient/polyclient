@@ -1,28 +1,20 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/polyclient/polyclient/pkg/pluginsdk"
-	"github.com/polyclient/polyclient/pkg/utils"
 )
 
 func main() {
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	plugin, err := pluginsdk.NewPlugin()
+	if err != nil {
+		log.Fatal("failed to initialize plugin:", err)
+	}
 
-	socketPath := utils.GetSocketPath("db_sqlite")
-	log.Printf("Plugin will create socket at: %s", socketPath)
-
-	p := pluginsdk.NewPlugin("db_sqlite", "0.0.1")
-
-	p.RegisterHandler("query", func(payload []byte, metadata map[string]string) ([]byte, error) {
-		fmt.Print(string(payload))
-
-		return []byte("take some users"), nil
+	plugin.RegisterHandler("query", func(payload []byte) ([]byte, error) {
+		return []byte("[{\"id\": 1, \"name\": \"John\"}, {\"id\": 2, \"name\": \"Jane\"}]"), nil
 	})
 
-	if err := pluginsdk.Serve(p); err != nil {
-		log.Fatalf("Failed to serve plugin: %v", err)
-	}
+	pluginsdk.Serve(plugin)
 }

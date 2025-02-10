@@ -17,12 +17,14 @@ func main() {
 	userConfigDir, err := os.UserConfigDir()
 	if err == nil {
 		configPlugins := path.Join(userConfigDir, config.PolyClientConfigDir, config.PolyClientPluginsDir)
+		if _, err := os.Stat(configPlugins); err != nil && os.IsNotExist(err) {
+			os.MkdirAll(configPlugins, 0755)
+		}
+
 		externalPluginsDirs = append(externalPluginsDirs, configPlugins)
 	}
 
 	pluginsDirs = append(pluginsDirs, externalPluginsDirs...)
-
-	log.Default().Println("Looking for plugins in: " + fmt.Sprint(pluginsDirs))
 
 	pm := plugin.NewPluginManager(plugin.NewPluginManagerOptions{
 		PluginsDirs: pluginsDirs,
@@ -38,6 +40,14 @@ func main() {
 	}
 
 	plugins := pm.GetPlugins()
-
 	fmt.Println(plugins)
+
+	result, err := pm.Execute("polyclient-db-sqlite", "query", []byte("SELECT * FROM users"), map[string]string{})
+	if err != nil {
+		log.Fatal(fmt.Errorf("failed to execute action: %w", err))
+	}
+
+	fmt.Println(string(result))
+
+	pm.Shutdown()
 }

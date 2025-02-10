@@ -19,16 +19,14 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Plugin_Register_FullMethodName = "/plugin.Plugin/Register"
-	Plugin_Execute_FullMethodName  = "/plugin.Plugin/Execute"
+	Plugin_Execute_FullMethodName = "/plugin.Plugin/Execute"
 )
 
 // PluginClient is the client API for Plugin service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PluginClient interface {
-	Register(ctx context.Context, in *PluginInfo, opts ...grpc.CallOption) (*PluginInfo, error)
-	Execute(ctx context.Context, in *PluginRequest, opts ...grpc.CallOption) (*PluginResponse, error)
+	Execute(ctx context.Context, in *PluginExecuteRequest, opts ...grpc.CallOption) (*PluginExecuteResponse, error)
 }
 
 type pluginClient struct {
@@ -39,19 +37,9 @@ func NewPluginClient(cc grpc.ClientConnInterface) PluginClient {
 	return &pluginClient{cc}
 }
 
-func (c *pluginClient) Register(ctx context.Context, in *PluginInfo, opts ...grpc.CallOption) (*PluginInfo, error) {
+func (c *pluginClient) Execute(ctx context.Context, in *PluginExecuteRequest, opts ...grpc.CallOption) (*PluginExecuteResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(PluginInfo)
-	err := c.cc.Invoke(ctx, Plugin_Register_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *pluginClient) Execute(ctx context.Context, in *PluginRequest, opts ...grpc.CallOption) (*PluginResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(PluginResponse)
+	out := new(PluginExecuteResponse)
 	err := c.cc.Invoke(ctx, Plugin_Execute_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -63,8 +51,7 @@ func (c *pluginClient) Execute(ctx context.Context, in *PluginRequest, opts ...g
 // All implementations must embed UnimplementedPluginServer
 // for forward compatibility.
 type PluginServer interface {
-	Register(context.Context, *PluginInfo) (*PluginInfo, error)
-	Execute(context.Context, *PluginRequest) (*PluginResponse, error)
+	Execute(context.Context, *PluginExecuteRequest) (*PluginExecuteResponse, error)
 	mustEmbedUnimplementedPluginServer()
 }
 
@@ -75,10 +62,7 @@ type PluginServer interface {
 // pointer dereference when methods are called.
 type UnimplementedPluginServer struct{}
 
-func (UnimplementedPluginServer) Register(context.Context, *PluginInfo) (*PluginInfo, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
-}
-func (UnimplementedPluginServer) Execute(context.Context, *PluginRequest) (*PluginResponse, error) {
+func (UnimplementedPluginServer) Execute(context.Context, *PluginExecuteRequest) (*PluginExecuteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Execute not implemented")
 }
 func (UnimplementedPluginServer) mustEmbedUnimplementedPluginServer() {}
@@ -102,26 +86,8 @@ func RegisterPluginServer(s grpc.ServiceRegistrar, srv PluginServer) {
 	s.RegisterService(&Plugin_ServiceDesc, srv)
 }
 
-func _Plugin_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PluginInfo)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(PluginServer).Register(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Plugin_Register_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PluginServer).Register(ctx, req.(*PluginInfo))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _Plugin_Execute_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(PluginRequest)
+	in := new(PluginExecuteRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -133,7 +99,7 @@ func _Plugin_Execute_Handler(srv interface{}, ctx context.Context, dec func(inte
 		FullMethod: Plugin_Execute_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PluginServer).Execute(ctx, req.(*PluginRequest))
+		return srv.(PluginServer).Execute(ctx, req.(*PluginExecuteRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -145,10 +111,6 @@ var Plugin_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "plugin.Plugin",
 	HandlerType: (*PluginServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "Register",
-			Handler:    _Plugin_Register_Handler,
-		},
 		{
 			MethodName: "Execute",
 			Handler:    _Plugin_Execute_Handler,

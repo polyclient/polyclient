@@ -4,6 +4,11 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
+	"time"
 
 	"github.com/polyclient/polyclient/pkg/utils"
 	pb "github.com/polyclient/polyclient/proto"
@@ -14,37 +19,35 @@ import (
 type pluginServer struct {
 	pb.UnimplementedPluginServer
 	plugin *Plugin
-}
-
-// Register registers the plugin to the gRPC server.
-func (s *pluginServer) Register(ctx context.Context, info *pb.PluginInfo) (*pb.PluginInfo, error) {
-	return &pb.PluginInfo{
-		Name:     s.plugin.Name,
-		Version:  s.plugin.Version,
-		Actions:  s.plugin.GetActions(),
-		Metadata: s.plugin.Metadata,
-	}, nil
+	mu     sync.RWMutex
 }
 
 // Execute executes the specified action handler for a plugin.
-func (s *pluginServer) Execute(ctx context.Context, req *pb.PluginRequest) (*pb.PluginResponse, error) {
-	handler, exists := s.plugin.handlers[req.Action]
+func (s *pluginServer) Execute(ctx context.Context, req *pb.PluginExecuteRequest) (res *pb.PluginExecuteResponse, err error) {
+	defer func() {
+		// We recover from panics in the action handler to prevent the entire
+		// gRPC server from crashing. This is important because a panic in the
+		// plugin should not affect the main PolyClient process.
+		if r := recover(); r != nil {
+			err = fmt.Errorf("handler panic: %v", r)
+			res = &pb.PluginExecuteResponse{Error: err.Error()}
+		}
+	}()
+
+	s.mu.RLock()
+	handler, exists := s.plugin.Handlers[req.Action]
+	s.mu.RUnlock()
+
 	if !exists {
-		return &pb.PluginResponse{
-			Error: "unknown action: " + req.Action,
-		}, nil
+		return &pb.PluginExecuteResponse{Error: "unknown action: " + req.Action}, nil
 	}
 
-	result, err := handler(req.Payload, req.Metadata)
+	result, err := handler(req.Payload)
 	if err != nil {
-		return &pb.PluginResponse{
-			Error: err.Error(),
-		}, err
+		return &pb.PluginExecuteResponse{Error: err.Error()}, err
 	}
 
-	return &pb.PluginResponse{
-		Payload: result,
-	}, nil
+	return &pb.PluginExecuteResponse{Payload: result}, nil
 }
 
 // Serve starts a gRPC server for the given Plugin. It determines the appropriate communication
@@ -54,39 +57,56 @@ func (s *pluginServer) Execute(ctx context.Context, req *pb.PluginRequest) (*pb.
 //
 // Sockets (Unix domain sockets) and pipes (named pipes on Windows) are used here because they
 // provide efficient, local communication without the overhead of TCP/IP networking.
-//
-// Example usage:
-//
-//	p := pluginsdk.NewPlugin("myPlugin", "0.0.1")
-//	p.RegisterHandler("someAction", func(payload []byte, metadata map[string]string) ([]byte, error) {
-//		return []byte("Hello, world!"), nil
-//	})
-//
-//	err := Serve(p)
-//	if err != nil {
-//		log.Fatalf("Error serving plugin: %v", err)
-//	}
-func Serve(plugin *Plugin) error {
-	socketPath := utils.GetSocketPath(plugin.Name)
+func Serve(plugin *Plugin) {
+	socketPath := utils.GetSocketPath(plugin.Manifest.Name)
 
+	// Create a listener for the gRPC server
 	listener, err := createListener(socketPath)
 	if err != nil {
-		return fmt.Errorf("failed to create listener: %v", err)
+		log.Fatalf("failed to create listener: %v", err)
+	}
+	defer listener.Close()
+
+	if _, err := os.Stat(socketPath); os.IsNotExist(err) {
+		log.Fatalf("socket file was not created: %v", err)
 	}
 
-	defer func() {
-		listener.Close()
+	// Create gRPC server
+	grpcServer := grpc.NewServer()
+	pb.RegisterPluginServer(grpcServer, &pluginServer{plugin: plugin})
 
-		if err := cleanupSocket(socketPath); err != nil {
-			log.Printf("Failed to clean up socket: %v", err)
+	// Graceful shutdown setup
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
+	defer stop()
+
+	// Server in goroutine so we can block on context
+	go func() {
+		log.Printf("Server starting on socket: %s", socketPath)
+		if err := grpcServer.Serve(listener); err != nil && err != grpc.ErrServerStopped {
+			log.Fatalf("gRPC server error: %v", err)
 		}
 	}()
 
-	server := grpc.NewServer()
+	// Wait for shutdown signal
+	<-ctx.Done()
 
-	pb.RegisterPluginServer(server, &pluginServer{plugin: plugin})
+	// Graceful stop with timeout
+	log.Println("Shutting down server...")
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	log.Printf("Plugin %s v%s starting...", plugin.Name, plugin.Version)
+	// First try graceful stop
+	stopped := make(chan struct{})
+	go func() {
+		grpcServer.GracefulStop()
+		close(stopped)
+	}()
 
-	return server.Serve(listener)
+	select {
+	case <-stopped:
+		log.Println("Server stopped gracefully")
+	case <-shutdownCtx.Done():
+		log.Println("Forcing server stop after timeout")
+		grpcServer.Stop()
+	}
 }

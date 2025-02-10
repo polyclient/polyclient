@@ -3,7 +3,7 @@
   "type": "object",
   "title": "Plugin Manifest Schema",
   "description": "JSON Schema for validating a plugin manifest file.",
-  "required": ["name", "version"],
+  "required": ["name", "version", "entryPoint"],
   "additionalProperties": false,
   "properties": {
     "$schema": {
@@ -18,7 +18,11 @@
     "version": {
       "type": "string",
       "description": "The version of the plugin, following the semantic versioning spec.",
-      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "displayName": {
+      "type": "string",
+      "description": "The name of the plugin, which will be used to describe the plugin in the plugin list."
     },
     "description": {
       "type": "string",
@@ -36,6 +40,30 @@
       "type": "string",
       "description": "URL of the repository where the source code of the plugin lives. This should be a url that points to a public git repository.",
       "format": "uri"
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "description": "The category of the plugin, which will be used to group plugins in the plugin list.",
+        "enum": [
+          "Database", 
+          "Data Transformation", 
+          "Data Visualization", 
+          "Data Analysis", 
+          "AI Assistant", 
+          "Theme", 
+          "Cloud", 
+          "Service", 
+          "Storage", 
+          "Security", 
+          "Development", 
+          "Testing",
+          "Logger",
+          "Other"
+        ]
+      },
+      "description": "The categories of the plugin, which will be used to group plugins in the plugin list."
     },
     "entryPoint": {
       "type": "string",
