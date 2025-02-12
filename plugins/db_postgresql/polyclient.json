@@ -1,0 +1,17 @@
+{
+  "$schema": "../../schemas/plugin.v1.json",
+  "manifest": {
+    "name": "polyclient-db-postgresql",
+    "version": "0.0.1",
+    "displayName": "PostgreSQL",
+    "description": "PostgreSQL database adapter for PolyClient",
+    "author": "Juan Mesa <ju4n97@proton.me>",
+    "license": "MIT",
+    "repository": "https://github.com/polyclient/polyclient/plugins/db_postgresql",
+    "categories": ["Database"],
+    "entryPoint": "./bin/polyclient-db-postgresql"
+  },
+  "runtime": {
+    "os": ["linux", "darwin", "windows"]
+  }
+}

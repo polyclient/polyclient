@@ -19,10 +19,10 @@ type PluginManager struct {
 
 // managedPlugin represents a plugin managed by the PluginManager and its associated resources.
 type managedPlugin struct {
-	manifest pluginsdk.Manifest
-	client   pb.PluginClient
-	process  *os.Process
-	conn     *grpc.ClientConn
+	config  pluginsdk.Config
+	client  pb.PluginClient
+	process *os.Process
+	conn    *grpc.ClientConn
 }
 
 // NewPluginManagerOptions defines the options for creating a new PluginManager.

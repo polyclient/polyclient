@@ -26,7 +26,6 @@ func (pm *PluginManager) cleanup() error {
 		} else {
 			log.Default().Printf("[%s] Process killed", name)
 		}
-
 	}
 
 	pm.plugins = make(map[string]*managedPlugin)

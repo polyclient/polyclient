@@ -57,7 +57,7 @@ func (s *pluginServer) Execute(ctx context.Context, req *pb.PluginExecuteRequest
 // Sockets (Unix domain sockets) and pipes (named pipes on Windows) are used here because they
 // provide efficient, local communication without the overhead of TCP/IP networking.
 func Serve(plugin *Plugin) {
-	socketPath := GetSocketPath(plugin.Manifest.Name)
+	socketPath := GetSocketPath(plugin.Config.Manifest.Name)
 
 	// Create a listener for the gRPC server
 	listener, err := createListener(socketPath)

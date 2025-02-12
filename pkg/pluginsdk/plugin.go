@@ -14,13 +14,13 @@ type ActionHandler func(payload []byte) ([]byte, error)
 
 // Plugin represents a generic plugin that can be used to extend any functionality of PolyClient.
 type Plugin struct {
-	Manifest *Manifest
+	Config   *Config
 	Handlers map[string]ActionHandler
 }
 
 // NewPlugin creates a new plugin instance for the current executable.
 //
-// It assumes that the manifest.json file is in the same directory as the
+// It assumes that the plugin config file is in the same directory as the
 // executable. If the file is not found, it returns an error.
 func NewPlugin() (*Plugin, error) {
 	var pluginDir string
@@ -44,19 +44,26 @@ func NewPlugin() (*Plugin, error) {
 		pluginDir = filepath.Dir(execPath)
 	}
 
-	manifestPath := filepath.Join(pluginDir, "manifest.json")
+	var configFilePath string
 
-	if _, err := os.Stat(manifestPath); os.IsNotExist(err) {
-		return nil, fmt.Errorf("manifest.json not found in plugin directory: %s", pluginDir)
+	for _, configFile := range supportedConfigFiles {
+		if _, err := os.Stat(filepath.Join(pluginDir, configFile)); err == nil {
+			configFilePath = filepath.Join(pluginDir, configFile)
+			break
+		}
 	}
 
-	manifest, err := LoadManifest(manifestPath)
+	if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
+		return nil, fmt.Errorf("failed to find plugin config in %s", pluginDir)
+	}
+
+	config, err := LoadConfig(configFilePath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load plugin manifest at %s: %w", manifestPath, err)
+		return nil, fmt.Errorf("failed to load plugin config from %s: %w", configFilePath, err)
 	}
 
 	return &Plugin{
-		Manifest: manifest,
+		Config:   config,
 		Handlers: make(map[string]ActionHandler),
 	}, nil
 }
