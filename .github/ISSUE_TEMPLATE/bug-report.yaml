@@ -1,0 +1,68 @@
+name: Bug report
+description: File a bug report for the project
+labels: ["bug"]
+body:
+  - type: checkboxes
+    id: search
+    attributes:
+      label: Duplicate check
+      description: Please search through the existing issues to confirm this bug hasn't been reported yet.
+      options:
+        - label: I have checked for existing issues and this bug is not yet reported.
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: Please provide a clear and concise description of what the bug is.
+      placeholder: e.g., "When I try to do X, Y happens instead of Z."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: How do you trigger this bug? Please provide steps to reproduce.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment details
+      description: Please provide details about your operating system and environment where the bug occurred.
+      placeholder: |
+        - Operating System: [e.g., Windows 10 Pro, macOS Monterey 12.3, Ubuntu 20.04 LTS]
+        - Graphics Card: [e.g., NVIDIA GeForce RTX 3070, AMD Radeon RX 6800 XT, Intel UHD Graphics 630]
+        - CPU: [e.g., Intel Core i7-10700K, AMD Ryzen 5 3600]
+        - RAM: [e.g., 16GB DDR4]
+        - Display Resolution: [e.g., 1920x1080, 2560x1440]
+        - Additional relevant hardware/software:
+    validations:
+      required: true
+
+  - type: input
+    id: app_version
+    attributes:
+      label: Application version
+      description: Which version of the app are you using? This helps tracking down version-specific issues.
+      placeholder: e.g., "1.2.3", "1.0.0-beta"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: contribution
+    attributes:
+      label: Would you like to work on fixing this bug?
+      options:
+        - "Yes, I would like to contribute."
+        - "No, I'm just reporting the issue."
+    validations:
+      required: true

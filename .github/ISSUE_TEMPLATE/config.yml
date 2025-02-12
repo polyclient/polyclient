@@ -1,0 +1,9 @@
+blank_issues_enabled: true
+contact_links:
+  - name: PolyClient feedback
+    url: https://github.com/polyclient/polyclient/discussions/categories/ideas
+    about: Please submit your suggestions and feedback for PolyClient.
+
+  - name: PolyClient questions
+    url: https://github.com/polyclient/polyclient/discussions/categories/q-a
+    about: Please ask and answer questions regarding PolyClient.
