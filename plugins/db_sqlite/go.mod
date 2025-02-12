@@ -1,3 +1,3 @@
 module github.com/polyclient/polyclient/plugins/db_sqlite
 
-go 1.23.6
+go 1.24
