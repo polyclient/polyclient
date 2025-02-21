@@ -18,9 +18,13 @@ tasks:
       - go work init
       - go work use .
 
-  dev-cli:
-    desc: Run the CLI application in development mode for testing and debugging
-    cmd: go run ./cmd/cli/main.go
+  dev:
+    desc: Run the CLI in development mode for testing and debugging
+    cmd: go run ./cmd/main.go {{ .CLI_ARGS }}
+
+  build:
+    desc: Build the CLI binary
+    cmd: go build -o bin/${APP_NAME} ./cmd
 
   lint:
     desc: Check code quality and identify potential issues
