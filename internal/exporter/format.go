@@ -50,27 +50,27 @@ var formatRegistry = map[Format]FormatDetails{
 	HTML: {
 		MIMEType:  "text/html",
 		FileExt:   "html",
-		Formatter: formatHTML,
+		Formatter: FormatHTML,
 	},
 	XML: {
 		MIMEType:  "application/xml",
 		FileExt:   "xml",
-		Formatter: formatXML,
+		Formatter: FormatXML,
 	},
 	YAML: {
 		MIMEType:  "application/yaml",
 		FileExt:   "yaml",
-		Formatter: formatYAML,
+		Formatter: FormatYAML,
 	},
 	TOML: {
 		MIMEType:  "application/toml",
 		FileExt:   "toml",
-		Formatter: formatTOML,
+		Formatter: FormatTOML,
 	},
 	Markdown: {
 		MIMEType:  "text/markdown",
 		FileExt:   "md",
-		Formatter: formatMarkdown,
+		Formatter: FormatMarkdown,
 	},
 }
 
@@ -89,29 +89,4 @@ func GetSupportedFormats() []string {
 	}
 
 	return formats
-}
-
-// formatHTML writes the provided data to the writer in HTML format.
-func formatHTML(w io.Writer, data any) error {
-	return nil
-}
-
-// formatXML writes the provided data to the writer in XML format.
-func formatXML(w io.Writer, data any) error {
-	return nil
-}
-
-// formatYAML writes the provided data to the writer in YAML format.
-func formatYAML(w io.Writer, data any) error {
-	return nil
-}
-
-// formatTOML writes the provided data to the writer in TOML format.
-func formatTOML(w io.Writer, data any) error {
-	return nil
-}
-
-// formatMarkdown writes the provided data to the writer in Markdown format.
-func formatMarkdown(w io.Writer, data any) error {
-	return nil
 }
