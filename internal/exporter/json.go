@@ -11,10 +11,7 @@ import (
 	"io"
 )
 
-// formatJSON formats and writes the provided data to the writer in JSON format.
-// It automatically adds indentation of 2 spaces to make the output more readable.
-// The data parameter can be of any type that is JSON-encodable.
-// Returns an error if JSON encoding fails.
+// FormatJSON formats and writes the provided data to the writer in JSON format.
 func FormatJSON(w io.Writer, data any) error {
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
