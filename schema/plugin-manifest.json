@@ -1,0 +1,155 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Plugin Manifest Schema",
+  "description": "JSON Schema for validating a plugin manifest file.",
+  "definitions": {
+    "author": {
+      "type": "object",
+      "description": "Information about the plugin author.",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the person or organization that created the plugin."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The author's contact email (optional)."
+        },
+        "websites": {
+          "type": "array",
+          "description": "A list of URLs associated with the plugin author or organization (optional).",
+          "minItems": 1,
+          "maxItems": 5,
+          "uniqueItems": true,
+          "items": {
+            "format": "uri",
+            "description": "A website or homepage for the plugin author or organization."
+          }
+        }
+      }
+    }
+  },
+  "type": "object",
+  "required": ["id", "name", "version", "entrypoint"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Pointer to the schema against which this document should be validated."
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_-]+$",
+      "description": "A globally unique identifier for the plugin. Should be lowercase and URL-safe."
+    },
+    "name": {
+      "type": "string",
+      "description": "The human-readable name of the plugin.",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "version": {
+      "type": "string",
+      "description": "The version of the plugin, following the semantic versioning spec.",
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "description": {
+      "type": "string",
+      "description": "A short description of the plugin, which will be used to describe it in the plugin list.",
+      "maxLength": 300
+    },
+    "authors": {
+      "type": "array",
+      "description": "A list of authors associated with the plugin.",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/definitions/author"
+      }
+    },
+    "license": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "enum": [
+            "AGPL-3.0-only",
+            "Apache-2.0",
+            "BSD-2-Clause",
+            "BSD-3-Clause",
+            "BSL-1.0",
+            "CC0-1.0",
+            "CDDL-1.0",
+            "CDDL-1.1",
+            "EPL-1.0",
+            "EPL-2.0",
+            "GPL-2.0-only",
+            "GPL-3.0-only",
+            "ISC",
+            "LGPL-2.0-only",
+            "LGPL-2.1-only",
+            "LGPL-2.1-or-later",
+            "LGPL-3.0-only",
+            "LGPL-3.0-or-later",
+            "MIT",
+            "MPL-2.0",
+            "MS-PL",
+            "UNLICENSED"
+          ]
+        }
+      ]
+    },
+    "repository": {
+      "type": "string",
+      "description": "URL of the repository where the source code of the plugin is maintained.",
+      "format": "uri"
+    },
+    "homepage": {
+      "type": "string",
+      "description": "URL of the plugin's homepage or documentation (optional).",
+      "format": "uri"
+    },
+    "categories": {
+      "type": "array",
+      "description": "A list of categories that describe the plugin.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "Database",
+          "AI",
+          "Themes",
+          "Keymaps",
+          "Snippets",
+          "Visualization",
+          "Utility",
+          "Security",
+          "Networking",
+          "Testing",
+          "Storage",
+          "Debugging",
+          "Other"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "keywords": {
+      "type": "array",
+      "description": "A list of keywords related to the plugin, useful for search and discovery.",
+      "items": {
+        "type": "string"
+      },
+      "uniqueItems": true,
+      "maxItems": 5
+    },
+    "entrypoint": {
+      "type": "string",
+      "description": "The main WebAssembly (.wasm) file that serves as the entry point for the plugin.",
+      "pattern": "^(https?://[\\w./-]+|[a-zA-Z0-9._/-]+\\.wasm)$"
+    }
+  }
+}
