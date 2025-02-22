@@ -27,10 +27,6 @@ Refer to the [contributor's guide](CONTRIBUTING.md) for more in-depth informatio
 
 ## License
 
-[![image](https://www.gnu.org/graphics/gplv3-with-text-136x68.png)](https://www.gnu.org/licenses/gpl-3.0.html)
-
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpolyclient%2Fpolyclient.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpolyclient%2Fpolyclient?ref=badge_large&issueType=license)
 
-This project is licensed under the GNU General Public License v3.0 (see [LICENSE](LICENSE)), with an additional exception for Runtime Library Linkage (see [COPYING.RUNTIME](COPYING.RUNTIME)).
-
-The Runtime Library Linkage Exception allows you to create and distribute modules that link with this software under the terms of your choice, including proprietary licenses.
+This project is licensed under the [GNU General Public License v3.0](LICENSE-GPL), with a [runtime library linkage exception](COPYING.RUNTIME). Built-in plugin modules are licensed under the [Apache License v2.0](LICENSE-APACHE), The runtime library linkage exception allows you to build and distribute your own linked modules under any terms you choose, including proprietary licenses.

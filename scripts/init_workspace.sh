@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-if [ ! -f go.work ]; then
-    go work init
-    go work use .
-    go mod tidy
-fi
+rm -f go.work go.work.sum
+
+go work init
+go work use .
+go work use ./plugins/sqlite
+go mod tidy

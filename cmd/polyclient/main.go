@@ -11,8 +11,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/polyclient/polyclient/cmd/db"
-	"github.com/polyclient/polyclient/cmd/gui"
+	"github.com/polyclient/polyclient/cmd/polyclient/db"
+	"github.com/polyclient/polyclient/cmd/polyclient/gui"
+	"github.com/polyclient/polyclient/cmd/polyclient/plugin"
 	"github.com/urfave/cli/v3"
 )
 
@@ -26,6 +27,7 @@ func main() {
 		Commands: []*cli.Command{
 			db.NewQueryCommand(),
 			gui.NewGuiCommand(),
+			plugin.NewPluginCommand(),
 		},
 	})
 
