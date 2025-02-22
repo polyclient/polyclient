@@ -82,7 +82,8 @@ func ValidateFormat(format Format) bool {
 
 // GetSupportedFormats returns a slice of supported formats.
 func GetSupportedFormats() []string {
-	var formats []string
+	formats := make([]string, 0, len(formatRegistry))
+
 	for format := range formatRegistry {
 		formats = append(formats, string(format))
 	}

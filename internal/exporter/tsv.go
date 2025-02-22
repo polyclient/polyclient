@@ -13,6 +13,7 @@ import (
 	"github.com/jszwec/csvutil"
 )
 
+// FormatTSV formats and writes the provided data to the writer in TSV format.
 func FormatTSV(w io.Writer, data any) error {
 	writer := csv.NewWriter(w)
 	writer.Comma = '\t'
