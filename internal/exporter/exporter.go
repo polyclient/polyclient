@@ -11,17 +11,19 @@ import (
 	"io"
 )
 
-// Exporter represents the data format exporter
+// Exporter represents the data format exporter.
 type DataExporter struct {
 	format Format
 	output io.Writer
 }
 
+// DataExporterOptions represents the options for creating a DataExporter.
 type DataExporterOptions struct {
 	Format string
 	Output io.Writer
 }
 
+// NewDataExporter creates a new DataExporter instance with the given options.
 func NewDataExporter(opts DataExporterOptions) *DataExporter {
 	return &DataExporter{
 		format: Format(opts.Format),
@@ -29,6 +31,7 @@ func NewDataExporter(opts DataExporterOptions) *DataExporter {
 	}
 }
 
+// Exports the given data to the specified format using the configured writer.
 func (de *DataExporter) Export(data any) error {
 	formatter, ok := formatRegistry[de.format]
 	if !ok {

@@ -7,12 +7,10 @@
 package exporter
 
 import (
-	"encoding/csv"
-	"encoding/json"
 	"io"
 )
 
-// Format represents supported export formats
+// Format represents supported export formats.
 type Format string
 
 const (
@@ -26,7 +24,7 @@ const (
 	Markdown = "markdown"
 )
 
-// FormatDetails contains metadata and handlers for each format
+// FormatDetails contains metadata and handlers for each format.
 type FormatDetails struct {
 	MIMEType  string
 	FileExt   string
@@ -37,17 +35,17 @@ var formatRegistry = map[Format]FormatDetails{
 	CSV: {
 		MIMEType:  "text/csv",
 		FileExt:   "csv",
-		Formatter: formatCSV,
+		Formatter: FormatCSV,
 	},
 	TSV: {
 		MIMEType:  "text/tab-separated-values",
 		FileExt:   "tsv",
-		Formatter: formatTSV,
+		Formatter: FormatTSV,
 	},
 	JSON: {
 		MIMEType:  "application/json",
 		FileExt:   "json",
-		Formatter: formatJSON,
+		Formatter: FormatJSON,
 	},
 	HTML: {
 		MIMEType:  "text/html",
@@ -90,31 +88,6 @@ func GetSupportedFormats() []string {
 	}
 
 	return formats
-}
-
-// formatCSV writes the provided data to the writer in CSV format.
-func formatCSV(w io.Writer, data any) error {
-	writer := csv.NewWriter(w)
-	defer writer.Flush()
-
-	return nil
-}
-
-// formatTSV writes the provided data to the writer in TSV format.
-func formatTSV(w io.Writer, data any) error {
-	writer := csv.NewWriter(w)
-	writer.Comma = '\t'
-	defer writer.Flush()
-
-	return nil
-}
-
-// formatJSON writes the provided data to the writer in JSON format.
-func formatJSON(w io.Writer, data any) error {
-	enc := json.NewEncoder(w)
-	enc.SetIndent("", "  ")
-
-	return enc.Encode(data)
 }
 
 // formatHTML writes the provided data to the writer in HTML format.

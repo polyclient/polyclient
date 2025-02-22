@@ -15,8 +15,7 @@ tasks:
   init-workspace:
     desc: Initialize Go workspace
     cmds:
-      - go work init
-      - go work use .
+      - ./scripts/init_workspace.sh
 
   dev:
     desc: Run the CLI in development mode for testing and debugging

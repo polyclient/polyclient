@@ -8,6 +8,7 @@ package db
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -17,17 +18,17 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-// NewQueryCommand returns a new query command that can be used to query a database from the CLI
+// NewQueryCommand returns a new query command that can be used to query a database from the CLI.
 func NewQueryCommand() *cli.Command {
 	return &cli.Command{
-		Name:     "query",
-		Usage:    "Execute a query against a database",
+		Name:     "execute",
+		Usage:    "Execute a query against a database (SQL or NoSQL)",
 		Category: "Database",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:     "query",
-				Aliases:  []string{"q"},
-				Usage:    "Query to execute (e.g. 'SELECT * FROM users')",
+				Name:     "command",
+				Aliases:  []string{"c"},
+				Usage:    "Command to execute (e.g., 'SELECT * FROM users')",
 				Required: true,
 			},
 			&cli.StringFlag{
@@ -45,14 +46,14 @@ func NewQueryCommand() *cli.Command {
 				},
 			},
 			&cli.StringFlag{
-				Name:        "write",
-				Usage:       "Write method (stdout or file)",
-				Aliases:     []string{"w"},
+				Name:        "destination",
+				Usage:       "Output destination (stdout or [path-to-file])",
+				Aliases:     []string{"d"},
 				Value:       "stdout",
 				DefaultText: "stdout",
-				Validator: func(output string) error {
-					if output != "stdout" && output != "file" {
-						return fmt.Errorf("invalid write method: %s", output)
+				Validator: func(write string) error {
+					if write == "" {
+						return errors.New("flag needs an argument: -w")
 					}
 
 					return nil
@@ -60,19 +61,20 @@ func NewQueryCommand() *cli.Command {
 			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			query := cmd.String("query")
+			// command := cmd.String("command")
 			output := cmd.String("output")
-			write := cmd.String("write")
-
-			fmt.Printf("Query: %s\n", query)
-			fmt.Printf("Output: %s\n", output)
-			fmt.Printf("Write: %s\n", write)
+			destination := cmd.String("destination")
 
 			var w io.Writer
-			if write == "stdout" {
+			if destination == "stdout" {
 				w = os.Stdout
 			} else {
-				w = io.Discard
+				file, err := os.Create(destination)
+				if err != nil {
+					return fmt.Errorf("failed to create file '%s': %w", destination, err)
+				}
+				defer file.Close()
+				w = file
 			}
 
 			dataExporter := exporter.NewDataExporter(exporter.DataExporterOptions{
@@ -80,9 +82,27 @@ func NewQueryCommand() *cli.Command {
 				Output: w,
 			})
 
-			mockData := []map[string]string{
+			mockData := []struct {
+				Key   string
+				Value any
+			}{
 				{
-					"foo": "bar",
+					Key: "User1", Value: struct {
+						name string
+						age  int
+					}{
+						name: "John",
+						age:  30,
+					},
+				},
+				{
+					Key: "User2", Value: struct {
+						name string
+						age  int
+					}{
+						name: "Jane",
+						age:  25,
+					},
 				},
 			}
 
