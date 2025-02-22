@@ -14,20 +14,20 @@ import (
 // Exporter represents the data format exporter.
 type DataExporter struct {
 	format Format
-	output io.Writer
+	writer io.Writer
 }
 
 // DataExporterOptions represents the options for creating a DataExporter.
 type DataExporterOptions struct {
 	Format string
-	Output io.Writer
+	Writer io.Writer
 }
 
 // NewDataExporter creates a new DataExporter instance with the given options.
 func NewDataExporter(opts DataExporterOptions) *DataExporter {
 	return &DataExporter{
 		format: Format(opts.Format),
-		output: opts.Output,
+		writer: opts.Writer,
 	}
 }
 
@@ -38,5 +38,5 @@ func (de *DataExporter) Export(data any) error {
 		return fmt.Errorf("format %s is not supported", de.format)
 	}
 
-	return formatter.Formatter(de.output, data)
+	return formatter.Formatter(de.writer, data)
 }

@@ -13,6 +13,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/polyclient/polyclient/internal/exporter"
 	"github.com/urfave/cli/v3"
@@ -20,26 +21,28 @@ import (
 
 // NewQueryCommand returns a new query command that can be used to query a database from the CLI.
 func NewQueryCommand() *cli.Command {
+	supportedFormats := strings.Join(exporter.GetSupportedFormats(), ", ")
+
 	return &cli.Command{
-		Name:     "execute",
+		Name:     "query",
 		Usage:    "Execute a query against a database (SQL or NoSQL)",
 		Category: "Database",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:     "command",
-				Aliases:  []string{"c"},
-				Usage:    "Command to execute (e.g., 'SELECT * FROM users')",
+				Name:     "query",
+				Aliases:  []string{"q"},
+				Usage:    "Query to execute (e.g., 'SELECT * FROM users')",
 				Required: true,
 			},
 			&cli.StringFlag{
 				Name:        "output",
-				Usage:       fmt.Sprintf("Output format (%s)", strings.Join(exporter.GetSupportedFormats(), ", ")),
+				Usage:       fmt.Sprintf("Output format (%s)", supportedFormats),
 				Aliases:     []string{"o"},
 				Value:       "markdown",
 				DefaultText: "markdown",
 				Validator: func(output string) error {
 					if !exporter.ValidateFormat(exporter.Format(output)) {
-						return fmt.Errorf("invalid output format: %s", output)
+						return fmt.Errorf("invalid output format: %s\nSupported formats: %s", output, supportedFormats)
 					}
 
 					return nil
@@ -61,7 +64,7 @@ func NewQueryCommand() *cli.Command {
 			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			// command := cmd.String("command")
+			// query := cmd.String("query")
 			output := cmd.String("output")
 			destination := cmd.String("destination")
 
@@ -79,30 +82,28 @@ func NewQueryCommand() *cli.Command {
 
 			dataExporter := exporter.NewDataExporter(exporter.DataExporterOptions{
 				Format: output,
-				Output: w,
+				Writer: w,
 			})
 
 			mockData := []struct {
-				Key   string
-				Value any
+				Name     string
+				Email    string
+				Birthday time.Time
 			}{
 				{
-					Key: "User1", Value: struct {
-						name string
-						age  int
-					}{
-						name: "John",
-						age:  30,
-					},
+					Name:     "John Doe",
+					Email:    "johndoe@example.com",
+					Birthday: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
 				},
 				{
-					Key: "User2", Value: struct {
-						name string
-						age  int
-					}{
-						name: "Jane",
-						age:  25,
-					},
+					Name:     "Jane Doe",
+					Email:    "janedoe@example.com",
+					Birthday: time.Date(1995, 1, 1, 0, 0, 0, 0, time.UTC),
+				},
+				{
+					Name:     "Bob Smith",
+					Email:    "bobsmith@example.com",
+					Birthday: time.Date(1980, 1, 1, 0, 0, 0, 0, time.UTC),
 				},
 			}
 
