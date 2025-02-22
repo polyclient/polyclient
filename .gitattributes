@@ -1,2 +1,4 @@
-# Use unix line endings in all text files.
 * text=auto eol=lf
+*.tmpl linguist-language=go-html-template
+*.pb.go linguist-generated
+Dockerfile.* linguist-language=Dockerfile
