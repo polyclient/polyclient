@@ -8,6 +8,8 @@ tasks:
     desc: Install the project dependencies and devtools
     cmds:
       - go mod tidy
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      - go install github.com/evilmartians/lefthook@latest
       - task: init-workspace
 
   init:workspace:
