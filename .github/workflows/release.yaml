@@ -10,7 +10,8 @@ on:
       - "*"
 
 permissions:
-  contents: write
+  contents: write # to create release
+  packages: write # to upload Docker image to GHCR
 
 jobs:
   goreleaser:
