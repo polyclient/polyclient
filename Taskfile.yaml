@@ -8,11 +8,9 @@ tasks:
     desc: Install the project dependencies and devtools
     cmds:
       - go mod tidy
-      - go mod download
-      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
       - task: init-workspace
 
-  init-workspace:
+  init:workspace:
     desc: Initialize Go workspace
     cmds:
       - ./scripts/init_workspace.sh
@@ -25,8 +23,8 @@ tasks:
     desc: Build the CLI binary
     cmd: go build -o bin/${APP_NAME} ./cmd
 
-  build-plugins:
-    desc: Build the plugins using tinygo
+  build:plugins:
+    desc: Build the plugins for WASM target
     cmds:
       - GOOS=wasip1 GOARCH=wasm go build -buildmode=c-shared -o ./plugins/sqlite/sqlite-plugin.wasm ./plugins/sqlite/main.go
 
@@ -34,7 +32,7 @@ tasks:
     desc: Check code quality and identify potential issues
     cmd: golangci-lint run ./...
 
-  lint-fix:
+  lint:fix:
     desc: Check code quality and identify potential issues + fix them where possible
     cmd: golangci-lint run ./... --fix
 

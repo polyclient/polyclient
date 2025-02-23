@@ -8,6 +8,8 @@ package plugin
 
 import (
 	"context"
+	"fmt"
+	"log"
 
 	"github.com/polyclient/polyclient/runtime/plugin"
 	"github.com/urfave/cli/v3"
@@ -19,8 +21,27 @@ func newLoadCommand() *cli.Command {
 		Usage:    "Load a plugin",
 		Category: "Plugins",
 		Action: func(context.Context, *cli.Command) error {
-			pm := plugin.NewPluginManager()
-			return pm.LoadPlugins()
+			lookupPaths := []string{
+				"./plugins",
+			}
+			pr := plugin.NewPluginRegistry(lookupPaths)
+
+			if err := pr.LoadPlugins(); err != nil {
+				return err
+			}
+
+			plugin, err := pr.GetWASMPlugin("sqlite")
+			if err != nil {
+				return err
+			}
+
+			_, result, err := plugin.Call("greet", []byte("Juan"))
+			if err != nil {
+				return fmt.Errorf("failed to call function: %w", err)
+			}
+
+			log.Println(string(result))
+			return nil
 		},
 	}
 }
