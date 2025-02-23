@@ -5,12 +5,9 @@ env:
   GORELEASER_VERSION: "latest"
 
 on:
-  pull_request:
   push:
-    branches:
-      - master
-    # tags:
-    #   - "*"
+    tags:
+      - "*"
 
 permissions:
   contents: write
@@ -41,6 +38,7 @@ jobs:
         name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
+          distribution: goreleaser
           version: ${{ env.GORELEASER_VERSION }}
           args: release --clean
         env:
