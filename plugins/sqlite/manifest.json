@@ -1,7 +1,7 @@
 {
-  "$schema": "../../schema/plugin-manifest.json",
   "id": "sqlite",
   "name": "SQLite Plugin",
+  "scope": "sql",
   "version": "0.0.1",
   "description": "Provides SQLite database access for PolyClient.",
   "authors": [
@@ -14,7 +14,6 @@
   "license": "SEE LICENSE IN LICENSE-APACHE",
   "repository": "https://github.com/polyclient/polyclient/tree/master/plugins/sqlite",
   "homepage": "https://polyclient.pages.dev/plugins/sqlite",
-  "categories": ["Database"],
   "keywords": ["sql", "sqlite", "database"],
   "entrypoint": "sqlite-plugin.wasm"
 }
