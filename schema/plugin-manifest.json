@@ -2,38 +2,8 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Plugin Manifest Schema",
   "description": "JSON Schema for validating a plugin manifest file.",
-  "definitions": {
-    "author": {
-      "type": "object",
-      "description": "Information about the plugin author.",
-      "required": ["name"],
-      "additionalProperties": false,
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "The name of the person or organization that created the plugin."
-        },
-        "email": {
-          "type": "string",
-          "format": "email",
-          "description": "The author's contact email (optional)."
-        },
-        "websites": {
-          "type": "array",
-          "description": "A list of URLs associated with the plugin author or organization (optional).",
-          "minItems": 1,
-          "maxItems": 5,
-          "uniqueItems": true,
-          "items": {
-            "format": "uri",
-            "description": "A website or homepage for the plugin author or organization."
-          }
-        }
-      }
-    }
-  },
   "type": "object",
-  "required": ["id", "name", "version", "entrypoint"],
+  "required": ["id", "name", "scope", "version", "entrypoint"],
   "additionalProperties": false,
   "properties": {
     "$schema": {
@@ -49,7 +19,16 @@
       "type": "string",
       "description": "The human-readable name of the plugin.",
       "minLength": 1,
-      "maxLength": 100
+      "maxLength": 30
+    },
+    "scope": {
+      "type": "string",
+      "oneOf": [
+        {
+          "enum": ["sql", "nosql", "ai", "theme"]
+        }
+      ],
+      "description": "Specifies the category of the plugin, which is used to identify its capabilities and dictate its loading process."
     },
     "version": {
       "type": "string",
@@ -113,43 +92,49 @@
       "description": "URL of the plugin's homepage or documentation (optional).",
       "format": "uri"
     },
-    "categories": {
-      "type": "array",
-      "description": "A list of categories that describe the plugin.",
-      "items": {
-        "type": "string",
-        "enum": [
-          "Database",
-          "AI",
-          "Themes",
-          "Keymaps",
-          "Snippets",
-          "Visualization",
-          "Utility",
-          "Security",
-          "Networking",
-          "Testing",
-          "Storage",
-          "Debugging",
-          "Other"
-        ]
-      },
-      "minItems": 1,
-      "uniqueItems": true
-    },
     "keywords": {
       "type": "array",
       "description": "A list of keywords related to the plugin, useful for search and discovery.",
       "items": {
         "type": "string"
       },
-      "uniqueItems": true,
-      "maxItems": 5
+      "maxItems": 5,
+      "uniqueItems": true
     },
     "entrypoint": {
       "type": "string",
       "description": "The main WebAssembly (.wasm) file that serves as the entry point for the plugin.",
-      "pattern": "^(https?://[\\w./-]+|[a-zA-Z0-9._/-]+\\.wasm)$"
+      "pattern": "^[a-zA-Z0-9._/-]+\\.wasm$"
+    }
+  },
+  "definitions": {
+    "author": {
+      "type": "object",
+      "description": "Information about the plugin author.",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the person or organization that created the plugin."
+        },
+        "email": {
+          "type": "string",
+          "description": "The author's contact email (optional).",
+          "format": "email"
+        },
+        "websites": {
+          "type": "array",
+          "description": "A list of URLs associated with the plugin author or organization (optional).",
+          "minItems": 1,
+          "maxItems": 5,
+          "uniqueItems": true,
+          "items": {
+            "format": "uri",
+            "description": "A website or homepage for the plugin author or organization."
+          }
+        }
+      }
     }
   }
 }
