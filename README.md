@@ -1,6 +1,7 @@
 > [!IMPORTANT]
 > This project is in early development. Features and documentation are expected to change.
 
+[![release](https://github.com/polyclient/polyclient/actions/workflows/release.yaml/badge.svg)](https://github.com/polyclient/polyclient/actions/workflows/release.yaml)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpolyclient%2Fpolyclient.svg?type=shield&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpolyclient%2Fpolyclient?ref=badge_shield&issueType=license)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpolyclient%2Fpolyclient.svg?type=shield&issueType=security)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpolyclient%2Fpolyclient?ref=badge_shield&issueType=security)
 
