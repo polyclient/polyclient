@@ -9,8 +9,7 @@ before:
     - go mod tidy
 
 builds:
-  - env:
-      - CGO_ENABLED=0
+  - main: ./cmd/polyclient
     goos:
       - linux
       - windows
@@ -18,6 +17,8 @@ builds:
     goarch:
       - amd64
       - arm64
+    env:
+      - CGO_ENABLED=0
 
 nfpms:
   - maintainer: Juan Mesa <ju4n97@proton.me>
