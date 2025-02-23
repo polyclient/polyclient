@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/evilmartians/lefthook/refs/heads/master/schema.json
+
+assert_lefthook_installed: true
+
+pre-commit:
+  parallel: true
+
+  jobs:
+    - name: lint & test
+      glob: "*.go"
+      group:
+        jobs:
+          - run: task lint
+            stage_fixed: true
+
+          - run: task test
+
+    - name: check links
+      glob: "*.md,*.html,*.hbs,*.svelte"
+      run: lychee --max-concurrency 5 {staged_files}
+      exclude:
+        - CHANGELOG.md

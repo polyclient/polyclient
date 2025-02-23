@@ -64,6 +64,9 @@ enable = [
 [linters-settings.mnd]
 checks = ["argument", "case", "condition", "operation", "return"]
 
+[linters-settings.misspell]
+locale = "US"
+
 [[issues.exclude-rules]]
 path = "_test\\.go"
 linters = ["gocritic", "gocyclo", "gosec", "govet", "noctx"]
