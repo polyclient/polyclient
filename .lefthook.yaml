@@ -14,9 +14,3 @@ pre-commit:
             stage_fixed: true
 
           - run: task test
-
-    - name: check links
-      glob: "*.md,*.html,*.hbs,*.svelte"
-      run: lychee --max-concurrency 5 {staged_files}
-      exclude:
-        - CHANGELOG.md

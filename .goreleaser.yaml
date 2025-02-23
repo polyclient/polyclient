@@ -20,6 +20,9 @@ builds:
     env:
       - CGO_ENABLED=0
 
+release:
+  prerelease: auto
+
 nfpms:
   - maintainer: Juan Mesa <ju4n97@proton.me>
     description: A versatile database client with support for SQL and NoSQL.
@@ -29,7 +32,6 @@ nfpms:
       - deb
       - rpm
       - apk
-      - archlinux
 
 changelog:
   use: "github"
@@ -37,7 +39,6 @@ changelog:
   sort: asc
   filters:
     exclude:
-      - "^docs:"
       - "^test:"
   groups:
     - title: Features
@@ -52,5 +53,8 @@ changelog:
     - title: "Refactoring"
       regexp: '^.*?refactor(\([[:word:]]+\))??!?:.+$'
       order: 3
+    - title: "Documentation updates"
+      regexp: '^.*?docs(\([[:word:]]+\))??!?:.+$'
+      order: 4
     - title: Others
       order: 999
