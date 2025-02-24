@@ -4,8 +4,11 @@ version: 2
 
 project_name: polyclient
 
+report_sizes: true
+
 before:
   hooks:
+    - go mod download
     - go mod tidy
 
 builds:
@@ -19,9 +22,6 @@ builds:
       - arm64
     env:
       - CGO_ENABLED=0
-
-release:
-  prerelease: auto
 
 nfpms:
   - maintainer: Juan Mesa <ju4n97@proton.me>
@@ -58,3 +58,7 @@ changelog:
       order: 4
     - title: Others
       order: 999
+
+release:
+  draft: true
+  prerelease: auto

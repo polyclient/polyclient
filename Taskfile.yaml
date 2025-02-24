@@ -10,7 +10,7 @@ tasks:
       - go mod tidy
       - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
       - go install github.com/evilmartians/lefthook@latest
-      - task: init-workspace
+      - task: init:workspace
 
   init:workspace:
     desc: Initialize Go workspace
@@ -30,6 +30,11 @@ tasks:
     cmds:
       - GOOS=wasip1 GOARCH=wasm go build -buildmode=c-shared -o ./plugins/sqlite/sqlite-plugin.wasm ./plugins/sqlite/main.go
 
+  release:
+    desc: Create a new release
+    cmds:
+      - go run ./scripts/release.go {{ .CLI_ARGS }}
+
   lint:
     desc: Check code quality and identify potential issues
     cmd: golangci-lint run ./...
@@ -41,3 +46,7 @@ tasks:
   format:
     desc: Apply standard Go code formatting to all project files
     cmd: go fmt ./...
+
+  test:
+    desc: Run the project tests
+    cmd: go test ./...
