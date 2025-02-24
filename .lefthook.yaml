@@ -10,7 +10,7 @@ pre-commit:
       glob: "*.go"
       group:
         jobs:
-          - run: task lint
+          - run: go-task lint
             stage_fixed: true
 
-          - run: task test
+          - run: go-task test
