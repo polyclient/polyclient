@@ -15,6 +15,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+// NewPluginCommand creates a CLI command for managing PolyClient plugins.
 func NewPluginCommand() *cli.Command {
 	return &cli.Command{
 		Name:     "plugin",

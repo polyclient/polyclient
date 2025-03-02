@@ -12,6 +12,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+// NewGuiCommand creates a CLI command for launching PolyClient in GUI mode.
 func NewGuiCommand() *cli.Command {
 	return &cli.Command{
 		Name:     "gui",

@@ -10,14 +10,15 @@ import (
 	"context"
 	"log"
 	"os"
+
 	"github.com/polyclient/polyclient/cmd/polyclient/commands"
 	"github.com/polyclient/polyclient/internal/version"
 	"github.com/urfave/cli/v3"
 )
 
-// main is the entry point for the PolyClient CLI application. It configures a CLI command with dynamic versioning and registers subcommands for version management, database querying, GUI operations, and plugin management. The command is executed with the system arguments, and if an error occurs during execution, the application logs the error and terminates.
+// main initializes and runs the PolyClient CLI application.
 func main() {
-	cmd := (&cli.Command{
+	cmd := &cli.Command{
 		Name:                  "PolyClient CLI",
 		Usage:                 "Manage and query your databases with ease",
 		Version:               version.Version(),
@@ -29,7 +30,7 @@ func main() {
 			commands.NewPluginCommand(),
 			commands.NewGuiCommand(),
 		},
-	})
+	}
 
 	if err := cmd.Run(context.Background(), os.Args); err != nil {
 		log.Fatal(err)
