@@ -38,7 +38,7 @@ func NewDatabaseCommand() *cli.Command {
 	}
 }
 
-// NewQueryCommand returns a new query command that can be used to query a database from the CLI.
+// newQueryCommand returns a new query command that can be used to query a database from the CLI.
 func newQueryCommand() *cli.Command {
 	supportedFormats := strings.Join(exporter.GetSupportedFormats(), ", ")
 
