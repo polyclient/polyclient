@@ -4,7 +4,7 @@
 // as published by the Free Software Foundation, with the Runtime
 // Library Exception. See the COPYING.RUNTIME file for details.
 
-package main
+package commands
 
 import (
 	"context"
@@ -19,7 +19,7 @@ func NewVersionCommand() *cli.Command {
 		Name:  "version",
 		Usage: "Show more detailed version information",
 		Action: func(context.Context, *cli.Command) error {
-			//nolint:forbidigo
+			//nolint:forbidigo  // Printing version info to stdout is intentional here.
 			fmt.Println(version.String())
 
 			return nil

@@ -11,9 +11,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/polyclient/polyclient/cmd/polyclient/db"
-	"github.com/polyclient/polyclient/cmd/polyclient/gui"
-	"github.com/polyclient/polyclient/cmd/polyclient/plugin"
+	"github.com/polyclient/polyclient/cmd/polyclient/commands"
 	"github.com/polyclient/polyclient/internal/version"
 	"github.com/urfave/cli/v3"
 )
@@ -26,10 +24,10 @@ func main() {
 		EnableShellCompletion: true,
 		HideHelpCommand:       true,
 		Commands: []*cli.Command{
-			NewVersionCommand(),
-			db.NewQueryCommand(),
-			gui.NewGuiCommand(),
-			plugin.NewPluginCommand(),
+			commands.NewVersionCommand(),
+			commands.NewDatabaseCommand(),
+			commands.NewPluginCommand(),
+			commands.NewGuiCommand(),
 		},
 	})
 

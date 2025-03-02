@@ -4,7 +4,7 @@
 // as published by the Free Software Foundation, with the Runtime
 // Library Exception. See the COPYING.RUNTIME file for details.
 
-package db
+package commands
 
 import (
 	"context"
@@ -19,8 +19,27 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+func NewDatabaseCommand() *cli.Command {
+	return &cli.Command{
+		Name:     "database",
+		Usage:    "Manage databases from the CLI",
+		Category: "Database",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:     "connection",
+				Aliases:  []string{"c"},
+				Usage:    "Connection ID to use",
+				Required: true,
+			},
+		},
+		Commands: []*cli.Command{
+			newQueryCommand(),
+		},
+	}
+}
+
 // NewQueryCommand returns a new query command that can be used to query a database from the CLI.
-func NewQueryCommand() *cli.Command {
+func newQueryCommand() *cli.Command {
 	supportedFormats := strings.Join(exporter.GetSupportedFormats(), ", ")
 
 	return &cli.Command{
