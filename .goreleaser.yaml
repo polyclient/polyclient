@@ -1,18 +1,24 @@
 # yaml-language-server: $schema=https://goreleaser.com/static/schema.json
 
 version: 2
-
 project_name: polyclient
-
 report_sizes: true
-
-before:
-  hooks:
-    - go mod download
-    - go mod tidy
 
 builds:
   - main: ./cmd/polyclient
+    binary: polyclient
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+      - -X github.com/polyclient/polyclient/internal/version.version={{.Version}}
+      - -X github.com/polyclient/polyclient/internal/version.branch={{.Branch}}
+      - -X github.com/polyclient/polyclient/internal/version.shortCommit={{.ShortCommit}}
+      - -X github.com/polyclient/polyclient/internal/version.fullCommit={{.FullCommit}}
+      - -X github.com/polyclient/polyclient/internal/version.date={{.Date}}
+      - -X github.com/polyclient/polyclient/internal/version.os={{.Os}}
+      - -X github.com/polyclient/polyclient/internal/version.arch={{.Arch}}
     goos:
       - linux
       - windows
@@ -22,6 +28,10 @@ builds:
       - arm64
     env:
       - CGO_ENABLED=0
+
+release:
+  draft: true
+  prerelease: auto
 
 nfpms:
   - maintainer: Juan Mesa <ju4n97@proton.me>
@@ -39,26 +49,21 @@ changelog:
   sort: asc
   filters:
     exclude:
+      - "^docs:"
       - "^test:"
+      - "^tmp:"
+      - "^Merge branch"
+      - "^Merge pull request"
+      - "^Merge remote-tracking branch"
   groups:
-    - title: Features
+    - title: "Features"
       regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
       order: 0
     - title: "Bug fixes"
       regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
       order: 1
-    - title: "Performance"
+    - title: "Performance improvements"
       regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
       order: 2
-    - title: "Refactoring"
-      regexp: '^.*?refactor(\([[:word:]]+\))??!?:.+$'
-      order: 3
-    - title: "Documentation updates"
-      regexp: '^.*?docs(\([[:word:]]+\))??!?:.+$'
-      order: 4
-    - title: Others
+    - title: "Other changes"
       order: 999
-
-release:
-  draft: true
-  prerelease: auto

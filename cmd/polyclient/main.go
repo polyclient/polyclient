@@ -14,6 +14,7 @@ import (
 	"github.com/polyclient/polyclient/cmd/polyclient/db"
 	"github.com/polyclient/polyclient/cmd/polyclient/gui"
 	"github.com/polyclient/polyclient/cmd/polyclient/plugin"
+	"github.com/polyclient/polyclient/internal/version"
 	"github.com/urfave/cli/v3"
 )
 
@@ -21,10 +22,11 @@ func main() {
 	cmd := (&cli.Command{
 		Name:                  "PolyClient CLI",
 		Usage:                 "Manage and query your databases with ease",
-		Version:               "0.0.1",
+		Version:               version.Version(),
 		EnableShellCompletion: true,
 		HideHelpCommand:       true,
 		Commands: []*cli.Command{
+			NewVersionCommand(),
 			db.NewQueryCommand(),
 			gui.NewGuiCommand(),
 			plugin.NewPluginCommand(),

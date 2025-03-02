@@ -23,7 +23,11 @@ tasks:
 
   build:
     desc: Build the CLI binary
-    cmd: go build -o bin/${APP_NAME} ./cmd
+    cmd: goreleaser build --snapshot --clean
+
+  build:single-target:
+    desc: Build the CLI binary
+    cmd: goreleaser build --snapshot --clean --single-target
 
   build:plugins:
     desc: Build the plugins for WASM target
