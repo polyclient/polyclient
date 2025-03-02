@@ -4,19 +4,25 @@
 // as published by the Free Software Foundation, with the Runtime
 // Library Exception. See the COPYING.RUNTIME file for details.
 
-package plugin
+package commands
 
 import (
+	"context"
+	"fmt"
+
+	"github.com/polyclient/polyclient/internal/version"
 	"github.com/urfave/cli/v3"
 )
 
-func NewPluginCommand() *cli.Command {
+func NewVersionCommand() *cli.Command {
 	return &cli.Command{
-		Name:     "plugin",
-		Usage:    "Manage PolyClient plugins from the CLI",
-		Category: "Plugins",
-		Commands: []*cli.Command{
-			newLoadCommand(),
+		Name:  "version",
+		Usage: "Show more detailed version information",
+		Action: func(context.Context, *cli.Command) error {
+			//nolint:forbidigo  // Printing version info to stdout is intentional here.
+			fmt.Println(version.String())
+
+			return nil
 		},
 	}
 }
