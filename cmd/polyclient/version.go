@@ -14,6 +14,8 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+// NewVersionCommand creates a CLI command for displaying detailed version information.
+// When executed, the command prints the application’s version string retrieved from the version package.
 func NewVersionCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "version",

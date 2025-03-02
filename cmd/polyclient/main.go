@@ -18,6 +18,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+// main is the entry point for the PolyClient CLI application. It configures a CLI command with dynamic versioning and registers subcommands for version management, database querying, GUI operations, and plugin management. The command is executed with the system arguments, and if an error occurs during execution, the application logs the error and terminates.
 func main() {
 	cmd := (&cli.Command{
 		Name:                  "PolyClient CLI",
