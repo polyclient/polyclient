@@ -19,36 +19,44 @@ var (
 	arch        = "unknown" // CPU architecture (e.g., "amd64")
 )
 
+// String returns a formatted multi-line string that displays the build metadata, including version, branch, short and full commit SHAs, build date, operating system, and CPU architecture.
 func String() string {
 	return fmt.Sprintf(
 		"Version: %s\nBranch: %s\nShort commit: %s\nFull commit: %s\nBuild date: %s\nOS: %s\nArch: %s",
 		version, branch, shortCommit, fullCommit, date, os, arch)
 }
 
+// Version returns the build version of the application.
 func Version() string {
 	return version
 }
 
+// Branch returns the Git branch name used during the build.
 func Branch() string {
 	return branch
 }
 
+// ShortCommit returns the abbreviated Git Commit SHA from which the binary was built.
 func ShortCommit() string {
 	return shortCommit
 }
 
+// FullCommit returns the full Git commit SHA from which the binary was built.
 func FullCommit() string {
 	return fullCommit
 }
 
+// Date returns the build date in RFC3339 format.
 func Date() string {
 	return date
 }
 
+// OS returns the operating system of target binary recorded at build time.
 func OS() string {
 	return os
 }
 
+// Arch returns the CPU architecture of target binary recorded at build time.
 func Arch() string {
 	return arch
 }
