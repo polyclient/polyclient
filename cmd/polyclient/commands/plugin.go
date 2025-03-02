@@ -4,16 +4,27 @@
 // as published by the Free Software Foundation, with the Runtime
 // Library Exception. See the COPYING.RUNTIME file for details.
 
-package plugin
+package commands
 
 import (
 	"context"
 	"fmt"
 	"log"
 
-	"github.com/polyclient/polyclient/runtime/plugin"
+	"github.com/polyclient/polyclient/internal/runtime/plugin"
 	"github.com/urfave/cli/v3"
 )
+
+func NewPluginCommand() *cli.Command {
+	return &cli.Command{
+		Name:     "plugin",
+		Usage:    "Manage PolyClient plugins from the CLI",
+		Category: "Plugins",
+		Commands: []*cli.Command{
+			newLoadCommand(),
+		},
+	}
+}
 
 func newLoadCommand() *cli.Command {
 	return &cli.Command{
