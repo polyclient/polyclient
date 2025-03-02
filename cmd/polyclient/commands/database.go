@@ -19,6 +19,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+// NewDatabaseCommand returns a new database command for managing databases from the CLI.
 func NewDatabaseCommand() *cli.Command {
 	return &cli.Command{
 		Name:     "database",
