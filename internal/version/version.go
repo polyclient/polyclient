@@ -26,7 +26,7 @@ func String() string {
 		version, branch, shortCommit, fullCommit, date, os, arch)
 }
 
-// Version returns the build version of the application. This value is typically set at compile time.
+// Version returns the build version of the application.
 func Version() string {
 	return version
 }
@@ -36,7 +36,7 @@ func Branch() string {
 	return branch
 }
 
-// ShortCommit returns the abbreviated SHA of the commit used to build the software.
+// ShortCommit returns the abbreviated Git Commit SHA from which the binary was built.
 func ShortCommit() string {
 	return shortCommit
 }
@@ -51,13 +51,12 @@ func Date() string {
 	return date
 }
 
-// OS returns the operating system build metadata.
-// It retrieves the operating system name set during build time, defaulting to "unknown" if not specified.
+// OS returns the operating system of target binary recorded at build time.
 func OS() string {
 	return os
 }
 
-// Arch returns the CPU architecture recorded at build time.
+// Arch returns the CPU architecture of target binary recorded at build time.
 func Arch() string {
 	return arch
 }
