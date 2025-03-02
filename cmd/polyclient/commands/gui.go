@@ -4,4 +4,21 @@
 // as published by the Free Software Foundation, with the Runtime
 // Library Exception. See the COPYING.RUNTIME file for details.
 
-package db
+package commands
+
+import (
+	"context"
+
+	"github.com/urfave/cli/v3"
+)
+
+func NewGuiCommand() *cli.Command {
+	return &cli.Command{
+		Name:     "gui",
+		Usage:    "Launch PolyClient in GUI mode",
+		Category: "GUI",
+		Action: func(context.Context, *cli.Command) error {
+			return nil
+		},
+	}
+}
