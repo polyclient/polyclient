@@ -37,4 +37,4 @@ This project is distributed under multiple licenses, following the [SPDX](https:
 - The website and documentation are licensed under [CC-BY-4.0](LICENSES/CC-BY-4.0.txt).  
 - Some configuration files and metadata are licensed under [CC0-1.0](LICENSES/CC0-1.0.txt).  
 
-This project follows to the [REUSE Specification](https://reuse.software/) to ensure clear and consistent licensing.
+This project follows the [REUSE Specification](https://reuse.software/) to ensure clear and consistent licensing.
