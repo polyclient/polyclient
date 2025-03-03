@@ -28,6 +28,8 @@ Refer to the [contributor's guide](CONTRIBUTING.md) for more in-depth informatio
 
 ## License
 
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpolyclient%2Fpolyclient.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpolyclient%2Fpolyclient?ref=badge_large&issueType=license)
+
 This project is distributed under multiple licenses, following the [SPDX](https://spdx.dev/) standard:
 
 - The core is licensed under [GPL-3.0-or-later](LICENSES/GPL-3.0-or-later.txt) with a [Plugin Exception](LICENSES/LicenseRef-PolyClient-Plugin-Exception.txt).  
