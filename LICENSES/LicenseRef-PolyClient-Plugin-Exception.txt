@@ -1,11 +1,11 @@
-POLYCLIENT PLUGIN EXCEPTION  
-Version 1.0, 21 February 2025  
-Copyright (C) 2025 The PolyClient Project  
+POLYCLIENT PLUGIN EXCEPTION
+Version 1.0, 21 February 2025
+Copyright (C) 2025 The PolyClient Project
 
 Everyone is permitted to copy and distribute verbatim copies of this
 license document, but changing it is not allowed.
 
-This PolyClient Plugin Exception ("Exception") is an additional permission
+This PolyClient Plugin Exception ("Exception") is additional permission
 under section 7 of the GNU General Public License, version 3 ("GPLv3").
 It applies to a given file that bears a notice placed by the copyright
 holder of the file stating that the file is governed by GPLv3 along
