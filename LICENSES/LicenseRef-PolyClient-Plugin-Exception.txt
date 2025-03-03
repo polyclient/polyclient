@@ -1,11 +1,11 @@
-RUNTIME LIBRARY EXCEPTION
-Version 1.0, 21 February 2025
-Copyright (C) 2025 The PolyClient Project
+POLYCLIENT PLUGIN EXCEPTION  
+Version 1.0, 21 February 2025  
+Copyright (C) 2025 The PolyClient Project  
 
 Everyone is permitted to copy and distribute verbatim copies of this
 license document, but changing it is not allowed.
 
-This Runtime Library Linkage Exception ("Exception") is an additional permission
+This PolyClient Plugin Exception ("Exception") is an additional permission
 under section 7 of the GNU General Public License, version 3 ("GPLv3").
 It applies to a given file that bears a notice placed by the copyright
 holder of the file stating that the file is governed by GPLv3 along
@@ -16,13 +16,13 @@ under any license terms, including proprietary licenses, to extend the
 functionality of the host application (the "Program") through dynamic
 linking with the Program's documented Interface.
 
-0. Definitions.
+0. Definitions
 
 A "Module" is any WASM binary that communicates with the Program
 exclusively through the documented Interface.
 
 "Independent Module" means a Module that either requires the Program for
-execution, or makes use of an interface provided by the Program, but is
+execution or makes use of an interface provided by the Program but is
 not otherwise based on the Program. A Module is *not* considered
 independent if it includes substantial portions of the Program's source
 code beyond what is strictly necessary to interact with the Interface.
@@ -31,7 +31,7 @@ code beyond what is strictly necessary to interact with the Interface.
 protocols that enable communication between the Program and linked
 Modules. The Interface is documented at https://polyclient.pages.dev/docs/plugins.
 
-1. Grant of Additional Permission.
+1. Grant of Additional Permission
 
 You have permission to create and distribute works formed by combining
 the Program with Independent Modules through dynamic linking, even if
@@ -40,11 +40,11 @@ then convey such Independent Modules under terms of your choice.
 
 This permission specifically includes:
 
-a) Loading and executing WASM modules through dynamic linking with the Program.
-b) Implementing the Interface specification in any Module.
-c) Distributing such Independent Modules under terms of your choice.
+a) Loading and executing WASM modules through dynamic linking with the Program.  
+b) Implementing the Interface specification in any Module.  
+c) Distributing such Independent Modules under terms of your choice.  
 
-2. No Weakening of Program's Copyleft.
+2. No Weakening of Program's Copyleft
 
 The availability of this Exception does not imply any general presumption
 that third-party software is unaffected by the copyleft requirements of
