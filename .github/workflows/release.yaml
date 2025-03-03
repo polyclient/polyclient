@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
-name: release
+name: Release
 
 env:
   GO_VERSION: "stable"
