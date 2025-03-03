@@ -16,9 +16,8 @@ import (
 // NewPluginCommand creates a CLI command for managing PolyClient plugins.
 func NewPluginCommand() *cli.Command {
 	return &cli.Command{
-		Name:     "plugin",
-		Usage:    "Manage PolyClient plugins from the CLI",
-		Category: "Plugins",
+		Name:  "plugin",
+		Usage: "Manage PolyClient plugins from the CLI",
 		Commands: []*cli.Command{
 			newLoadCommand(),
 		},
@@ -27,9 +26,8 @@ func NewPluginCommand() *cli.Command {
 
 func newLoadCommand() *cli.Command {
 	return &cli.Command{
-		Name:     "load",
-		Usage:    "Load a plugin",
-		Category: "Plugins",
+		Name:  "load",
+		Usage: "Load a plugin",
 		Action: func(context.Context, *cli.Command) error {
 			lookupPaths := []string{
 				"./plugins",
