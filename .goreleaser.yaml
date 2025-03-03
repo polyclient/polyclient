@@ -29,23 +29,40 @@ builds:
     env:
       - CGO_ENABLED=0
 
-release:
-  draft: true
-  prerelease: auto
+archives:
+  - name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "arm64" }}aarch64      
+      {{- else }}{{ .Arch }}{{ end }}
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: "sha256"
 
 nfpms:
   - maintainer: Juan Mesa <ju4n97@proton.me>
+    package_name: polyclient
     description: A versatile database client with support for SQL and NoSQL.
     homepage: https://github.com/polyclient/polyclient
-    license: GPL-3.0
+    license: GPL-3.0-or-later
+    file_name_template: >-
+      {{ .ProjectName }}_{{ .Version }}_{{ .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "arm64" }}aarch64      
+      {{- else }}{{ .Arch }}{{ end }}
     formats:
+      - apk
       - deb
       - rpm
-      - apk
+      - archlinux
 
 changelog:
   use: "github"
-  format: "{{.SHA}}: {{.Message}} (@{{.AuthorUsername}})"
+  format: "{{.SHA}}: {{.Message}} by @{{.AuthorUsername}}"
   sort: asc
   filters:
     exclude:
@@ -77,3 +94,7 @@ changelog:
       order: 6
     - title: "Other Changes"
       order: 999
+
+release:
+  draft: true
+  prerelease: auto

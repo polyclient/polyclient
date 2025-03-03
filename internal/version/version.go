@@ -49,8 +49,8 @@ func Date() string {
 	return date
 }
 
-// OS returns the operating system of target binary recorded at build time.
-func OS() string {
+// Os returns the operating system of target binary recorded at build time.
+func Os() string {
 	return os
 }
 
