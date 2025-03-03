@@ -11,6 +11,8 @@ env:
 permissions:
   contents: write # to create release
   packages: write # to upload Docker image to GHCR
+  issues: read
+  pull-requests: read
 
 on:
   push:
@@ -48,3 +50,26 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - if: success()
+        name: Generate changelog
+        uses: orhun/git-cliff-action@v4
+        id: git-cliff
+        with:
+          config: cliff.toml
+          args: --github-repo ${{ github.repository }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          OUTPUT: CHANGELOG.md
+          GITHUB_REPO: ${{ github.repository }}
+
+      - if: success()
+        name: Commit changelog
+        run: |
+          git checkout ${{ github.event.repository.default_branch }}
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          set +e
+          git add CHANGELOG.md
+          git commit -m "chore: update changelog"
+          git push https://${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git ${{ github.event.repository.default_branch }}
