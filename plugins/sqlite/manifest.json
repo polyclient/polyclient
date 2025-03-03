@@ -1,4 +1,5 @@
 {
+  "$schema": "../../schema/plugin-manifest.json",
   "id": "sqlite",
   "name": "SQLite Plugin",
   "scope": "sql",

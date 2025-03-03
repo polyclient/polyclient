@@ -1,0 +1,36 @@
+version = 1
+
+[[annotations]]
+path = ["go.mod", "go.sum", ".*", "*.md", "*.yaml", "*.toml"]
+SPDX-FileCopyrightText = "2025 The PolyClient Authors"
+SPDX-License-Identifier = "GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception"
+
+[[annotations]]
+path = "schema/*"
+SPDX-FileCopyrightText = "2025 The PolyClient Authors"
+SPDX-License-Identifier = "GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception"
+
+[[annotations]]
+path = "scripts/*"
+SPDX-FileCopyrightText = "2025 The PolyClient Authors"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = ["plugins/**/manifest.json", "plugins/**/go.mod", "plugins/**/go.sum"]
+SPDX-FileCopyrightText = "2025 The PolyClient Authors"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "website/**/*"
+SPDX-FileCopyrightText = "2025 The PolyClient Authors"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+[[annotations]]
+path = [
+    ".github/ISSUE_TEMPLATE/*",
+    ".github/pull_request_template.md",
+    ".github/CODEOWNERS",
+    ".github/FUNDING.yml",
+]
+SPDX-FileCopyrightText = "2025 The PolyClient Authors"
+SPDX-License-Identifier = "CC0-1.0"
