@@ -35,7 +35,7 @@ tasks:
       - GOOS=wasip1 GOARCH=wasm go build -buildmode=c-shared -o ./plugins/sqlite/sqlite-plugin.wasm ./plugins/sqlite/main.go
 
   release:
-    desc: Create a new release
+    desc: Create a new release (e.g., task release 0.1.0-beta.1)
     cmds:
       - go run ./scripts/release.go {{ .CLI_ARGS }}
 
