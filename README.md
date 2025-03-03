@@ -28,6 +28,11 @@ Refer to the [contributor's guide](CONTRIBUTING.md) for more in-depth informatio
 
 ## License
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpolyclient%2Fpolyclient.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpolyclient%2Fpolyclient?ref=badge_large&issueType=license)
+This project is distributed under multiple licenses, following the [SPDX](https://spdx.dev/) standard:
 
-This project is licensed under the [GNU General Public License v3.0](LICENSE-GPL), with a [runtime library linkage exception](COPYING.RUNTIME). Built-in plugin modules are licensed under the [Apache License v2.0](LICENSE-APACHE), The runtime library linkage exception allows you to build and distribute your own linked modules under any terms you choose, including proprietary licenses.
+- The core is licensed under [GPL-3.0-or-later](LICENSES/GPL-3.0-or-later.txt) with a [Plugin Exception](LICENSES/LicenseRef-PolyClient-Plugin-Exception.txt).  
+- Plugins are licensed under [Apache-2.0](LICENSES/Apache-2.0.txt).  
+- The website and documentation are licensed under [CC-BY-4.0](LICENSES/CC-BY-4.0.txt).  
+- Some configuration files and metadata are licensed under [CC0-1.0](LICENSES/CC0-1.0.txt).  
+
+This project follows to the [REUSE Specification](https://reuse.software/) to ensure clear and consistent licensing.
