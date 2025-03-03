@@ -8,14 +8,14 @@ env:
   GO_VERSION: "stable"
   GORELEASER_VERSION: "latest"
 
+permissions:
+  contents: write # to create release
+  packages: write # to upload Docker image to GHCR
+
 on:
   push:
     tags:
       - "*"
-
-permissions:
-  contents: write # to create release
-  packages: write # to upload Docker image to GHCR
 
 jobs:
   goreleaser:

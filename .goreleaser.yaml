@@ -49,8 +49,6 @@ changelog:
   sort: asc
   filters:
     exclude:
-      - "^docs:"
-      - "^test:"
       - "^tmp:"
       - "^Merge branch"
       - "^Merge pull request"
@@ -59,11 +57,23 @@ changelog:
     - title: "Features"
       regexp: '^.*?feat(\([[:word:]]+\))??!?:.+$'
       order: 0
-    - title: "Bug fixes"
+    - title: "Bug Fixes"
       regexp: '^.*?fix(\([[:word:]]+\))??!?:.+$'
       order: 1
-    - title: "Performance improvements"
-      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
+    - title: "Refactor"
+      regexp: '^.*?refactor(\([[:word:]]+\))??!?:.+$'
       order: 2
-    - title: "Other changes"
+    - title: "Performance"
+      regexp: '^.*?perf(\([[:word:]]+\))??!?:.+$'
+      order: 3
+    - title: "Documentation"
+      regexp: '^.*?docs(\([[:word:]]+\))??!?:.+$'
+      order: 4
+    - title: "Styling"
+      regexp: '^.*?style(\([[:word:]]+\))??!?:.+$'
+      order: 5
+    - title: "Testing"
+      regexp: '^.*?test(\([[:word:]]+\))??!?:.+$'
+      order: 6
+    - title: "Other Changes"
       order: 999
