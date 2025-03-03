@@ -13,9 +13,8 @@ import (
 // NewGuiCommand creates a CLI command for launching PolyClient in GUI mode.
 func NewGuiCommand() *cli.Command {
 	return &cli.Command{
-		Name:     "gui",
-		Usage:    "Launch PolyClient in GUI mode",
-		Category: "GUI",
+		Name:  "gui",
+		Usage: "Launch PolyClient in GUI mode",
 		Action: func(context.Context, *cli.Command) error {
 			return nil
 		},

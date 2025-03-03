@@ -20,9 +20,8 @@ import (
 // NewDatabaseCommand returns a new database command for managing databases from the CLI.
 func NewDatabaseCommand() *cli.Command {
 	return &cli.Command{
-		Name:     "database",
-		Usage:    "Manage databases from the CLI",
-		Category: "Database",
+		Name:  "database",
+		Usage: "Manage databases from the CLI",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:     "connection",
@@ -42,9 +41,8 @@ func newQueryCommand() *cli.Command {
 	supportedFormats := strings.Join(exporter.GetSupportedFormats(), ", ")
 
 	return &cli.Command{
-		Name:     "query",
-		Usage:    "Execute a query against a database (SQL or NoSQL)",
-		Category: "Database",
+		Name:  "query",
+		Usage: "Execute a query against a database (SQL or NoSQL)",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:     "query",
