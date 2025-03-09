@@ -12,7 +12,7 @@
       "websites": ["https://github.com/ju4n97"]
     }
   ],
-  "license": "SEE LICENSE IN LICENSE-APACHE",
+  "license": "SEE LICENSE IN LICENSE.txt",
   "repository": "https://github.com/polyclient/polyclient/tree/master/plugins/sqlite",
   "homepage": "https://polyclient.pages.dev/plugins/sqlite",
   "keywords": ["sql", "sqlite", "database"],

@@ -16,7 +16,13 @@ SPDX-FileCopyrightText = "2025 The PolyClient Authors"
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]
-path = ["plugins/**/manifest.json", "plugins/**/go.mod", "plugins/**/go.sum"]
+path = [
+    "plugins/**/manifest.json",
+    "plugins/**/go.mod",
+    "plugins/**/go.sum",
+    "plugins/**/LICENSE.txt",
+    "plugins/**/README.md",
+]
 SPDX-FileCopyrightText = "2025 The PolyClient Authors"
 SPDX-License-Identifier = "Apache-2.0"
 

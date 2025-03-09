@@ -16,18 +16,21 @@ import (
 	"github.com/tetratelabs/wazero"
 )
 
+// PluginRegistry manages discovery, loading, and execution of WASM plugins.
 type PluginRegistry struct {
 	lookupDirs    []string
 	loadedPlugins map[string]*LoadedPlugin
 	mu            sync.RWMutex
 }
 
+// LoadedPlugin represents a loaded WASM plugin.
 type LoadedPlugin struct {
 	wasmPath   string
 	wasmPlugin *extism.Plugin
-	manifest   *Manifest
+	manifest   *PluginManifest
 }
 
+// NewPluginRegistry initializes a registry with specified lookup directories.
 func NewPluginRegistry(lookupDirs []string) *PluginRegistry {
 	return &PluginRegistry{
 		lookupDirs:    lookupDirs,
@@ -35,6 +38,7 @@ func NewPluginRegistry(lookupDirs []string) *PluginRegistry {
 	}
 }
 
+// GetWASMPath returns the WASM file path for a plugin ID.
 func (pr *PluginRegistry) GetWASMPath(id string) (string, error) {
 	pr.mu.Lock()
 	defer pr.mu.Unlock()
@@ -47,6 +51,7 @@ func (pr *PluginRegistry) GetWASMPath(id string) (string, error) {
 	return plugin.wasmPath, nil
 }
 
+// GetWASMPlugin returns the extism.Plugin instance for a plugin ID.
 func (pr *PluginRegistry) GetWASMPlugin(id string) (*extism.Plugin, error) {
 	pr.mu.Lock()
 	defer pr.mu.Unlock()
@@ -59,7 +64,8 @@ func (pr *PluginRegistry) GetWASMPlugin(id string) (*extism.Plugin, error) {
 	return plugin.wasmPlugin, nil
 }
 
-func (pr *PluginRegistry) GetManifest(id string) (*Manifest, error) {
+// GetManifest returns the manifest for a plugin ID.
+func (pr *PluginRegistry) GetManifest(id string) (*PluginManifest, error) {
 	pr.mu.Lock()
 	defer pr.mu.Unlock()
 
@@ -71,6 +77,37 @@ func (pr *PluginRegistry) GetManifest(id string) (*Manifest, error) {
 	return plugin.manifest, nil
 }
 
+// CallFunction executes a function in the specified WASM plugin.
+func (pr *PluginRegistry) CallFunction(pluginId, functionName string, input []byte) ([]byte, error) {
+	plugin, err := pr.GetWASMPlugin(pluginId)
+	if err != nil {
+		return nil, err
+	}
+
+	_, result, err := plugin.Call(functionName, input)
+	if err != nil {
+		return nil, fmt.Errorf("failed to call function %s: %w", functionName, err)
+	}
+
+	return result, nil
+}
+
+// CallFunctionWithContext executes a function in the specified WASM plugin with a context.
+func (pr *PluginRegistry) CallFunctionWithContext(ctx context.Context, pluginId, functionName string, input []byte) ([]byte, error) {
+	plugin, err := pr.GetWASMPlugin(pluginId)
+	if err != nil {
+		return nil, err
+	}
+
+	_, result, err := plugin.CallWithContext(ctx, functionName, input)
+	if err != nil {
+		return nil, fmt.Errorf("failed to call function %s: %w", functionName, err)
+	}
+
+	return result, nil
+}
+
+// LoadPlugins scans lookup directories and loads available plugins.
 func (pr *PluginRegistry) LoadPlugins() error {
 	var wg sync.WaitGroup
 
@@ -98,6 +135,7 @@ func (pr *PluginRegistry) LoadPlugins() error {
 	return nil
 }
 
+// LoadPlugin loads a single plugin from a manifest file path.
 func (pr *PluginRegistry) LoadPlugin(manifestPath string) (*LoadedPlugin, error) {
 	manifest, err := LoadManifest(manifestPath)
 	if err != nil {
@@ -112,20 +150,40 @@ func (pr *PluginRegistry) LoadPlugin(manifestPath string) (*LoadedPlugin, error)
 			fmt.Errorf("failed to load plugin: %w", err)
 	}
 
-	loadedPlugin := &LoadedPlugin{
-		wasmPath:   wasmPath,
-		wasmPlugin: wasmPlugin,
-		manifest:   manifest,
+	plugin := &LoadedPlugin{
+		wasmPath,
+		wasmPlugin,
+		manifest,
 	}
 
 	pr.mu.Lock()
-	pr.loadedPlugins[manifest.Id] = loadedPlugin
+	pr.loadedPlugins[manifest.Id] = plugin
 	pr.mu.Unlock()
 
-	return loadedPlugin, nil
+	return plugin, nil
 }
 
-func loadWASMPlugin(m *Manifest, wasmPath string) (*extism.Plugin, error) {
+// UnloadPlugin unloads a single plugin from the registry.
+func (pr *PluginRegistry) UnloadPlugin(id string) error {
+	pr.mu.Lock()
+	defer pr.mu.Unlock()
+
+	ctx := context.Background()
+
+	plugin, ok := pr.loadedPlugins[id]
+	if !ok {
+		return fmt.Errorf("failed to find plugin with id %s", id)
+	}
+
+	plugin.wasmPlugin.Close(ctx)
+
+	delete(pr.loadedPlugins, id)
+
+	return nil
+}
+
+// loadWASMPlugin loads a single WASM plugin from a file path.
+func loadWASMPlugin(m *PluginManifest, wasmPath string) (*extism.Plugin, error) {
 	ctx := context.Background()
 	cache := wazero.NewCompilationCache()
 	defer cache.Close(ctx)
