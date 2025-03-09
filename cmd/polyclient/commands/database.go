@@ -10,15 +10,16 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
-	"time"
 
-	"github.com/polyclient/polyclient/internal/exporter"
+	"github.com/samber/lo"
+
+	"github.com/polyclient/polyclient/pkg/dataexchange"
+	"github.com/polyclient/polyclient/runtime/plugin"
 	"github.com/urfave/cli/v3"
 )
 
 // NewDatabaseCommand returns a new database command for managing databases from the CLI.
-func NewDatabaseCommand() *cli.Command {
+func NewDatabaseCommand(pr *plugin.PluginRegistry) *cli.Command {
 	return &cli.Command{
 		Name:  "database",
 		Usage: "Manage databases from the CLI",
@@ -31,14 +32,16 @@ func NewDatabaseCommand() *cli.Command {
 			},
 		},
 		Commands: []*cli.Command{
-			newQueryCommand(),
+			newQueryCommand(pr),
 		},
 	}
 }
 
 // newQueryCommand returns a new query command that can be used to query a database from the CLI.
-func newQueryCommand() *cli.Command {
-	supportedFormats := strings.Join(exporter.GetSupportedFormats(), ", ")
+func newQueryCommand(pr *plugin.PluginRegistry) *cli.Command {
+	supportedFormats := lo.Map(dataexchange.GetSupportedExportFormats(), func(format dataexchange.Format, _ int) string {
+		return fmt.Sprintf("%v", format)
+	})
 
 	return &cli.Command{
 		Name:  "query",
@@ -54,10 +57,11 @@ func newQueryCommand() *cli.Command {
 				Name:        "output",
 				Usage:       fmt.Sprintf("Output format (%s)", supportedFormats),
 				Aliases:     []string{"o"},
-				Value:       "markdown",
-				DefaultText: "markdown",
+				Value:       "json",
+				DefaultText: "json",
 				Validator: func(output string) error {
-					if !exporter.ValidateFormat(exporter.Format(output)) {
+					_, ok := dataexchange.GetRegistryEntry(dataexchange.Format(output))
+					if !ok {
 						return fmt.Errorf("invalid output format: %s\nSupported formats: %s", output, supportedFormats)
 					}
 
@@ -80,7 +84,7 @@ func newQueryCommand() *cli.Command {
 			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			// query := cmd.String("query")
+			query := cmd.String("query")
 			output := cmd.String("output")
 			destination := cmd.String("destination")
 
@@ -96,34 +100,26 @@ func newQueryCommand() *cli.Command {
 				w = file
 			}
 
-			dataExporter := exporter.NewDataExporter(exporter.DataExporterOptions{
-				Format: output,
-				Writer: w,
-			})
-
-			mockData := []struct {
-				Name     string
-				Email    string
-				Birthday time.Time
-			}{
-				{
-					Name:     "John Doe",
-					Email:    "johndoe@example.com",
-					Birthday: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
-				},
-				{
-					Name:     "Jane Doe",
-					Email:    "janedoe@example.com",
-					Birthday: time.Date(1995, 1, 1, 0, 0, 0, 0, time.UTC),
-				},
-				{
-					Name:     "Bob Smith",
-					Email:    "bobsmith@example.com",
-					Birthday: time.Date(1980, 1, 1, 0, 0, 0, 0, time.UTC),
-				},
+			resultBytes, err := pr.CallFunction("sqlite", "query", []byte(query))
+			if err != nil {
+				return fmt.Errorf("failed to execute query: %w", err)
 			}
 
-			return dataExporter.Export(mockData)
+			result, err := dataexchange.ParseDataFromBytes[any](resultBytes, dataexchange.Format(output))
+			if err != nil {
+				return fmt.Errorf("failed to parse data: %w", err)
+			}
+
+			entry, ok := dataexchange.GetRegistryEntry(dataexchange.Format(output))
+			if !ok {
+				return fmt.Errorf("output format %s is not supported", output)
+			}
+
+			if err := entry.Exporter.Export(w, result); err != nil {
+				return fmt.Errorf("failed to export data: %w", err)
+			}
+
+			return nil
 		},
 	}
 }

@@ -6,50 +6,69 @@ package commands
 
 import (
 	"context"
-	"fmt"
-	"log"
 
-	"github.com/polyclient/polyclient/internal/runtime/plugin"
+	"github.com/polyclient/polyclient/runtime/plugin"
 	"github.com/urfave/cli/v3"
 )
 
 // NewPluginCommand creates a CLI command for managing PolyClient plugins.
-func NewPluginCommand() *cli.Command {
+func NewPluginCommand(pr *plugin.PluginRegistry) *cli.Command {
 	return &cli.Command{
 		Name:  "plugin",
 		Usage: "Manage PolyClient plugins from the CLI",
 		Commands: []*cli.Command{
-			newLoadCommand(),
+			newLoadCommand(pr),
+			newUnloadCommand(pr),
 		},
 	}
 }
 
-func newLoadCommand() *cli.Command {
+// newLoadCommand creates a CLI command for loading PolyClient plugins.
+func newLoadCommand(pr *plugin.PluginRegistry) *cli.Command {
 	return &cli.Command{
 		Name:  "load",
 		Usage: "Load a plugin",
-		Action: func(context.Context, *cli.Command) error {
-			lookupPaths := []string{
-				"./plugins",
-			}
-			pr := plugin.NewPluginRegistry(lookupPaths)
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:     "path",
+				Aliases:  []string{"p"},
+				Usage:    "Path to the plugin directory or WASM file",
+				Required: true,
+			},
+		},
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			path := cmd.String("path")
 
-			if err := pr.LoadPlugins(); err != nil {
-				return err
-			}
-
-			plugin, err := pr.GetWASMPlugin("sqlite")
+			manifestPath, err := plugin.FindManifestPath(path)
 			if err != nil {
 				return err
 			}
 
-			_, result, err := plugin.Call("greet", []byte("Juan"))
-			if err != nil {
-				return fmt.Errorf("failed to call function: %w", err)
+			if _, err := pr.LoadPlugin(manifestPath); err != nil {
+				return err
 			}
 
-			log.Println(string(result))
 			return nil
+		},
+	}
+}
+
+// newUnloadCommand creates a CLI command for unloading PolyClient plugins.
+func newUnloadCommand(pr *plugin.PluginRegistry) *cli.Command {
+	return &cli.Command{
+		Name:  "unload",
+		Usage: "Unload a plugin",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:     "id",
+				Usage:    "ID of the plugin to unload",
+				Required: true,
+			},
+		},
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			id := cmd.String("id")
+
+			return pr.UnloadPlugin(id)
 		},
 	}
 }

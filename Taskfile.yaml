@@ -20,6 +20,8 @@ tasks:
   dev:
     desc: Run the CLI in development mode for testing and debugging
     cmd: go run ./cmd/polyclient/main.go {{ .CLI_ARGS }}
+    deps:
+      - build:plugins
 
   build:
     desc: Build the CLI binary

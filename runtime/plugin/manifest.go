@@ -17,7 +17,7 @@ import (
 
 var supportedManifestFiles = [...]string{"manifest.json"}
 
-type Manifest struct {
+type PluginManifest struct {
 	Id          string   `json:"id"          validate:"required,idPattern"`
 	Name        string   `json:"name"        validate:"required,gte=1,lte=30"`
 	Scope       string   `json:"scope"       validate:"required,oneof=sql nosql ai theme"`
@@ -39,7 +39,7 @@ type Author struct {
 
 // ValidateManifest verifies that a give manifest configuration
 // complies with all the defined validation rules.
-func ValidateManifest(m *Manifest) error {
+func ValidateManifest(m *PluginManifest) error {
 	v := validator.New(validator.WithRequiredStructEnabled())
 
 	// Register custom validation for id pattern
@@ -65,13 +65,13 @@ func ValidateManifest(m *Manifest) error {
 
 // LoadManifest reads and validates a plugin manifest from the
 // specified file path.
-func LoadManifest(path string) (*Manifest, error) {
+func LoadManifest(path string) (*PluginManifest, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load manifest: %w", err)
 	}
 
-	var manifest Manifest
+	var manifest PluginManifest
 	if err := json.Unmarshal(data, &manifest); err != nil {
 		return nil, fmt.Errorf("failed to load manifest: %w", err)
 	}

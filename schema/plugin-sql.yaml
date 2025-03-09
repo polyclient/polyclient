@@ -1,0 +1,176 @@
+# yaml-language-server: $schema=https://xtp.dylibso.com/assets/wasm/schema.json
+
+version: v1-draft
+exports:
+  Query:
+    input:
+      type: string
+      contentType: text/plain; charset=utf-8
+      description: The SQL query to execute.
+
+    output:
+      $ref: "#/components/schemas/QueryResult"
+      contentType: application/json
+
+components:
+  schemas:
+    QueryResult:
+      description: The result of an executed SQL query.
+      required:
+        - success
+        - rowCount
+        - executionTime
+      properties:
+        success:
+          type: boolean
+          description: Indicates whether the query executed successfully.
+
+        rowCount:
+          type: integer
+          description: The number of rows affected or returned by the query.
+
+        executionTime:
+          type: number
+          description: The execution time of the query in milliseconds.
+
+        rows:
+          type: array
+          items:
+            type: object
+          description: The data rows returned by the query.
+
+        columns:
+          type: array
+          items:
+            $ref: "#/components/schemas/QueryColumnInfo"
+          description: Metadata about the columns in the result set.
+
+        pagination:
+          $ref: "#/components/schemas/QueryPagination"
+          description: Pagination information for the query results.
+
+        error:
+          $ref: "#/components/schemas/QueryErrorInfo"
+          description: Error information if the query failed.
+
+        performanceStatistics:
+          $ref: "#/components/schemas/QueryPerformanceStatistics"
+          description: Performance statistics for the query execution.
+
+        schemaVersion:
+          type: string
+          description: The version of the schema used for the query result.
+
+        metadata:
+          type: object
+          additionalProperties:
+            type: string
+          description: Additional database-specific metadata about the query execution.
+
+    QueryColumnInfo:
+      description: Information about a column in a table.
+      required:
+        - name
+        - type
+        - table
+      properties:
+        name:
+          type: string
+          description: The name of the column.
+
+        type:
+          type: string
+          description: The data type of the column.
+
+        table:
+          type: string
+          description: The name of the table that the column belongs to.
+
+        isPrimaryKey:
+          type: boolean
+          description: Whether the column is a primary key column.
+
+        isAutoIncrement:
+          type: boolean
+          description: Whether the column is auto-incrementing.
+
+        isUnique:
+          type: boolean
+          description: Whether the column is unique within the table.
+
+        isNullable:
+          type: boolean
+          description: Whether the column can contain null values.
+
+        defaultValue:
+          type: string
+          description: The default value for the column if it is not specified in the query.
+
+        precision:
+          type: number
+          format: float
+          description: For numeric columns, the maximum number of digits after the decimal point.
+
+        scale:
+          type: integer
+          description: For numeric columns, the number of digits to the right of the decimal point.
+
+        comment:
+          type: string
+          description: A comment associated with the column.
+
+        length:
+          type: integer
+          description: For string columns, the maximum length of the string.
+
+        collation:
+          type: string
+          description: The collation for the column.
+
+        ordinalPosition:
+          type: integer
+          description: The ordinal position of the column within the table.
+
+    QueryPerformanceStatistics:
+      description: Performance statistics for the query execution.
+      properties:
+        cpuTime:
+          type: number
+          format: float
+          description: CPU time used for query execution in milliseconds.
+        memoryUsage:
+          type: number
+          description: Memory used during query execution in bytes.
+        cacheHit:
+          type: boolean
+          description: Whether the query result was served from cache.
+        planningTime:
+          type: number
+          format: float
+          description: Time spent on query planning in milliseconds.
+
+    QueryPagination:
+      description: Pagination information for large result sets.
+      properties:
+        currentPage:
+          type: integer
+          description: The current page number.
+        recordsPerPage:
+          type: integer
+          description: The number of records per page.
+        totalRecords:
+          type: integer
+          description: The total number of records.
+        totalPages:
+          type: integer
+          description: The total number of pages.
+
+    QueryErrorInfo:
+      description: Information about a database error.
+      properties:
+        code:
+          type: string
+          description: The error code.
+        message:
+          type: string
+          description: The error message.
