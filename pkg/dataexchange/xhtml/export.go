@@ -11,6 +11,7 @@ import (
 	"html/template"
 	"io"
 	"reflect"
+	"sort"
 	"time"
 
 	"github.com/polyclient/polyclient/pkg/stringify"
@@ -20,7 +21,7 @@ import (
 type HtmlExporter struct {
 	// DateFormat is the format for date fields (default time.RFC3339).
 	DateFormat string
-	// UseCss is whether to use default styles in the HTML output (default true).
+	// UseCss is whether to use default CSS styles in the HTML output (default true).
 	UseCss bool
 	// template is the template for the HTML output.
 	template *template.Template
@@ -58,11 +59,7 @@ func NewHtmlExporter(opts ...HtmlExporterOption) *HtmlExporter {
 	return ex
 }
 
-// Export writes the provided slice data to the given writer in HTML format.
-// The data must be a slice of one of:
-// - structs (writes headers from exported fields)
-// - maps[string]any (writes headers from first row's keys)
-// Returns an error if data is not a slice or if writing fails.
+// Export writes a slice to HTML, supporting primitive types, structs, and maps.
 func (ex *HtmlExporter) Export(w io.Writer, data any) error {
 	if w == nil {
 		return errors.New("writer cannot be nil")
@@ -78,12 +75,7 @@ func (ex *HtmlExporter) Export(w io.Writer, data any) error {
 		return nil
 	}
 
-	converted := make([]any, v.Len())
-	for i := range v.Len() {
-		converted[i] = v.Index(i).Interface()
-	}
-
-	parsedData, err := ex.formatSlice(converted)
+	parsedData, err := ex.formatSlice(v)
 	if err != nil {
 		return err
 	}
@@ -94,44 +86,41 @@ func (ex *HtmlExporter) Export(w io.Writer, data any) error {
 }
 
 // formatSlice formats the data for the HTML template.
-func (ex *HtmlExporter) formatSlice(data []any) (*HtmlTemplateData, error) {
-	switch first := data[0].(type) {
+func (ex *HtmlExporter) formatSlice(v reflect.Value) (*HtmlTemplateData, error) {
+	first := v.Index(0).Interface()
+
+	switch first.(type) {
 	case map[string]any:
-		return ex.formatMapSlice(data)
+		return ex.formatMapSlice(v)
 	default:
-		if reflect.TypeOf(first).Kind() == reflect.Struct {
-			return ex.formatStructSlice(data)
+		if v.Index(0).Kind() == reflect.Struct {
+			return ex.formatStructSlice(v)
 		}
 
-		return ex.formatSingleColumnSlice(data)
+		return ex.formatSingleColumnSlice(v)
 	}
 }
 
 // formatMapSlice formats a slice of maps for HTML output.
-func (ex *HtmlExporter) formatMapSlice(data []any) (*HtmlTemplateData, error) {
+func (ex *HtmlExporter) formatMapSlice(v reflect.Value) (*HtmlTemplateData, error) {
 	parsed := &HtmlTemplateData{
 		Headers: make([]string, 0),
-		Rows:    make([][]string, 0, len(data)),
+		Rows:    make([][]string, 0, v.Len()),
 	}
 
-	first, ok := data[0].(map[string]any)
-	if !ok {
-		return nil, fmt.Errorf("first element is not a map: %T", data[0])
-	}
-
+	first := v.Index(0).Interface().(map[string]any)
 	for header := range first {
 		parsed.Headers = append(parsed.Headers, header)
 	}
 
-	for _, item := range data {
-		record, ok := item.(map[string]any)
-		if !ok {
-			return nil, fmt.Errorf("item is not a map: %T", item)
-		}
+	sort.Strings(parsed.Headers) // Ensure consistent column ordering
 
+	for i := range v.Len() {
+		record := v.Index(i).Interface().(map[string]any)
 		row := make([]string, len(parsed.Headers))
-		for i, header := range parsed.Headers {
-			row[i] = stringify.Stringify(record[header],
+
+		for j, header := range parsed.Headers {
+			row[j] = stringify.Stringify(record[header],
 				stringify.WithDateFormat(ex.DateFormat),
 				stringify.WithCustomFormatter(sanitizeHtml),
 			)
@@ -144,33 +133,33 @@ func (ex *HtmlExporter) formatMapSlice(data []any) (*HtmlTemplateData, error) {
 }
 
 // formatStructSlice formats a slice of structs for HTML output.
-func (ex *HtmlExporter) formatStructSlice(data []any) (*HtmlTemplateData, error) {
+func (ex *HtmlExporter) formatStructSlice(v reflect.Value) (*HtmlTemplateData, error) {
 	parsed := &HtmlTemplateData{
 		Headers: make([]string, 0),
-		Rows:    make([][]string, 0, len(data)),
+		Rows:    make([][]string, 0, v.Len()),
 	}
 
-	first := reflect.TypeOf(data[0])
-	for i := 0; i < first.NumField(); i++ {
-		field := first.Field(i)
+	typeOfStruct := v.Index(0).Type()
+	for i := range typeOfStruct.NumField() {
+		field := typeOfStruct.Field(i)
 		if field.PkgPath == "" {
 			parsed.Headers = append(parsed.Headers, field.Name)
 		}
 	}
 
-	for _, item := range data {
-		value := reflect.ValueOf(item)
+	for i := range v.Len() {
+		value := v.Index(i)
 		row := make([]string, len(parsed.Headers))
 
-		for i, header := range parsed.Headers {
+		for j, header := range parsed.Headers {
 			field := value.FieldByName(header)
 			if field.IsValid() && field.CanInterface() {
-				row[i] = stringify.Stringify(field.Interface(),
+				row[j] = stringify.Stringify(field.Interface(),
 					stringify.WithDateFormat(ex.DateFormat),
 					stringify.WithCustomFormatter(sanitizeHtml),
 				)
 			} else {
-				row[i] = ""
+				row[j] = ""
 			}
 		}
 
@@ -181,15 +170,15 @@ func (ex *HtmlExporter) formatStructSlice(data []any) (*HtmlTemplateData, error)
 }
 
 // formatSingleColumnSlice writes `[]any` as a single-column HTML.
-func (ex *HtmlExporter) formatSingleColumnSlice(data []any) (*HtmlTemplateData, error) {
+func (ex *HtmlExporter) formatSingleColumnSlice(v reflect.Value) (*HtmlTemplateData, error) {
 	parsed := &HtmlTemplateData{
 		Headers: []string{"Value"},
-		Rows:    make([][]string, 0, len(data)),
+		Rows:    make([][]string, 0, v.Len()),
 	}
 
-	for _, item := range data {
+	for i := range v.Len() {
 		parsed.Rows = append(parsed.Rows, []string{
-			stringify.Stringify(item,
+			stringify.Stringify(v.Index(i).Interface(),
 				stringify.WithDateFormat(ex.DateFormat),
 				stringify.WithCustomFormatter(sanitizeHtml),
 			),

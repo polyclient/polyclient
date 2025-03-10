@@ -10,53 +10,35 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"sort"
 	"time"
 
 	"github.com/polyclient/polyclient/pkg/stringify"
 )
 
-// CsvExporter is a data exporter for CSV format.
+// CsvExporter exports data as CSV.
 type CsvExporter struct {
-	// Comma is the character used to separate fields (default ',').
-	Comma rune
-	// UseCRLF indicates whether to use CRLF line endings (default false).
-	UseCRLF bool
-	// DateFormat is the format for date fields (default time.RFC3339).
+	Comma      rune
+	UseCRLF    bool
 	DateFormat string
 }
 
-// CsvExporterOption defines a functional option for configuring CSV output.
 type CsvExporterOption func(*CsvExporter)
 
-// WithComma sets a custom field separator.
 func WithComma(comma rune) CsvExporterOption {
-	return func(opts *CsvExporter) {
-		opts.Comma = comma
-	}
+	return func(opts *CsvExporter) { opts.Comma = comma }
 }
 
-// WithCRLF sets whether to use CRLF line endings.
 func WithCRLF(useCRLF bool) CsvExporterOption {
-	return func(opts *CsvExporter) {
-		opts.UseCRLF = useCRLF
-	}
+	return func(opts *CsvExporter) { opts.UseCRLF = useCRLF }
 }
 
-// WithDateFormat sets a custom date format for date fields.
 func WithDateFormat(format string) CsvExporterOption {
-	return func(opts *CsvExporter) {
-		opts.DateFormat = format
-	}
+	return func(opts *CsvExporter) { opts.DateFormat = format }
 }
 
-// NewCsvExporter creates a new CsvExporter with the specified options.
 func NewCsvExporter(opts ...CsvExporterOption) *CsvExporter {
-	ex := &CsvExporter{
-		Comma:      ',',
-		UseCRLF:    false,
-		DateFormat: time.RFC3339,
-	}
-
+	ex := &CsvExporter{Comma: ',', UseCRLF: false, DateFormat: time.RFC3339}
 	for _, opt := range opts {
 		opt(ex)
 	}
@@ -64,19 +46,13 @@ func NewCsvExporter(opts ...CsvExporterOption) *CsvExporter {
 	return ex
 }
 
-// Export writes the provided slice data to the given writer in CSV format.
-// The data must be a slice of one of:
-// - primitive types (writes single column)
-// - structs (writes headers from exported fields)
-// - maps[string]any (writes headers from first row's keys)
-// Returns an error if data is not a slice or if writing fails.
+// Export writes a slice to CSV, supporting primitive types, structs, and maps.
 func (ex *CsvExporter) Export(w io.Writer, data any) error {
 	if w == nil {
 		return errors.New("writer cannot be nil")
 	}
 
 	v := reflect.ValueOf(data)
-
 	if v.Kind() != reflect.Slice {
 		return fmt.Errorf("expected a slice, got %T", data)
 	}
@@ -85,60 +61,52 @@ func (ex *CsvExporter) Export(w io.Writer, data any) error {
 		return nil
 	}
 
-	converted := make([]any, v.Len())
-	for i := range v.Len() {
-		converted[i] = v.Index(i).Interface()
-	}
-
-	return ex.formatSlice(w, converted)
+	return ex.formatSlice(w, v)
 }
 
-// formatSlice formats the data as CSV, detecting the appropriate format based on the first element's type.
-func (ex *CsvExporter) formatSlice(w io.Writer, data []any) error {
+// formatSlice processes a slice and determines the CSV format.
+func (ex *CsvExporter) formatSlice(w io.Writer, v reflect.Value) error {
 	writer := csv.NewWriter(w)
 	writer.Comma = ex.Comma
 	writer.UseCRLF = ex.UseCRLF
 
 	defer writer.Flush()
 
-	switch first := data[0].(type) {
+	first := v.Index(0).Interface()
+
+	switch first.(type) {
 	case map[string]any:
-		return ex.formatMapSlice(writer, data)
+		return ex.formatMapSlice(writer, v)
 	default:
 		if reflect.TypeOf(first).Kind() == reflect.Struct {
-			return ex.formatStructSlice(writer, data)
+			return ex.formatStructSlice(writer, v)
 		}
 
-		return ex.formatSingleColumnSlice(writer, data)
+		return ex.formatSingleColumnSlice(writer, v)
 	}
 }
 
-// formatMapSlice writes `[]map[string]any` as a multi-column CSV.
-func (ex *CsvExporter) formatMapSlice(w *csv.Writer, data []any) error {
-	first, ok := data[0].(map[string]any)
-	if !ok {
-		return fmt.Errorf("first element is not a map: %T", data[0])
+// formatMapSlice writes `[]map[string]any` as a CSV.
+func (ex *CsvExporter) formatMapSlice(w *csv.Writer, v reflect.Value) error {
+	first := v.Index(0).Interface().(map[string]any)
+	headers := make([]string, 0, len(first))
+
+	for k := range first {
+		headers = append(headers, k)
 	}
 
-	var headers = make([]string, 0, len(first))
-	for header := range first {
-		headers = append(headers, header)
-	}
+	sort.Strings(headers) // Ensure consistent column ordering
 
 	if err := w.Write(headers); err != nil {
 		return fmt.Errorf("failed to write headers: %w", err)
 	}
 
-	for _, item := range data {
-		record, ok := item.(map[string]any)
-		if !ok {
-			return fmt.Errorf("item is not a map: %T", item)
-		}
+	for i := range v.Len() {
+		record := v.Index(i).Interface().(map[string]any)
+		row := make([]string, len(headers))
 
-		row := make([]string, 0, len(headers))
-
-		for _, header := range headers {
-			row = append(row, stringify.Stringify(record[header]))
+		for j, header := range headers {
+			row[j] = stringify.Stringify(record[header])
 		}
 
 		if err := w.Write(row); err != nil {
@@ -149,15 +117,20 @@ func (ex *CsvExporter) formatMapSlice(w *csv.Writer, data []any) error {
 	return nil
 }
 
-// formatStructSlice writes `[]struct` as a multi-column CSV.
-func (ex *CsvExporter) formatStructSlice(w *csv.Writer, data []any) error {
+// formatStructSlice writes `[]struct` as a CSV.
+func (ex *CsvExporter) formatStructSlice(w *csv.Writer, v reflect.Value) error {
+	t := v.Index(0).Type()
+
 	var headers []string
 
-	first := reflect.TypeOf(data[0])
-	for i := range first.NumField() {
-		field := first.Field(i)
+	var fieldIndices []int
+
+	// Filter out private fields
+	for i := range t.NumField() {
+		field := t.Field(i)
 		if field.PkgPath == "" {
 			headers = append(headers, field.Name)
+			fieldIndices = append(fieldIndices, i)
 		}
 	}
 
@@ -165,17 +138,14 @@ func (ex *CsvExporter) formatStructSlice(w *csv.Writer, data []any) error {
 		return fmt.Errorf("failed to write headers: %w", err)
 	}
 
-	for _, item := range data {
-		record := reflect.ValueOf(item)
+	for i := range v.Len() {
+		record := v.Index(i)
+		row := make([]string, len(headers))
 
-		var row []string
-
-		for _, header := range headers {
-			field := record.FieldByName(header)
-			if field.IsValid() && field.CanInterface() {
-				row = append(row, stringify.Stringify(field.Interface()))
-			} else {
-				row = append(row, "")
+		for j, idx := range fieldIndices {
+			field := record.Field(idx)
+			if field.CanInterface() {
+				row[j] = stringify.Stringify(field.Interface())
 			}
 		}
 
@@ -188,11 +158,10 @@ func (ex *CsvExporter) formatStructSlice(w *csv.Writer, data []any) error {
 }
 
 // formatSingleColumnSlice writes `[]any` as a single-column CSV.
-func (ex *CsvExporter) formatSingleColumnSlice(w *csv.Writer, data []any) error {
-	rows := make([][]string, 0, len(data))
-
-	for _, item := range data {
-		rows = append(rows, []string{stringify.Stringify(item)})
+func (ex *CsvExporter) formatSingleColumnSlice(w *csv.Writer, v reflect.Value) error {
+	rows := make([][]string, v.Len())
+	for i := range v.Len() {
+		rows[i] = []string{stringify.Stringify(v.Index(i).Interface())}
 	}
 
 	if err := w.WriteAll(rows); err != nil {
