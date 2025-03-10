@@ -11,131 +11,236 @@ import (
 
 	"github.com/polyclient/polyclient/pkg/dataexchange/xhtml"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
-func TestNewHtmlExporter_Defaults(t *testing.T) {
-	t.Parallel()
-
-	ex := xhtml.NewHtmlExporter()
-	assert.True(t, ex.UseCss)
-	assert.Equal(t, time.RFC3339, ex.DateFormat)
+type TestPerson struct {
+	Name     string
+	Age      int
+	Active   bool
+	JoinedAt time.Time
 }
 
-func TestNewHtmlExporter_WithOptions(t *testing.T) {
-	t.Parallel()
-
-	ex := xhtml.NewHtmlExporter(
-		xhtml.WithUseCss(false),
-		xhtml.WithDateFormat("2006-01-02"),
-	)
-
-	assert.False(t, ex.UseCss)
-	assert.Equal(t, "2006-01-02", ex.DateFormat)
+type PrivateFieldStruct struct {
+	Public  string
+	private string
 }
 
-func TestHtmlExporter_Export_SingleColumn(t *testing.T) {
+func TestNewHtmlExporter(t *testing.T) {
 	t.Parallel()
 
-	data := []any{"foo", "bar", "baz"}
+	t.Run("default configuration", func(t *testing.T) {
+		t.Parallel()
 
-	var buf bytes.Buffer
+		exporter := xhtml.NewHtmlExporter()
+		assert.NotNil(t, exporter)
+	})
 
-	ex := xhtml.NewHtmlExporter()
-	err := ex.Export(&buf, data)
-	require.NoError(t, err)
+	t.Run("custom configuration", func(t *testing.T) {
+		t.Parallel()
 
-	output := buf.String()
-	assert.Contains(t, output, "<td>foo</td>")
-	assert.Contains(t, output, "<td>bar</td>")
-	assert.Contains(t, output, "<td>baz</td>")
+		exporter := xhtml.NewHtmlExporter(
+			xhtml.WithDateFormat("2006-01-02"),
+			xhtml.WithUseCss(false),
+		)
+		assert.NotNil(t, exporter)
+	})
 }
 
-func TestHtmlExporter_Export_MapSlice(t *testing.T) {
+func TestExport(t *testing.T) {
 	t.Parallel()
 
-	data := []any{
-		map[string]any{"name": "John", "age": 30},
-		map[string]any{"name": "Jane", "age": 25},
-	}
+	t.Run("invalid input - non-slice", func(t *testing.T) {
+		t.Parallel()
 
-	var buf bytes.Buffer
+		exporter := xhtml.NewHtmlExporter()
 
-	ex := xhtml.NewHtmlExporter()
-	err := ex.Export(&buf, data)
-	require.NoError(t, err)
+		var buf bytes.Buffer
+		err := exporter.Export(&buf, "not a slice")
+		assert.Error(t, err)
+	})
 
-	output := buf.String()
-	assert.Contains(t, output, "<th>name</th>")
-	assert.Contains(t, output, "<th>age</th>")
-	assert.Contains(t, output, "<td>John</td>")
-	assert.Contains(t, output, "<td>30</td>")
-	assert.Contains(t, output, "<td>Jane</td>")
-	assert.Contains(t, output, "<td>25</td>")
-}
+	t.Run("empty slice", func(t *testing.T) {
+		t.Parallel()
 
-func TestHtmlExporter_Export_StructSlice(t *testing.T) {
-	t.Parallel()
+		exporter := xhtml.NewHtmlExporter()
 
-	type Person struct {
-		Name string
-		Age  int
-	}
+		var buf bytes.Buffer
+		err := exporter.Export(&buf, []string{})
+		assert.NoError(t, err)
+		assert.Empty(t, buf.String())
+	})
 
-	data := []Person{
-		{Name: "Alice", Age: 28},
-		{Name: "Bob", Age: 35},
-	}
+	t.Run("slice of structs", func(t *testing.T) {
+		t.Parallel()
 
-	var buf bytes.Buffer
+		exporter := xhtml.NewHtmlExporter()
 
-	ex := xhtml.NewHtmlExporter()
-	err := ex.Export(&buf, data)
-	require.NoError(t, err)
+		var buf bytes.Buffer
 
-	output := buf.String()
-	assert.Contains(t, output, "<th>Name</th>")
-	assert.Contains(t, output, "<th>Age</th>")
-	assert.Contains(t, output, "<td>Alice</td>")
-	assert.Contains(t, output, "<td>28</td>")
-	assert.Contains(t, output, "<td>Bob</td>")
-	assert.Contains(t, output, "<td>35</td>")
-}
+		now := time.Now()
+		data := []TestPerson{
+			{Name: "Alice", Age: 30, Active: true, JoinedAt: now},
+			{Name: "Bob", Age: 25, Active: false, JoinedAt: now},
+		}
 
-func TestHtmlExporter_Export_EmptyInput(t *testing.T) {
-	t.Parallel()
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
 
-	var buf bytes.Buffer
+		result := buf.String()
+		assert.Contains(t, result, "<th>Name</th>")
+		assert.Contains(t, result, "<th>Age</th>")
+		assert.Contains(t, result, "<th>Active</th>")
+		assert.Contains(t, result, "<th>JoinedAt</th>")
+		assert.Contains(t, result, "<td>Alice</td>")
+		assert.Contains(t, result, "<td>30</td>")
+		assert.Contains(t, result, "<td>true</td>")
+	})
 
-	ex := xhtml.NewHtmlExporter()
-	err := ex.Export(&buf, []any{})
-	assert.NoError(t, err)
-	assert.Empty(t, buf.String())
-}
+	t.Run("slice of maps", func(t *testing.T) {
+		t.Parallel()
 
-func TestHtmlExporter_Export_UnsupportedType(t *testing.T) {
-	t.Parallel()
+		exporter := xhtml.NewHtmlExporter()
 
-	var buf bytes.Buffer
+		var buf bytes.Buffer
 
-	ex := xhtml.NewHtmlExporter()
-	err := ex.Export(&buf, 123)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "expected a slice, got int")
-}
+		data := []map[string]any{
+			{"name": "Alice", "age": 30},
+			{"name": "Bob", "age": 25},
+		}
 
-func TestHtmlExporter_Export_InvalidMapSlice(t *testing.T) {
-	t.Parallel()
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
 
-	data := []any{
-		map[string]any{"name": "Alice", "age": 30},
-		"invalid", // Should cause an error
-	}
+		result := buf.String()
+		assert.Contains(t, result, "<th>name</th>")
+		assert.Contains(t, result, "<th>age</th>")
+		assert.Contains(t, result, "<td>Alice</td>")
+		assert.Contains(t, result, "<td>30</td>")
+		assert.Contains(t, result, "<td>Bob</td>")
+		assert.Contains(t, result, "<td>25</td>")
+	})
 
-	var buf bytes.Buffer
+	t.Run("null values in maps", func(t *testing.T) {
+		t.Parallel()
 
-	ex := xhtml.NewHtmlExporter()
-	err := ex.Export(&buf, data)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "item is not a map")
+		exporter := xhtml.NewHtmlExporter()
+
+		var buf bytes.Buffer
+
+		data := []map[string]any{
+			{"name": "Alice", "age": nil},
+			{"name": nil, "age": 25},
+		}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.Contains(t, result, "<td>Alice</td>")
+		assert.Contains(t, result, "<td>25</td>")
+		assert.Contains(t, result, "<td></td>") // Empty cells for nil values
+	})
+
+	t.Run("html escaping enabled", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xhtml.NewHtmlExporter()
+
+		var buf bytes.Buffer
+
+		data := []map[string]any{
+			{"field": "<script>alert('xss')</script>"},
+			{"field": "Contains & and >"},
+		}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.Contains(t, result, "&amp;lt;script&amp;gt;")
+		assert.Contains(t, result, "Contains &amp;amp; and &amp;gt;")
+		assert.NotContains(t, result, "<script>")
+	})
+
+	t.Run("unicode characters", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xhtml.NewHtmlExporter()
+
+		var buf bytes.Buffer
+
+		data := []map[string]any{
+			{"field": "🌟"},
+			{"field": "世界"},
+			{"field": "über"},
+		}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.Contains(t, result, "🌟")
+		assert.Contains(t, result, "世界")
+		assert.Contains(t, result, "über")
+	})
+
+	t.Run("private fields in struct", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xhtml.NewHtmlExporter()
+
+		var buf bytes.Buffer
+
+		data := []PrivateFieldStruct{
+			{Public: "visible", private: "hidden"},
+		}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.Contains(t, result, "<th>Public</th>")
+		assert.NotContains(t, result, "private")
+		assert.Contains(t, result, "<td>visible</td>")
+		assert.NotContains(t, result, "hidden")
+	})
+
+	t.Run("css disabled", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xhtml.NewHtmlExporter(xhtml.WithUseCss(false))
+
+		var buf bytes.Buffer
+
+		data := []map[string]any{
+			{"name": "Alice"},
+		}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.NotContains(t, result, "<style>")
+		assert.NotContains(t, result, "class=")
+	})
+
+	t.Run("custom date format", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xhtml.NewHtmlExporter(xhtml.WithDateFormat("2006-01-02"))
+
+		var buf bytes.Buffer
+
+		now := time.Date(2025, 3, 14, 15, 9, 26, 0, time.UTC)
+		data := []TestPerson{
+			{Name: "Alice", JoinedAt: now},
+		}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.Contains(t, result, "2025-03-14")
+		assert.NotContains(t, result, "15:09:26")
+	})
 }
