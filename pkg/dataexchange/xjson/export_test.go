@@ -12,83 +12,240 @@ import (
 
 	"github.com/polyclient/polyclient/pkg/dataexchange/xjson"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
-func TestJsonExporter_Defaults(t *testing.T) {
-	t.Parallel()
-
-	exporter := xjson.NewJsonExporter()
-
-	var buf bytes.Buffer
-
-	data := map[string]any{"key": "value"}
-	err := exporter.Export(&buf, data)
-	require.NoError(t, err)
-
-	var result map[string]any
-
-	require.NoError(t, json.Unmarshal(buf.Bytes(), &result))
-	assert.Equal(t, data, result)
+type TestPerson struct {
+	Name     string
+	Age      int
+	Active   bool
+	JoinedAt time.Time
 }
 
-func TestJsonExporter_Indentation(t *testing.T) {
-	t.Parallel()
-
-	exporter := xjson.NewJsonExporter(xjson.WithIndentString("\t"))
-
-	var buf bytes.Buffer
-
-	data := map[string]any{"key": "value"}
-	require.NoError(t, exporter.Export(&buf, data))
-
-	assert.Contains(t, buf.String(), "\n\t") // Check if tab indentation is applied
+type PrivateFieldStruct struct {
+	Public  string
+	private string
 }
 
-func TestJsonExporter_EscapeHTML(t *testing.T) {
+func TestNewJsonExporter(t *testing.T) {
 	t.Parallel()
 
-	data := map[string]any{"html": "<script>alert('xss')</script>"}
+	t.Run("default configuration", func(t *testing.T) {
+		t.Parallel()
 
-	exporter := xjson.NewJsonExporter()
+		exporter := xjson.NewJsonExporter()
+		assert.NotNil(t, exporter)
+	})
 
-	var buf bytes.Buffer
+	t.Run("custom configuration", func(t *testing.T) {
+		t.Parallel()
 
-	require.NoError(t, exporter.Export(&buf, data))
-	assert.Contains(t, buf.String(), "\\u003cscript\\u003e") // Default should escape HTML
-
-	exporter = xjson.NewJsonExporter(xjson.WithEscapeHTML(false))
-
-	buf.Reset()
-	require.NoError(t, exporter.Export(&buf, data))
-	assert.Contains(t, buf.String(), "<script>") // HTML should not be escaped
+		exporter := xjson.NewJsonExporter(
+			xjson.WithIndentString("\t"),
+			xjson.WithEscapeHTML(false),
+		)
+		assert.NotNil(t, exporter)
+	})
 }
 
-func TestJsonExporter_VariousDataTypes(t *testing.T) {
+func TestExport(t *testing.T) {
 	t.Parallel()
 
-	exporter := xjson.NewJsonExporter()
+	t.Run("nil writer", func(t *testing.T) {
+		t.Parallel()
 
-	var buf bytes.Buffer
+		exporter := xjson.NewJsonExporter()
+		err := exporter.Export(nil, []string{"test"})
+		assert.Error(t, err)
+	})
 
-	timeVal := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)
-	data := map[string]any{
-		"string": "hello",
-		"int":    42,
-		"float":  3.14,
-		"bool":   true,
-		"nil":    nil,
-		"time":   timeVal,
-	}
-	require.NoError(t, exporter.Export(&buf, data))
+	t.Run("empty slice", func(t *testing.T) {
+		t.Parallel()
 
-	var result map[string]any
+		exporter := xjson.NewJsonExporter()
 
-	require.NoError(t, json.Unmarshal(buf.Bytes(), &result))
-	assert.Equal(t, "hello", result["string"])
-	assert.Equal(t, float64(42), result["int"]) // JSON encodes numbers as float64
-	assert.Equal(t, 3.14, result["float"])
-	assert.Equal(t, true, result["bool"])
-	assert.Nil(t, result["nil"])
-	assert.Equal(t, timeVal.Format(time.RFC3339), result["time"])
+		var buf bytes.Buffer
+
+		err := exporter.Export(&buf, []string{})
+		assert.NoError(t, err)
+		assert.Equal(t, "[]\n", buf.String())
+	})
+
+	t.Run("slice of structs", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xjson.NewJsonExporter()
+
+		var buf bytes.Buffer
+
+		now := time.Date(2025, 3, 14, 15, 9, 26, 0, time.UTC)
+		data := []TestPerson{
+			{Name: "Alice", Age: 30, Active: true, JoinedAt: now},
+			{Name: "Bob", Age: 25, Active: false, JoinedAt: now},
+		}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		var result []TestPerson
+		err = json.Unmarshal(buf.Bytes(), &result)
+		assert.NoError(t, err)
+		assert.Equal(t, data, result)
+	})
+
+	t.Run("slice of maps", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xjson.NewJsonExporter()
+
+		var buf bytes.Buffer
+
+		data := []map[string]any{
+			{"name": "Alice", "age": float64(30)},
+			{"name": "Bob", "age": float64(25)},
+		}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		var result []map[string]any
+		err = json.Unmarshal(buf.Bytes(), &result)
+		assert.NoError(t, err)
+		assert.Len(t, result, 2)
+
+		foundAlice := false
+		foundBob := false
+
+		for _, m := range result {
+			if m["name"] == "Alice" && m["age"] == float64(30) {
+				foundAlice = true
+			}
+
+			if m["name"] == "Bob" && m["age"] == float64(25) {
+				foundBob = true
+			}
+		}
+
+		assert.True(t, foundAlice, "Alice's data not found")
+		assert.True(t, foundBob, "Bob's data not found")
+	})
+
+	t.Run("null values in maps", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xjson.NewJsonExporter()
+
+		var buf bytes.Buffer
+
+		data := []map[string]any{
+			{"name": "Alice", "age": nil},
+			{"name": nil, "age": float64(25)},
+		}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		var result []map[string]any
+		err = json.Unmarshal(buf.Bytes(), &result)
+		assert.NoError(t, err)
+		assert.Equal(t, data, result)
+	})
+
+	t.Run("html escaping enabled", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xjson.NewJsonExporter(xjson.WithEscapeHTML(true))
+
+		var buf bytes.Buffer
+
+		data := map[string]string{
+			"html": "<script>alert('xss')</script>",
+			"text": "a & b < c > d",
+		}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.Contains(t, result, `\u003cscript\u003e`)
+		assert.Contains(t, result, `\u003c`)
+		assert.Contains(t, result, `\u003e`)
+		assert.Contains(t, result, `\u0026`)
+	})
+
+	t.Run("html escaping disabled", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xjson.NewJsonExporter(xjson.WithEscapeHTML(false))
+
+		var buf bytes.Buffer
+
+		data := map[string]string{
+			"html": "<script>alert('xss')</script>",
+			"text": "a & b < c > d",
+		}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.Contains(t, result, "<script>")
+		assert.Contains(t, result, "&")
+		assert.Contains(t, result, "<")
+		assert.Contains(t, result, ">")
+	})
+
+	t.Run("custom indentation", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xjson.NewJsonExporter(xjson.WithIndentString("\t"))
+
+		var buf bytes.Buffer
+
+		data := map[string]string{"key": "value"}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.Contains(t, result, "\t\"key\":")
+	})
+
+	t.Run("unicode characters", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xjson.NewJsonExporter()
+
+		var buf bytes.Buffer
+
+		data := []string{"🌟", "世界", "über"}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		var result []string
+		err = json.Unmarshal(buf.Bytes(), &result)
+		assert.NoError(t, err)
+		assert.Equal(t, data, result)
+	})
+
+	t.Run("private fields in struct", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xjson.NewJsonExporter()
+
+		var buf bytes.Buffer
+
+		data := []PrivateFieldStruct{
+			{Public: "visible", private: "hidden"},
+		}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		var result []map[string]any
+		err = json.Unmarshal(buf.Bytes(), &result)
+		assert.NoError(t, err)
+		assert.Equal(t, "visible", result[0]["Public"])
+		assert.NotContains(t, result[0], "private")
+	})
 }

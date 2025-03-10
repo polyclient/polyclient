@@ -11,10 +11,10 @@ import (
 	"os"
 	"path"
 
-	"github.com/polyclient/polyclient/cmd/polyclient/commands"
+	pCli "github.com/polyclient/polyclient/cli"
 	"github.com/polyclient/polyclient/internal/env"
+	"github.com/polyclient/polyclient/internal/runtime/plugin"
 	"github.com/polyclient/polyclient/internal/version"
-	"github.com/polyclient/polyclient/runtime/plugin"
 	"github.com/urfave/cli/v3"
 )
 
@@ -36,10 +36,10 @@ func main() {
 		EnableShellCompletion: true,
 		HideHelpCommand:       true,
 		Commands: []*cli.Command{
-			commands.NewVersionCommand(),
-			commands.NewDatabaseCommand(pr),
-			commands.NewPluginCommand(pr),
-			commands.NewGuiCommand(),
+			pCli.NewVersionCommand(),
+			pCli.NewDatabaseCommand(pr),
+			pCli.NewPluginCommand(pr),
+			pCli.NewGuiCommand(),
 		},
 	}
 

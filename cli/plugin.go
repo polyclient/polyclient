@@ -2,12 +2,12 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
-package commands
+package cli
 
 import (
 	"context"
 
-	"github.com/polyclient/polyclient/runtime/plugin"
+	"github.com/polyclient/polyclient/internal/runtime/plugin"
 	"github.com/urfave/cli/v3"
 )
 
