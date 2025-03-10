@@ -2,14 +2,14 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
-package xcsv_test
+package xhtml_test
 
 import (
 	"bytes"
 	"testing"
 	"time"
 
-	"github.com/polyclient/polyclient/pkg/dataexchange/xcsv"
+	"github.com/polyclient/polyclient/pkg/dataexchange/xhtml"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,23 +25,22 @@ type PrivateFieldStruct struct {
 	private string
 }
 
-func TestNewCsvExporter(t *testing.T) {
+func TestNewHtmlExporter(t *testing.T) {
 	t.Parallel()
 
 	t.Run("default configuration", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xhtml.NewHtmlExporter()
 		assert.NotNil(t, exporter)
 	})
 
 	t.Run("custom configuration", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter(
-			xcsv.WithComma(';'),
-			xcsv.WithCRLF(true),
-			xcsv.WithDateFormat("2006-01-02"),
+		exporter := xhtml.NewHtmlExporter(
+			xhtml.WithDateFormat("2006-01-02"),
+			xhtml.WithUseCss(false),
 		)
 		assert.NotNil(t, exporter)
 	})
@@ -53,7 +52,7 @@ func TestExport(t *testing.T) {
 	t.Run("nil writer", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xhtml.NewHtmlExporter()
 		err := exporter.Export(nil, []string{"data"})
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "writer")
@@ -62,7 +61,7 @@ func TestExport(t *testing.T) {
 	t.Run("invalid input - non-slice", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xhtml.NewHtmlExporter()
 
 		var buf bytes.Buffer
 		err := exporter.Export(&buf, "not a slice")
@@ -72,7 +71,7 @@ func TestExport(t *testing.T) {
 	t.Run("empty slice", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xhtml.NewHtmlExporter()
 
 		var buf bytes.Buffer
 		err := exporter.Export(&buf, []string{})
@@ -83,7 +82,7 @@ func TestExport(t *testing.T) {
 	t.Run("slice of structs", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xhtml.NewHtmlExporter()
 
 		var buf bytes.Buffer
 
@@ -97,22 +96,22 @@ func TestExport(t *testing.T) {
 		assert.NoError(t, err)
 
 		result := buf.String()
-		assert.Contains(t, result, "Name")
-		assert.Contains(t, result, "Age")
-		assert.Contains(t, result, "Active")
-		assert.Contains(t, result, "JoinedAt")
-		assert.Contains(t, result, "Alice")
-		assert.Contains(t, result, "30")
-		assert.Contains(t, result, "true")
-		assert.Contains(t, result, "Bob")
-		assert.Contains(t, result, "25")
-		assert.Contains(t, result, "false")
+		assert.Contains(t, result, "<th>Name</th>")
+		assert.Contains(t, result, "<th>Age</th>")
+		assert.Contains(t, result, "<th>Active</th>")
+		assert.Contains(t, result, "<th>JoinedAt</th>")
+		assert.Contains(t, result, "<td>Alice</td>")
+		assert.Contains(t, result, "<td>30</td>")
+		assert.Contains(t, result, "<td>true</td>")
+		assert.Contains(t, result, "<td>Bob</td>")
+		assert.Contains(t, result, "<td>25</td>")
+		assert.Contains(t, result, "<td>false</td>")
 	})
 
 	t.Run("slice of maps", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xhtml.NewHtmlExporter()
 
 		var buf bytes.Buffer
 
@@ -125,18 +124,18 @@ func TestExport(t *testing.T) {
 		assert.NoError(t, err)
 
 		result := buf.String()
-		assert.Contains(t, result, "name")
-		assert.Contains(t, result, "age")
-		assert.Contains(t, result, "Alice")
-		assert.Contains(t, result, "30")
-		assert.Contains(t, result, "Bob")
-		assert.Contains(t, result, "25")
+		assert.Contains(t, result, "<th>name</th>")
+		assert.Contains(t, result, "<th>age</th>")
+		assert.Contains(t, result, "<td>Alice</td>")
+		assert.Contains(t, result, "<td>30</td>")
+		assert.Contains(t, result, "<td>Bob</td>")
+		assert.Contains(t, result, "<td>25</td>")
 	})
 
 	t.Run("slice of primitive types", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xhtml.NewHtmlExporter()
 
 		var buf bytes.Buffer
 
@@ -146,50 +145,18 @@ func TestExport(t *testing.T) {
 		assert.NoError(t, err)
 
 		result := buf.String()
-		assert.Equal(t, "1\n2\n3\n4\n5\n", result)
-	})
-
-	t.Run("custom separator", func(t *testing.T) {
-		t.Parallel()
-
-		exporter := xcsv.NewCsvExporter(xcsv.WithComma(';'))
-
-		var buf bytes.Buffer
-
-		data := []map[string]any{
-			{"name": "Alice", "age": 30},
-			{"name": "Bob", "age": 25},
-		}
-
-		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
-
-		result := buf.String()
-		assert.Contains(t, result, ";")
-		assert.Contains(t, result, "name")
-		assert.Contains(t, result, "age")
-	})
-
-	t.Run("CRLF line endings", func(t *testing.T) {
-		t.Parallel()
-
-		exporter := xcsv.NewCsvExporter(xcsv.WithCRLF(true))
-
-		var buf bytes.Buffer
-
-		data := []string{"a", "b", "c"}
-
-		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
-
-		result := buf.String()
-		assert.Contains(t, result, "\r\n")
+		assert.Contains(t, result, "<th>Value</th>")
+		assert.Contains(t, result, "<td>1</td>")
+		assert.Contains(t, result, "<td>2</td>")
+		assert.Contains(t, result, "<td>3</td>")
+		assert.Contains(t, result, "<td>4</td>")
+		assert.Contains(t, result, "<td>5</td>")
 	})
 
 	t.Run("null values in maps", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xhtml.NewHtmlExporter()
 
 		var buf bytes.Buffer
 
@@ -202,42 +169,44 @@ func TestExport(t *testing.T) {
 		assert.NoError(t, err)
 
 		result := buf.String()
-		assert.Contains(t, result, "Alice")
-		assert.Contains(t, result, "25")
-		assert.Contains(t, result, "name")
-		assert.Contains(t, result, "age")
+		assert.Contains(t, result, "<td>Alice</td>")
+		assert.Contains(t, result, "<td>25</td>")
+		assert.Contains(t, result, "<td></td>") // Empty cells for nil values
 	})
 
-	t.Run("special characters", func(t *testing.T) {
+	t.Run("html escaping enabled", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xhtml.NewHtmlExporter()
 
 		var buf bytes.Buffer
 
 		data := []map[string]any{
-			{"field": "contains,comma"},
-			{"field": "contains\"quote"},
-			{"field": "contains\nnewline"},
+			{"field": "<script>alert('xss')</script>"},
+			{"field": "Contains & and >"},
 		}
 
 		err := exporter.Export(&buf, data)
 		assert.NoError(t, err)
 
 		result := buf.String()
-		assert.Contains(t, result, "\"contains,comma\"")
-		assert.Contains(t, result, "\"contains\"\"quote\"")
-		assert.Contains(t, result, "\"contains\nnewline\"")
+		assert.Contains(t, result, "&amp;lt;script&amp;gt;")
+		assert.Contains(t, result, "Contains &amp;amp; and &amp;gt;")
+		assert.NotContains(t, result, "<script>")
 	})
 
 	t.Run("unicode characters", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xhtml.NewHtmlExporter()
 
 		var buf bytes.Buffer
 
-		data := []string{"🌟", "世界", "über"}
+		data := []map[string]any{
+			{"field": "🌟"},
+			{"field": "世界"},
+			{"field": "über"},
+		}
 
 		err := exporter.Export(&buf, data)
 		assert.NoError(t, err)
@@ -251,7 +220,7 @@ func TestExport(t *testing.T) {
 	t.Run("private fields in struct", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xhtml.NewHtmlExporter()
 
 		var buf bytes.Buffer
 
@@ -263,44 +232,48 @@ func TestExport(t *testing.T) {
 		assert.NoError(t, err)
 
 		result := buf.String()
-		assert.Contains(t, result, "Public")
+		assert.Contains(t, result, "<th>Public</th>")
 		assert.NotContains(t, result, "private")
-		assert.Contains(t, result, "visible")
+		assert.Contains(t, result, "<td>visible</td>")
 		assert.NotContains(t, result, "hidden")
 	})
 
-	t.Run("missing map fields", func(t *testing.T) {
+	t.Run("css disabled", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xhtml.NewHtmlExporter(xhtml.WithUseCss(false))
 
 		var buf bytes.Buffer
 
 		data := []map[string]any{
-			{"name": "Alice", "age": 30},
-			{"name": "Bob"}, // missing age
+			{"name": "Alice"},
 		}
 
 		err := exporter.Export(&buf, data)
 		assert.NoError(t, err)
 
 		result := buf.String()
-		assert.Contains(t, result, "Alice")
-		assert.Contains(t, result, "30")
-		assert.Contains(t, result, "Bob")
+		assert.NotContains(t, result, "<style>")
+		assert.NotContains(t, result, "class=")
 	})
 
-	t.Run("empty map slice", func(t *testing.T) {
+	t.Run("custom date format", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xhtml.NewHtmlExporter(xhtml.WithDateFormat("2006-01-02"))
 
 		var buf bytes.Buffer
 
-		data := []map[string]any{}
+		now := time.Date(2025, 3, 14, 15, 9, 26, 0, time.UTC)
+		data := []TestPerson{
+			{Name: "Alice", JoinedAt: now},
+		}
 
 		err := exporter.Export(&buf, data)
 		assert.NoError(t, err)
-		assert.Empty(t, buf.String())
+
+		result := buf.String()
+		assert.Contains(t, result, "2025-03-14")
+		assert.NotContains(t, result, "15:09:26")
 	})
 }

@@ -18,7 +18,7 @@ linking with the Program's documented Interface.
 
 0. Definitions
 
-A "Module" is any WASM binary that communicates with the Program
+A "Module" is any Wasm binary that communicates with the Program
 exclusively through the documented Interface.
 
 "Independent Module" means a Module that either requires the Program for
@@ -40,7 +40,7 @@ then convey such Independent Modules under terms of your choice.
 
 This permission specifically includes:
 
-a) Loading and executing WASM modules through dynamic linking with the Program.  
+a) Loading and executing Wasm modules through dynamic linking with the Program.  
 b) Implementing the Interface specification in any Module.  
 c) Distributing such Independent Modules under terms of your choice.  
 

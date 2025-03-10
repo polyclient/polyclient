@@ -12,11 +12,17 @@ import (
 	"slices"
 
 	"github.com/polyclient/polyclient/pkg/dataexchange/xcsv"
+	"github.com/polyclient/polyclient/pkg/dataexchange/xhtml"
 	"github.com/polyclient/polyclient/pkg/dataexchange/xjson"
 )
 
 // Format represents supported export formats.
 type Format string
+
+// String returns the string representation of the format.
+func (f Format) String() string {
+	return string(f)
+}
 
 const (
 	FormatCsv      = "csv"
@@ -64,34 +70,34 @@ var registry = map[Format]Entry{
 		FileExt:  "json",
 		Exporter: xjson.NewJsonExporter(),
 	},
-	// HTML: {
-	// 	MIMEType:  "text/html",
-	// 	FileExt:   "html",
-	// 	Exporter:  NewHtmlExporter(),
-	// },
-	// XML: {
+	FormatHtml: {
+		MIMEType: "text/html",
+		FileExt:  "html",
+		Exporter: xhtml.NewHtmlExporter(),
+	},
+	// FormatXml: {
 	// 	MIMEType:  "application/xml",
 	// 	FileExt:   "xml",
-	// 	Exporter:  NewXmlExporter(),
+	// 	Exporter: xxml.NewXmlExporter(),
 	// },
-	// YAML: {
+	// FormatYaml: {
 	// 	MIMEType:  "application/yaml",
 	// 	FileExt:   "yaml",
-	// 	Exporter:  NewYamlExporter(),
+	// 	Exporter:  xyaml.NewYamlExporter(),
 	// },
-	// TOML: {
+	// FormatToml: {
 	// 	MIMEType:  "application/toml",
 	// 	FileExt:   "toml",
-	// 	Exporter:  NewTomlExporter(),
+	// 	Exporter:  xtoml.NewTomlExporter(),
 	// },
-	// Markdown: {
+	// FormatMarkdown: {
 	// 	MIMEType:  "text/markdown",
 	// 	FileExt:   "md",
-	// 	Exporter:  NewMarkdownExporter(),
+	// 	Exporter:  xmd.NewMarkdownExporter(),
 	// },
 }
 
-// GetSupportedFormats returns a list of supported export formats.
+// GetSupportedFormats returns a list of supported export formats as strings.
 func GetSupportedExportFormats() []Format {
 	return slices.Collect(maps.Keys(registry))
 }
