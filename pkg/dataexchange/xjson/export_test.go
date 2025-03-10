@@ -110,7 +110,23 @@ func TestExport(t *testing.T) {
 		var result []map[string]any
 		err = json.Unmarshal(buf.Bytes(), &result)
 		assert.NoError(t, err)
-		assert.Equal(t, data, result)
+		assert.Len(t, result, 2)
+
+		foundAlice := false
+		foundBob := false
+
+		for _, m := range result {
+			if m["name"] == "Alice" && m["age"] == float64(30) {
+				foundAlice = true
+			}
+
+			if m["name"] == "Bob" && m["age"] == float64(25) {
+				foundBob = true
+			}
+		}
+
+		assert.True(t, foundAlice, "Alice's data not found")
+		assert.True(t, foundBob, "Bob's data not found")
 	})
 
 	t.Run("null values in maps", func(t *testing.T) {

@@ -49,6 +49,15 @@ func TestNewHtmlExporter(t *testing.T) {
 func TestExport(t *testing.T) {
 	t.Parallel()
 
+	t.Run("nil writer", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xhtml.NewHtmlExporter()
+		err := exporter.Export(nil, []string{"data"})
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "writer")
+	})
+
 	t.Run("invalid input - non-slice", func(t *testing.T) {
 		t.Parallel()
 
@@ -94,6 +103,9 @@ func TestExport(t *testing.T) {
 		assert.Contains(t, result, "<td>Alice</td>")
 		assert.Contains(t, result, "<td>30</td>")
 		assert.Contains(t, result, "<td>true</td>")
+		assert.Contains(t, result, "<td>Bob</td>")
+		assert.Contains(t, result, "<td>25</td>")
+		assert.Contains(t, result, "<td>false</td>")
 	})
 
 	t.Run("slice of maps", func(t *testing.T) {
@@ -118,6 +130,27 @@ func TestExport(t *testing.T) {
 		assert.Contains(t, result, "<td>30</td>")
 		assert.Contains(t, result, "<td>Bob</td>")
 		assert.Contains(t, result, "<td>25</td>")
+	})
+
+	t.Run("slice of primitive types", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xhtml.NewHtmlExporter()
+
+		var buf bytes.Buffer
+
+		data := []int{1, 2, 3, 4, 5}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.Contains(t, result, "<th>Value</th>")
+		assert.Contains(t, result, "<td>1</td>")
+		assert.Contains(t, result, "<td>2</td>")
+		assert.Contains(t, result, "<td>3</td>")
+		assert.Contains(t, result, "<td>4</td>")
+		assert.Contains(t, result, "<td>5</td>")
 	})
 
 	t.Run("null values in maps", func(t *testing.T) {

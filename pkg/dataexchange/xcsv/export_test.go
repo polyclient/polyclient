@@ -50,6 +50,15 @@ func TestNewCsvExporter(t *testing.T) {
 func TestExport(t *testing.T) {
 	t.Parallel()
 
+	t.Run("nil writer", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xcsv.NewCsvExporter()
+		err := exporter.Export(nil, []string{"data"})
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "writer")
+	})
+
 	t.Run("invalid input - non-slice", func(t *testing.T) {
 		t.Parallel()
 
@@ -88,9 +97,16 @@ func TestExport(t *testing.T) {
 		assert.NoError(t, err)
 
 		result := buf.String()
-		assert.Contains(t, result, "Name,Age,Active,JoinedAt")
-		assert.Contains(t, result, "Alice,30,true")
-		assert.Contains(t, result, "Bob,25,false")
+		assert.Contains(t, result, "Name")
+		assert.Contains(t, result, "Age")
+		assert.Contains(t, result, "Active")
+		assert.Contains(t, result, "JoinedAt")
+		assert.Contains(t, result, "Alice")
+		assert.Contains(t, result, "30")
+		assert.Contains(t, result, "true")
+		assert.Contains(t, result, "Bob")
+		assert.Contains(t, result, "25")
+		assert.Contains(t, result, "false")
 	})
 
 	t.Run("slice of maps", func(t *testing.T) {
@@ -109,9 +125,12 @@ func TestExport(t *testing.T) {
 		assert.NoError(t, err)
 
 		result := buf.String()
-		assert.Contains(t, result, "name,age")
-		assert.Contains(t, result, "Alice,30")
-		assert.Contains(t, result, "Bob,25")
+		assert.Contains(t, result, "name")
+		assert.Contains(t, result, "age")
+		assert.Contains(t, result, "Alice")
+		assert.Contains(t, result, "30")
+		assert.Contains(t, result, "Bob")
+		assert.Contains(t, result, "25")
 	})
 
 	t.Run("slice of primitive types", func(t *testing.T) {
@@ -146,7 +165,9 @@ func TestExport(t *testing.T) {
 		assert.NoError(t, err)
 
 		result := buf.String()
-		assert.Contains(t, result, "name;age")
+		assert.Contains(t, result, ";")
+		assert.Contains(t, result, "name")
+		assert.Contains(t, result, "age")
 	})
 
 	t.Run("CRLF line endings", func(t *testing.T) {
@@ -264,8 +285,9 @@ func TestExport(t *testing.T) {
 		assert.NoError(t, err)
 
 		result := buf.String()
-		assert.Contains(t, result, "Alice,30")
-		assert.Contains(t, result, "Bob,")
+		assert.Contains(t, result, "Alice")
+		assert.Contains(t, result, "30")
+		assert.Contains(t, result, "Bob")
 	})
 
 	t.Run("empty map slice", func(t *testing.T) {

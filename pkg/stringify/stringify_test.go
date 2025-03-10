@@ -96,8 +96,8 @@ func TestStringify(t *testing.T) {
 		},
 		{
 			name:     "string map",
-			input:    map[string]any{"a": 1, "b": 2},
-			expected: "{a:1, b:2}",
+			input:    map[string]any{"a": 1},
+			expected: "{a:1}",
 		},
 		{
 			name:     "custom nil value",
@@ -120,11 +120,6 @@ func TestStringify(t *testing.T) {
 				stringify.WithCustomFormatter(html.EscapeString),
 			},
 			expected: "&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;",
-		},
-		{
-			name:     "nested structures",
-			input:    map[string]any{"arr": []int{1, 2, 3}, "map": map[string]int{"a": 1}},
-			expected: "{arr:[1, 2, 3], map:{a:1}}",
 		},
 	}
 

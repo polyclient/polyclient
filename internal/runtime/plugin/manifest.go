@@ -155,5 +155,9 @@ func FindManifestPaths(lookupPath string) ([]string, error) {
 // isPluginManifest returns true if the given file info
 // corresponds to a plugin manifest file.
 func isPluginManifest(info os.FileInfo) bool {
-	return !os.ModeAppend.IsDir() && slices.Contains(supportedManifestFiles[:], filepath.Base(info.Name()))
+	if info.IsDir() {
+		return false
+	}
+
+	return slices.Contains(supportedManifestFiles[:], filepath.Base(info.Name()))
 }

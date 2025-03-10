@@ -103,7 +103,7 @@ func (ex *HtmlExporter) formatSlice(data []any) (*HtmlTemplateData, error) {
 			return ex.formatStructSlice(data)
 		}
 
-		return nil, fmt.Errorf("unsupported data type: %T", first)
+		return ex.formatSingleColumnSlice(data)
 	}
 }
 
@@ -175,6 +175,25 @@ func (ex *HtmlExporter) formatStructSlice(data []any) (*HtmlTemplateData, error)
 		}
 
 		parsed.Rows = append(parsed.Rows, row)
+	}
+
+	return parsed, nil
+}
+
+// formatSingleColumnSlice writes `[]any` as a single-column HTML.
+func (ex *HtmlExporter) formatSingleColumnSlice(data []any) (*HtmlTemplateData, error) {
+	parsed := &HtmlTemplateData{
+		Headers: []string{"Value"},
+		Rows:    make([][]string, 0, len(data)),
+	}
+
+	for _, item := range data {
+		parsed.Rows = append(parsed.Rows, []string{
+			stringify.Stringify(item,
+				stringify.WithDateFormat(ex.DateFormat),
+				stringify.WithCustomFormatter(sanitizeHtml),
+			),
+		})
 	}
 
 	return parsed, nil
