@@ -11,7 +11,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/polyclient/polyclient/cmd/polyclient/commands"
+	"github.com/polyclient/polyclient/cmd/polyclient/shell"
 	"github.com/polyclient/polyclient/internal/env"
 	"github.com/polyclient/polyclient/internal/runtime/plugin"
 	"github.com/polyclient/polyclient/internal/version"
@@ -36,10 +36,10 @@ func main() {
 		EnableShellCompletion: true,
 		HideHelpCommand:       true,
 		Commands: []*cli.Command{
-			commands.NewVersionCommand(),
-			commands.NewDatabaseCommand(pr),
-			commands.NewPluginCommand(pr),
-			commands.NewGuiCommand(),
+			shell.NewVersionCommand(),
+			shell.NewDatabaseCommand(pr),
+			shell.NewPluginCommand(pr),
+			shell.NewGuiCommand(),
 		},
 	}
 
