@@ -10,6 +10,7 @@ import (
 	"io"
 	"time"
 
+	"github.com/polyclient/polyclient/pkg/stringify"
 	"github.com/samber/lo"
 )
 
@@ -40,7 +41,7 @@ func WithCRLF(useCRLF bool) CsvExporterOption {
 	}
 }
 
-// WithDateFormat sets a custom date format.
+// WithDateFormat sets a custom date format for date fields.
 func WithDateFormat(format string) CsvExporterOption {
 	return func(opts *CsvExporter) {
 		opts.DateFormat = format
@@ -63,12 +64,6 @@ func NewCsvExporter(opts ...CsvExporterOption) *CsvExporter {
 }
 
 // Format writes the provided data to the given writer in CSV format.
-//
-// It supports two formats for `data`:
-//  1. A flat slice of strings (`[]string`), treated as a single-column CSV.
-//  2. A slice of maps (`[]map[string]any`), where keys become headers and values form rows.
-//
-// If the input is empty, nothing is written. If the data format is invalid, an error is returned.
 func (ex *CsvExporter) Export(w io.Writer, data any) error {
 	switch v := data.(type) {
 	case []any:
@@ -121,7 +116,7 @@ func (ex *CsvExporter) formatMapSlice(w *csv.Writer, data []any) error {
 		}
 
 		row := lo.Map(headers, func(header string, _ int) string {
-			return ex.formatValue(record[header])
+			return stringify.Stringify(record[header])
 		})
 
 		if err := w.Write(row); err != nil {
@@ -135,7 +130,7 @@ func (ex *CsvExporter) formatMapSlice(w *csv.Writer, data []any) error {
 // formatSingleColumnCSV writes `[]any` as a single-column CSV.
 func (ex *CsvExporter) formatSingleColumnSlice(w *csv.Writer, data []any) error {
 	rows := lo.Map(data, func(item any, _ int) []string {
-		return []string{ex.formatValue(item)}
+		return []string{stringify.Stringify(item)}
 	})
 
 	if err := w.WriteAll(rows); err != nil {
@@ -143,24 +138,4 @@ func (ex *CsvExporter) formatSingleColumnSlice(w *csv.Writer, data []any) error 
 	}
 
 	return nil
-}
-
-// formatValue converts any value to a string, respecting the specified date format.
-func (ex *CsvExporter) formatValue(value any) string {
-	switch v := value.(type) {
-	case time.Time:
-		return v.Format(ex.DateFormat)
-	case *time.Time:
-		if v == nil {
-			return ""
-		}
-
-		return v.Format(ex.DateFormat)
-	case fmt.Stringer:
-		return v.String()
-	case error:
-		return v.Error()
-	default:
-		return fmt.Sprintf("%v", value)
-	}
 }

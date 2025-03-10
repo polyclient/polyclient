@@ -13,8 +13,8 @@ import (
 
 	"github.com/polyclient/polyclient/cmd/polyclient/commands"
 	"github.com/polyclient/polyclient/internal/env"
+	"github.com/polyclient/polyclient/internal/runtime/plugin"
 	"github.com/polyclient/polyclient/internal/version"
-	"github.com/polyclient/polyclient/runtime/plugin"
 	"github.com/urfave/cli/v3"
 )
 

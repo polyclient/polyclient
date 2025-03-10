@@ -17,6 +17,7 @@ import (
 
 var supportedManifestFiles = [...]string{"manifest.json"}
 
+// PluginManifest represents a PolyClient plugin manifest.
 type PluginManifest struct {
 	Id          string   `json:"id"          validate:"required,idPattern"`
 	Name        string   `json:"name"        validate:"required,gte=1,lte=30"`
@@ -31,6 +32,7 @@ type PluginManifest struct {
 	Entrypoint  string   `json:"entrypoint"  validate:"required,entrypointPattern"`
 }
 
+// Author represents a plugin author or organization.
 type Author struct {
 	Name     string   `json:"name"     validate:"required"`
 	Email    string   `json:"email"    validate:"omitempty,email"`
@@ -150,6 +152,8 @@ func FindManifestPaths(lookupPath string) ([]string, error) {
 	return foundPaths, nil
 }
 
+// isPluginManifest returns true if the given file info
+// corresponds to a plugin manifest file.
 func isPluginManifest(info os.FileInfo) bool {
 	return !os.ModeAppend.IsDir() && slices.Contains(supportedManifestFiles[:], filepath.Base(info.Name()))
 }
