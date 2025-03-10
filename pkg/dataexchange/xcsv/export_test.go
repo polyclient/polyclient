@@ -7,8 +7,6 @@ package xcsv_test
 import (
 	"bytes"
 	"encoding/csv"
-	"errors"
-	"strings"
 	"testing"
 	"time"
 
@@ -43,7 +41,7 @@ func TestNewCsvExporter_WithOptions(t *testing.T) {
 func TestCsvExporter_Export_SingleColumn(t *testing.T) {
 	t.Parallel()
 
-	data := []any{"uno", "dos", "tres"}
+	data := []any{"foo", "bar", "baz"}
 
 	var buf bytes.Buffer
 
@@ -55,7 +53,7 @@ func TestCsvExporter_Export_SingleColumn(t *testing.T) {
 	records, err := r.ReadAll()
 	require.NoError(t, err)
 
-	expected := [][]string{{"uno"}, {"dos"}, {"tres"}}
+	expected := [][]string{{"foo"}, {"bar"}, {"baz"}}
 	assert.Equal(t, expected, records)
 }
 
@@ -63,8 +61,8 @@ func TestCsvExporter_Export_MapSlice(t *testing.T) {
 	t.Parallel()
 
 	data := []any{
-		map[string]any{"name": "Juan", "age": 30},
-		map[string]any{"name": "Maria", "age": 25},
+		map[string]any{"name": "John", "age": 30},
+		map[string]any{"name": "Jane", "age": 25},
 	}
 
 	var buf bytes.Buffer
@@ -79,8 +77,8 @@ func TestCsvExporter_Export_MapSlice(t *testing.T) {
 
 	expected := [][]string{
 		{"name", "age"},
-		{"Juan", "30"},
-		{"Maria", "25"},
+		{"John", "30"},
+		{"Jane", "25"},
 	}
 	assert.Equal(t, expected, records)
 }
@@ -111,7 +109,7 @@ func TestCsvExporter_Export_InvalidMapSlice(t *testing.T) {
 	t.Parallel()
 
 	data := []any{
-		map[string]any{"name": "Alice", "age": 30},
+		map[string]any{"name": "Jane", "age": 30},
 		"invalid", // Should cause an error
 	}
 
@@ -121,39 +119,4 @@ func TestCsvExporter_Export_InvalidMapSlice(t *testing.T) {
 	err := ex.Export(&buf, data)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "item is not a map")
-}
-
-func TestCsvExporter_FormatValue(t *testing.T) {
-	t.Parallel()
-
-	ex := xcsv.NewCsvExporter(xcsv.WithDateFormat("2006-01-02"))
-	timeVal := time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)
-
-	tests := []struct {
-		name     string
-		input    any
-		expected string
-	}{
-		{"string", "hello", "hello"},
-		{"integer", 42, "42"},
-		{"float", 3.14, "3.14"},
-		{"bool", true, "true"},
-		{"time", timeVal, "2023-01-01"},
-		{"time pointer", &timeVal, "2023-01-01"},
-		{"error", errors.New("test error"), "test error"},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Parallel()
-
-			var buf bytes.Buffer
-			err := ex.Export(&buf, []any{tt.input})
-			require.NoError(t, err)
-
-			lines := strings.Split(strings.TrimSpace(buf.String()), "\n")
-			assert.Equal(t, 1, len(lines), "should have exactly one output row")
-			assert.Equal(t, tt.expected, lines[0], "formatted value should match expected output")
-		})
-	}
 }

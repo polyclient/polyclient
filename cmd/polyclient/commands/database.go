@@ -13,8 +13,8 @@ import (
 
 	"github.com/samber/lo"
 
+	"github.com/polyclient/polyclient/internal/runtime/plugin"
 	"github.com/polyclient/polyclient/pkg/dataexchange"
-	"github.com/polyclient/polyclient/runtime/plugin"
 	"github.com/urfave/cli/v3"
 )
 

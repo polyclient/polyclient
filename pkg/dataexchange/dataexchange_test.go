@@ -17,7 +17,7 @@ func TestGetSupportedExportFormats(t *testing.T) {
 	t.Parallel()
 
 	expectedFormats := []dataexchange.Format{
-		dataexchange.FormatCsv, dataexchange.FormatTsv, dataexchange.FormatJson,
+		dataexchange.FormatCsv, dataexchange.FormatTsv, dataexchange.FormatJson, dataexchange.FormatHtml,
 	}
 
 	supportedFormats := dataexchange.GetSupportedExportFormats()
@@ -34,9 +34,10 @@ func TestGetExporterRegistryEntry(t *testing.T) {
 		mimeType string
 		fileExt  string
 	}{
-		{"CSV", dataexchange.FormatCsv, true, "text/csv", "csv"},
-		{"TSV", dataexchange.FormatTsv, true, "text/tab-separated-values", "tsv"},
-		{"JSON", dataexchange.FormatJson, true, "application/json", "json"},
+		{"csv", dataexchange.FormatCsv, true, "text/csv", "csv"},
+		{"tsv", dataexchange.FormatTsv, true, "text/tab-separated-values", "tsv"},
+		{"json", dataexchange.FormatJson, true, "application/json", "json"},
+		{"html", dataexchange.FormatHtml, true, "text/html", "html"},
 		{"Invalid", "invalid_format", false, "", ""},
 	}
 
