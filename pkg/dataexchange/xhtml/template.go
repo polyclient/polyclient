@@ -26,7 +26,7 @@ const HtmlTemplate string = `
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            padding: 0;            
+            padding: 0;
         }
         table {
             width: 100%;
@@ -74,7 +74,7 @@ const HtmlTemplate string = `
 </html>
 `
 
-// LoadTemplate loads the HTML template for the HTML exporter.
+// GetTemplate loads the HTML template for the HTML exporter.
 func GetTemplate() *template.Template {
 	return template.Must(template.New("htmlExport").Parse(HtmlTemplate))
 }
