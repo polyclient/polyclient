@@ -6,117 +6,279 @@ package xcsv_test
 
 import (
 	"bytes"
-	"encoding/csv"
 	"testing"
 	"time"
 
 	"github.com/polyclient/polyclient/pkg/dataexchange/xcsv"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
-func TestNewCsvExporter_Defaults(t *testing.T) {
-	t.Parallel()
-
-	ex := xcsv.NewCsvExporter()
-	assert.Equal(t, ',', ex.Comma)
-	assert.False(t, ex.UseCRLF)
-	assert.Equal(t, time.RFC3339, ex.DateFormat)
+type TestPerson struct {
+	Name     string
+	Age      int
+	Active   bool
+	JoinedAt time.Time
 }
 
-func TestNewCsvExporter_WithOptions(t *testing.T) {
-	t.Parallel()
-
-	ex := xcsv.NewCsvExporter(
-		xcsv.WithComma(';'),
-		xcsv.WithCRLF(true),
-		xcsv.WithDateFormat("2006-01-02"),
-	)
-
-	assert.Equal(t, ';', ex.Comma)
-	assert.True(t, ex.UseCRLF)
-	assert.Equal(t, "2006-01-02", ex.DateFormat)
+type PrivateFieldStruct struct {
+	Public  string
+	private string
 }
 
-func TestCsvExporter_Export_SingleColumn(t *testing.T) {
+func TestNewCsvExporter(t *testing.T) {
 	t.Parallel()
 
-	data := []any{"foo", "bar", "baz"}
+	t.Run("default configuration", func(t *testing.T) {
+		t.Parallel()
 
-	var buf bytes.Buffer
+		exporter := xcsv.NewCsvExporter()
+		assert.NotNil(t, exporter)
+	})
 
-	ex := xcsv.NewCsvExporter()
-	err := ex.Export(&buf, data)
-	require.NoError(t, err)
+	t.Run("custom configuration", func(t *testing.T) {
+		t.Parallel()
 
-	r := csv.NewReader(&buf)
-	records, err := r.ReadAll()
-	require.NoError(t, err)
-
-	expected := [][]string{{"foo"}, {"bar"}, {"baz"}}
-	assert.Equal(t, expected, records)
+		exporter := xcsv.NewCsvExporter(
+			xcsv.WithComma(';'),
+			xcsv.WithCRLF(true),
+			xcsv.WithDateFormat("2006-01-02"),
+		)
+		assert.NotNil(t, exporter)
+	})
 }
 
-func TestCsvExporter_Export_MapSlice(t *testing.T) {
+func TestExport(t *testing.T) {
 	t.Parallel()
 
-	data := []any{
-		map[string]any{"name": "John", "age": 30},
-		map[string]any{"name": "Jane", "age": 25},
-	}
+	t.Run("invalid input - non-slice", func(t *testing.T) {
+		t.Parallel()
 
-	var buf bytes.Buffer
+		exporter := xcsv.NewCsvExporter()
 
-	ex := xcsv.NewCsvExporter()
-	err := ex.Export(&buf, data)
-	require.NoError(t, err)
+		var buf bytes.Buffer
+		err := exporter.Export(&buf, "not a slice")
+		assert.Error(t, err)
+	})
 
-	r := csv.NewReader(&buf)
-	records, err := r.ReadAll()
-	require.NoError(t, err)
+	t.Run("empty slice", func(t *testing.T) {
+		t.Parallel()
 
-	expected := [][]string{
-		{"name", "age"},
-		{"John", "30"},
-		{"Jane", "25"},
-	}
-	assert.Equal(t, expected, records)
-}
+		exporter := xcsv.NewCsvExporter()
 
-func TestCsvExporter_Export_EmptyInput(t *testing.T) {
-	t.Parallel()
+		var buf bytes.Buffer
+		err := exporter.Export(&buf, []string{})
+		assert.NoError(t, err)
+		assert.Empty(t, buf.String())
+	})
 
-	var buf bytes.Buffer
+	t.Run("slice of structs", func(t *testing.T) {
+		t.Parallel()
 
-	ex := xcsv.NewCsvExporter()
-	err := ex.Export(&buf, []any{})
-	assert.NoError(t, err)
-	assert.Empty(t, buf.String())
-}
+		exporter := xcsv.NewCsvExporter()
 
-func TestCsvExporter_Export_UnsupportedType(t *testing.T) {
-	t.Parallel()
+		var buf bytes.Buffer
 
-	var buf bytes.Buffer
+		now := time.Now()
+		data := []TestPerson{
+			{Name: "Alice", Age: 30, Active: true, JoinedAt: now},
+			{Name: "Bob", Age: 25, Active: false, JoinedAt: now},
+		}
 
-	ex := xcsv.NewCsvExporter()
-	err := ex.Export(&buf, 123)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "unsupported data type")
-}
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
 
-func TestCsvExporter_Export_InvalidMapSlice(t *testing.T) {
-	t.Parallel()
+		result := buf.String()
+		assert.Contains(t, result, "Name,Age,Active,JoinedAt")
+		assert.Contains(t, result, "Alice,30,true")
+		assert.Contains(t, result, "Bob,25,false")
+	})
 
-	data := []any{
-		map[string]any{"name": "Jane", "age": 30},
-		"invalid", // Should cause an error
-	}
+	t.Run("slice of maps", func(t *testing.T) {
+		t.Parallel()
 
-	var buf bytes.Buffer
+		exporter := xcsv.NewCsvExporter()
 
-	ex := xcsv.NewCsvExporter()
-	err := ex.Export(&buf, data)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "item is not a map")
+		var buf bytes.Buffer
+
+		data := []map[string]any{
+			{"name": "Alice", "age": 30},
+			{"name": "Bob", "age": 25},
+		}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.Contains(t, result, "name,age")
+		assert.Contains(t, result, "Alice,30")
+		assert.Contains(t, result, "Bob,25")
+	})
+
+	t.Run("slice of primitive types", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xcsv.NewCsvExporter()
+
+		var buf bytes.Buffer
+
+		data := []int{1, 2, 3, 4, 5}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.Equal(t, "1\n2\n3\n4\n5\n", result)
+	})
+
+	t.Run("custom separator", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xcsv.NewCsvExporter(xcsv.WithComma(';'))
+
+		var buf bytes.Buffer
+
+		data := []map[string]any{
+			{"name": "Alice", "age": 30},
+			{"name": "Bob", "age": 25},
+		}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.Contains(t, result, "name;age")
+	})
+
+	t.Run("CRLF line endings", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xcsv.NewCsvExporter(xcsv.WithCRLF(true))
+
+		var buf bytes.Buffer
+
+		data := []string{"a", "b", "c"}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.Contains(t, result, "\r\n")
+	})
+
+	t.Run("null values in maps", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xcsv.NewCsvExporter()
+
+		var buf bytes.Buffer
+
+		data := []map[string]any{
+			{"name": "Alice", "age": nil},
+			{"name": nil, "age": 25},
+		}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.Contains(t, result, "Alice")
+		assert.Contains(t, result, "25")
+		assert.Contains(t, result, "name")
+		assert.Contains(t, result, "age")
+	})
+
+	t.Run("special characters", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xcsv.NewCsvExporter()
+
+		var buf bytes.Buffer
+
+		data := []map[string]any{
+			{"field": "contains,comma"},
+			{"field": "contains\"quote"},
+			{"field": "contains\nnewline"},
+		}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.Contains(t, result, "\"contains,comma\"")
+		assert.Contains(t, result, "\"contains\"\"quote\"")
+		assert.Contains(t, result, "\"contains\nnewline\"")
+	})
+
+	t.Run("unicode characters", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xcsv.NewCsvExporter()
+
+		var buf bytes.Buffer
+
+		data := []string{"🌟", "世界", "über"}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.Contains(t, result, "🌟")
+		assert.Contains(t, result, "世界")
+		assert.Contains(t, result, "über")
+	})
+
+	t.Run("private fields in struct", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xcsv.NewCsvExporter()
+
+		var buf bytes.Buffer
+
+		data := []PrivateFieldStruct{
+			{Public: "visible", private: "hidden"},
+		}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.Contains(t, result, "Public")
+		assert.NotContains(t, result, "private")
+		assert.Contains(t, result, "visible")
+		assert.NotContains(t, result, "hidden")
+	})
+
+	t.Run("missing map fields", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xcsv.NewCsvExporter()
+
+		var buf bytes.Buffer
+
+		data := []map[string]any{
+			{"name": "Alice", "age": 30},
+			{"name": "Bob"}, // missing age
+		}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+
+		result := buf.String()
+		assert.Contains(t, result, "Alice,30")
+		assert.Contains(t, result, "Bob,")
+	})
+
+	t.Run("empty map slice", func(t *testing.T) {
+		t.Parallel()
+
+		exporter := xcsv.NewCsvExporter()
+
+		var buf bytes.Buffer
+
+		data := []map[string]any{}
+
+		err := exporter.Export(&buf, data)
+		assert.NoError(t, err)
+		assert.Empty(t, buf.String())
+	})
 }

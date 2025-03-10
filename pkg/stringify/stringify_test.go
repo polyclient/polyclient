@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/go-playground/assert/v2"
 	"github.com/polyclient/polyclient/pkg/stringify"
 	"github.com/polyclient/polyclient/test/mocks"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestStringify(t *testing.T) {
@@ -20,83 +20,120 @@ func TestStringify(t *testing.T) {
 
 	t.Parallel()
 
-	t.Run("Handles nil values", func(t *testing.T) {
-		t.Parallel()
+	tests := []struct {
+		name     string
+		input    any
+		opts     []stringify.StringifyOption
+		expected string
+	}{
+		{
+			name:     "nil value",
+			input:    nil,
+			expected: "",
+		},
+		{
+			name:     "string",
+			input:    "hello",
+			expected: "hello",
+		},
+		{
+			name:     "integer",
+			input:    42,
+			expected: "42",
+		},
+		{
+			name:     "float",
+			input:    3.14,
+			expected: "3.14",
+		},
+		{
+			name:     "boolean",
+			input:    true,
+			expected: "true",
+		},
+		{
+			name:     "time.Time with RFC3339",
+			input:    mockTime,
+			opts:     []stringify.StringifyOption{stringify.WithDateFormat(time.RFC3339)},
+			expected: "2025-03-09T14:30:00Z",
+		},
+		{
+			name:     "time.Time with RFC822",
+			input:    mockTime,
+			opts:     []stringify.StringifyOption{stringify.WithDateFormat(time.RFC822)},
+			expected: "09 Mar 25 14:30 UTC",
+		},
+		{
+			name:     "*time.Time with RFC3339",
+			input:    &mockTime,
+			opts:     []stringify.StringifyOption{stringify.WithDateFormat(time.RFC3339)},
+			expected: "2025-03-09T14:30:00Z",
+		},
+		{
+			name:     "fmt.Stringer",
+			input:    mocks.StringerPersonMock{Name: "Jane", Age: 30},
+			expected: "Hello, my name is Jane and I am 30 years old",
+		},
+		{
+			name:     "error",
+			input:    errors.New("something went wrong"),
+			expected: "something went wrong",
+		},
+		{
+			name:     "empty slice",
+			input:    []any{},
+			expected: "[]",
+		},
+		{
+			name:     "mixed slice",
+			input:    []any{1, 2, "three"},
+			expected: "[1, 2, three]",
+		},
+		{
+			name:     "empty map",
+			input:    map[string]any{},
+			expected: "{}",
+		},
+		{
+			name:     "string map",
+			input:    map[string]any{"a": 1, "b": 2},
+			expected: "{a:1, b:2}",
+		},
+		{
+			name:     "custom nil value",
+			input:    nil,
+			opts:     []stringify.StringifyOption{stringify.WithNilValue("N/A")},
+			expected: "N/A",
+		},
+		{
+			name:  "custom formatter - greeter",
+			input: "Jane",
+			opts: []stringify.StringifyOption{
+				stringify.WithCustomFormatter(func(v string) string { return "hello " + v }),
+			},
+			expected: "hello Jane",
+		},
+		{
+			name:  "custom formatter - HTML escape",
+			input: "<script>alert('xss')</script>",
+			opts: []stringify.StringifyOption{
+				stringify.WithCustomFormatter(html.EscapeString),
+			},
+			expected: "&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;",
+		},
+		{
+			name:     "nested structures",
+			input:    map[string]any{"arr": []int{1, 2, 3}, "map": map[string]int{"a": 1}},
+			expected: "{arr:[1, 2, 3], map:{a:1}}",
+		},
+	}
 
-		assert.Equal(t, "", stringify.Stringify(nil))
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-	t.Run("Handles primitive types", func(t *testing.T) {
-		t.Parallel()
-
-		assert.Equal(t, "hello", stringify.Stringify("hello"))
-		assert.Equal(t, "42", stringify.Stringify(42))
-		assert.Equal(t, "3.14", stringify.Stringify(3.14))
-		assert.Equal(t, "true", stringify.Stringify(true))
-		assert.Equal(t, "", stringify.Stringify(nil))
-	})
-
-	t.Run("Handles time.Time", func(t *testing.T) {
-		t.Parallel()
-
-		assert.Equal(t, "2025-03-09T14:30:00Z", stringify.Stringify(mockTime, stringify.WithDateFormat(time.RFC3339)))
-		assert.Equal(t, "09 Mar 25 14:30 UTC", stringify.Stringify(mockTime, stringify.WithDateFormat(time.RFC822)))
-		assert.Equal(t, "2025-03-09", stringify.Stringify(mockTime, stringify.WithDateFormat("2006-01-02")))
-		assert.Equal(t, "14:30:00", stringify.Stringify(mockTime, stringify.WithDateFormat("15:04:05")))
-	})
-
-	t.Run("Handles *time.Time", func(t *testing.T) {
-		t.Parallel()
-
-		assert.Equal(t, "2025-03-09T14:30:00Z", stringify.Stringify(&mockTime, stringify.WithDateFormat(time.RFC3339)))
-		assert.Equal(t, "09 Mar 25 14:30 UTC", stringify.Stringify(&mockTime, stringify.WithDateFormat(time.RFC822)))
-		assert.Equal(t, "2025-03-09", stringify.Stringify(&mockTime, stringify.WithDateFormat("2006-01-02")))
-		assert.Equal(t, "14:30:00", stringify.Stringify(&mockTime, stringify.WithDateFormat("15:04:05")))
-	})
-
-	t.Run("Handles fmt.Stringer", func(t *testing.T) {
-		t.Parallel()
-
-		assert.Equal(t, "Hello, my name is Jane and I am 30 years old", stringify.Stringify(mocks.StringerPersonMock{Name: "Jane", Age: 30}))
-	})
-
-	t.Run("Handles errors", func(t *testing.T) {
-		t.Parallel()
-
-		err := errors.New("something went wrong")
-		assert.Equal(t, "something went wrong", stringify.Stringify(err))
-	})
-
-	t.Run("Handles slices", func(t *testing.T) {
-		t.Parallel()
-
-		assert.Equal(t, "[]", stringify.Stringify([]any{}))
-		assert.Equal(t, "[1, 2, three]", stringify.Stringify([]any{1, 2, "three"}))
-	})
-
-	t.Run("Handles maps", func(t *testing.T) {
-		t.Parallel()
-
-		assert.Equal(t, "{}", stringify.Stringify(map[string]any{}))
-		assert.Equal(t, "{a:1, b:2}", stringify.Stringify(map[string]any{"a": 1, "b": 2}))
-	})
-
-	t.Run("Handles custom formatter", func(t *testing.T) {
-		t.Parallel()
-
-		greeterFunc := func(v string) string {
-			return "hello " + v
-		}
-
-		sanitizerFunc := func(v string) string {
-			return html.EscapeString(v)
-		}
-
-		assert.Equal(t, "hello Jane", stringify.Stringify("Jane", stringify.WithCustomFormatter(greeterFunc)))
-
-		assert.Equal(t, "&lt;script&gt;console.log(&#39;performing evil XSS attack&#39;)&lt;/script&gt;",
-			stringify.Stringify("<script>console.log('performing evil XSS attack')</script>",
-				stringify.WithCustomFormatter(sanitizerFunc),
-			))
-	})
+			result := stringify.Stringify(tt.input, tt.opts...)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
 }

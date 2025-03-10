@@ -7,9 +7,8 @@ package stringify
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
-
-	"github.com/samber/lo"
 )
 
 // StringifyConfig holds configuration options for converting values to strings.
@@ -18,6 +17,23 @@ type StringifyConfig struct {
 	DateFormat string
 	// CustomFormatter allows specifying a custom conversion function (default: fmt.Sprintf).
 	CustomFormatter func(string) string
+	// NilValue specifies how nil values are formatted (default: "").
+	NilValue string
+	// SliceDelimiters specifies the start/end delimiters for slices (default: "[", "]").
+	SliceDelimiters [2]string
+	// MapDelimiters specifies the start/end delimiters for maps (default: "{", "}").
+	MapDelimiters [2]string
+}
+
+// DefaultConfig returns the default configuration.
+func DefaultConfig() *StringifyConfig {
+	return &StringifyConfig{
+		DateFormat:      time.RFC3339,
+		CustomFormatter: func(v string) string { return v },
+		NilValue:        "",
+		SliceDelimiters: [2]string{"[", "]"},
+		MapDelimiters:   [2]string{"{", "}"},
+	}
 }
 
 // StringifyOption modifies the behavior of the Stringify function.
@@ -37,27 +53,39 @@ func WithCustomFormatter(f func(string) string) StringifyOption {
 	}
 }
 
+// WithNilValue sets the string representation for nil values.
+func WithNilValue(val string) StringifyOption {
+	return func(cfg *StringifyConfig) {
+		cfg.NilValue = val
+	}
+}
+
 // Stringify converts any value to a string, respecting the provided configuration.
 func Stringify(v any, opts ...StringifyOption) string {
-	cfg := &StringifyConfig{
-		DateFormat: time.RFC3339,
-		CustomFormatter: func(v string) string {
-			return v
-		},
-	}
-
+	cfg := DefaultConfig()
 	for _, opt := range opts {
 		opt(cfg)
 	}
 
+	if cfg.CustomFormatter == nil {
+		cfg.CustomFormatter = func(v string) string { return v }
+	}
+
+	return stringifyInternal(v, cfg)
+}
+
+// stringifyInternal is the internal implementation for string conversion.
+func stringifyInternal(v any, cfg *StringifyConfig) string {
+	if v == nil {
+		return cfg.NilValue
+	}
+
 	switch v := v.(type) {
-	case nil:
-		return ""
 	case time.Time:
 		return v.Format(cfg.DateFormat)
 	case *time.Time:
 		if v == nil {
-			return ""
+			return cfg.NilValue
 		}
 
 		return v.Format(cfg.DateFormat)
@@ -65,37 +93,47 @@ func Stringify(v any, opts ...StringifyOption) string {
 		return v.String()
 	case error:
 		return v.Error()
-	default:
-		// Handle slices, arrays, and maps gracefully
-		rv := reflect.ValueOf(v)
-		switch rv.Kind() {
-		case reflect.Slice, reflect.Array:
-			var result string
+	}
 
-			for i := range rv.Len() {
-				if i > 0 {
-					result += ", "
-				}
+	rv := reflect.ValueOf(v)
+	switch rv.Kind() {
+	case reflect.Slice, reflect.Array:
+		var b strings.Builder
 
-				result += Stringify(rv.Index(i).Interface(), opts...)
+		b.WriteString(cfg.SliceDelimiters[0])
+
+		for i := range rv.Len() {
+			if i > 0 {
+				b.WriteString(", ")
 			}
 
-			return "[" + result + "]"
-		case reflect.Map:
-			keys := lo.Uniq(lo.Keys(v.(map[string]any)))
-
-			var result string
-
-			for i, key := range keys {
-				if i > 0 {
-					result += ", "
-				}
-
-				result += fmt.Sprintf("%v:%v", key, Stringify(rv.MapIndex(reflect.ValueOf(key)).Interface(), opts...))
-			}
-
-			return "{" + result + "}"
+			b.WriteString(stringifyInternal(rv.Index(i).Interface(), cfg))
 		}
+
+		b.WriteString(cfg.SliceDelimiters[1])
+
+		return b.String()
+	case reflect.Map:
+		var b strings.Builder
+
+		b.WriteString(cfg.MapDelimiters[0])
+
+		keys := rv.MapKeys()
+		for i, key := range keys {
+			if i > 0 {
+				b.WriteString(", ")
+			}
+
+			keyStr := stringifyInternal(key.Interface(), cfg)
+			valStr := stringifyInternal(rv.MapIndex(key).Interface(), cfg)
+			fmt.Fprintf(&b, "%v:%v", keyStr, valStr)
+		}
+
+		b.WriteString(cfg.MapDelimiters[1])
+
+		return b.String()
+	case reflect.Chan, reflect.Func, reflect.UnsafePointer:
+		return fmt.Sprintf("%v", rv.Type())
 	}
 
 	return cfg.CustomFormatter(fmt.Sprintf("%v", v))

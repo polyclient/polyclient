@@ -19,6 +19,11 @@ import (
 // Format represents supported export formats.
 type Format string
 
+// String returns the string representation of the format.
+func (f Format) String() string {
+	return string(f)
+}
+
 const (
 	FormatCsv      = "csv"
 	FormatTsv      = "tsv"
@@ -92,7 +97,7 @@ var registry = map[Format]Entry{
 	// },
 }
 
-// GetSupportedFormats returns a list of supported export formats.
+// GetSupportedFormats returns a list of supported export formats as strings.
 func GetSupportedExportFormats() []Format {
 	return slices.Collect(maps.Keys(registry))
 }

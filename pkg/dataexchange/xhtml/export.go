@@ -5,6 +5,7 @@
 package xhtml
 
 import (
+	"errors"
 	"fmt"
 	"html"
 	"html/template"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	"github.com/polyclient/polyclient/pkg/stringify"
-	"github.com/samber/lo"
 )
 
 // HtmlExporter is a data exporter for HTML format.
@@ -22,8 +22,7 @@ type HtmlExporter struct {
 	DateFormat string
 	// UseCss is whether to use default styles in the HTML output (default true).
 	UseCss bool
-
-	// Template is the template for the HTML output.
+	// template is the template for the HTML output.
 	template *template.Template
 }
 
@@ -44,12 +43,12 @@ func WithUseCss(useCss bool) HtmlExporterOption {
 	}
 }
 
-// NewHtmlExporter creates a new HtmlExporter.
+// NewHtmlExporter creates a new HtmlExporter with the specified options.
 func NewHtmlExporter(opts ...HtmlExporterOption) *HtmlExporter {
 	ex := &HtmlExporter{
 		DateFormat: time.RFC3339,
-		template:   GetTemplate(),
 		UseCss:     true,
+		template:   GetTemplate(),
 	}
 
 	for _, opt := range opts {
@@ -59,8 +58,16 @@ func NewHtmlExporter(opts ...HtmlExporterOption) *HtmlExporter {
 	return ex
 }
 
-// Export formats and writes the provided data to the writer in HTML format.
+// Export writes the provided slice data to the given writer in HTML format.
+// The data must be a slice of one of:
+// - structs (writes headers from exported fields)
+// - maps[string]any (writes headers from first row's keys)
+// Returns an error if data is not a slice or if writing fails.
 func (ex *HtmlExporter) Export(w io.Writer, data any) error {
+	if w == nil {
+		return errors.New("writer cannot be nil")
+	}
+
 	v := reflect.ValueOf(data)
 
 	if v.Kind() != reflect.Slice {
@@ -71,19 +78,9 @@ func (ex *HtmlExporter) Export(w io.Writer, data any) error {
 		return nil
 	}
 
-	var converted []any
-
-	elemType := v.Type().Elem()
-	switch elemType.Kind() {
-	case reflect.Struct:
-		converted = make([]any, v.Len())
-		for i := range v.Len() {
-			converted[i] = v.Index(i).Interface()
-		}
-	case reflect.Interface:
-		converted = data.([]any)
-	default:
-		return fmt.Errorf("unsupported data type: %T", data)
+	converted := make([]any, v.Len())
+	for i := range v.Len() {
+		converted[i] = v.Index(i).Interface()
 	}
 
 	parsedData, err := ex.formatSlice(converted)
@@ -91,10 +88,12 @@ func (ex *HtmlExporter) Export(w io.Writer, data any) error {
 		return err
 	}
 
+	parsedData.UseCss = ex.UseCss
+
 	return ex.template.Execute(w, parsedData)
 }
 
-// formatDataForTemplate formats the data for the HTML template.
+// formatSlice formats the data for the HTML template.
 func (ex *HtmlExporter) formatSlice(data []any) (*HtmlTemplateData, error) {
 	switch first := data[0].(type) {
 	case map[string]any:
@@ -104,15 +103,15 @@ func (ex *HtmlExporter) formatSlice(data []any) (*HtmlTemplateData, error) {
 			return ex.formatStructSlice(data)
 		}
 
-		return ex.formatSingleColumnSlice(data)
+		return nil, fmt.Errorf("unsupported data type: %T", first)
 	}
 }
 
-// formatMapSlice writes `[]map[string]any` as a multi-column HTML table.
+// formatMapSlice formats a slice of maps for HTML output.
 func (ex *HtmlExporter) formatMapSlice(data []any) (*HtmlTemplateData, error) {
 	parsed := &HtmlTemplateData{
-		Headers: []string{},
-		Rows:    [][]string{},
+		Headers: make([]string, 0),
+		Rows:    make([][]string, 0, len(data)),
 	}
 
 	first, ok := data[0].(map[string]any)
@@ -120,7 +119,9 @@ func (ex *HtmlExporter) formatMapSlice(data []any) (*HtmlTemplateData, error) {
 		return nil, fmt.Errorf("first element is not a map: %T", data[0])
 	}
 
-	parsed.Headers = lo.Uniq(lo.Keys(first))
+	for header := range first {
+		parsed.Headers = append(parsed.Headers, header)
+	}
 
 	for _, item := range data {
 		record, ok := item.(map[string]any)
@@ -128,9 +129,13 @@ func (ex *HtmlExporter) formatMapSlice(data []any) (*HtmlTemplateData, error) {
 			return nil, fmt.Errorf("item is not a map: %T", item)
 		}
 
-		row := lo.Map(parsed.Headers, func(header string, _ int) string {
-			return stringify.Stringify(record[header], stringify.WithCustomFormatter(sanitizeHtml))
-		})
+		row := make([]string, len(parsed.Headers))
+		for i, header := range parsed.Headers {
+			row[i] = stringify.Stringify(record[header],
+				stringify.WithDateFormat(ex.DateFormat),
+				stringify.WithCustomFormatter(sanitizeHtml),
+			)
+		}
 
 		parsed.Rows = append(parsed.Rows, row)
 	}
@@ -138,49 +143,39 @@ func (ex *HtmlExporter) formatMapSlice(data []any) (*HtmlTemplateData, error) {
 	return parsed, nil
 }
 
-// formatStructSlice writes `[]struct` as a multi-column HTML table.
+// formatStructSlice formats a slice of structs for HTML output.
 func (ex *HtmlExporter) formatStructSlice(data []any) (*HtmlTemplateData, error) {
 	parsed := &HtmlTemplateData{
-		Headers: []string{},
-		Rows:    [][]string{},
+		Headers: make([]string, 0),
+		Rows:    make([][]string, 0, len(data)),
 	}
 
 	first := reflect.TypeOf(data[0])
-	for i := range first.NumField() {
+	for i := 0; i < first.NumField(); i++ {
 		field := first.Field(i)
-
 		if field.PkgPath == "" {
 			parsed.Headers = append(parsed.Headers, field.Name)
 		}
 	}
 
-	parsed.Rows = lo.Map(data, func(item any, _ int) []string {
+	for _, item := range data {
 		value := reflect.ValueOf(item)
+		row := make([]string, len(parsed.Headers))
 
-		return lo.Map(parsed.Headers, func(header string, _ int) string {
+		for i, header := range parsed.Headers {
 			field := value.FieldByName(header)
-
 			if field.IsValid() && field.CanInterface() {
-				return stringify.Stringify(field.Interface(), stringify.WithCustomFormatter(sanitizeHtml))
+				row[i] = stringify.Stringify(field.Interface(),
+					stringify.WithDateFormat(ex.DateFormat),
+					stringify.WithCustomFormatter(sanitizeHtml),
+				)
+			} else {
+				row[i] = ""
 			}
+		}
 
-			return ""
-		})
-	})
-
-	return parsed, nil
-}
-
-// formatSingleColumnSlice writes `[]any` as a single-column HTML table.
-func (ex *HtmlExporter) formatSingleColumnSlice(data []any) (*HtmlTemplateData, error) {
-	parsed := &HtmlTemplateData{
-		Headers: []string{},
-		Rows:    [][]string{},
+		parsed.Rows = append(parsed.Rows, row)
 	}
-
-	parsed.Rows = lo.Map(data, func(item any, _ int) []string {
-		return []string{stringify.Stringify(item, stringify.WithCustomFormatter(sanitizeHtml))}
-	})
 
 	return parsed, nil
 }

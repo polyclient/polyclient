@@ -11,8 +11,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/samber/lo"
-
 	"github.com/polyclient/polyclient/internal/runtime/plugin"
 	"github.com/polyclient/polyclient/pkg/dataexchange"
 	"github.com/urfave/cli/v3"
@@ -39,10 +37,6 @@ func NewDatabaseCommand(pr *plugin.PluginRegistry) *cli.Command {
 
 // newQueryCommand returns a new query command that can be used to query a database from the CLI.
 func newQueryCommand(pr *plugin.PluginRegistry) *cli.Command {
-	supportedFormats := lo.Map(dataexchange.GetSupportedExportFormats(), func(format dataexchange.Format, _ int) string {
-		return fmt.Sprintf("%v", format)
-	})
-
 	return &cli.Command{
 		Name:  "query",
 		Usage: "Execute a query against a database (SQL or NoSQL)",
@@ -55,14 +49,14 @@ func newQueryCommand(pr *plugin.PluginRegistry) *cli.Command {
 			},
 			&cli.StringFlag{
 				Name:        "output",
-				Usage:       fmt.Sprintf("Output format (%s)", supportedFormats),
+				Usage:       fmt.Sprintf("Output format (%s)", dataexchange.GetSupportedExportFormats()),
 				Aliases:     []string{"o"},
 				Value:       "json",
 				DefaultText: "json",
 				Validator: func(output string) error {
 					_, ok := dataexchange.GetRegistryEntry(dataexchange.Format(output))
 					if !ok {
-						return fmt.Errorf("invalid output format: %s\nSupported formats: %s", output, supportedFormats)
+						return fmt.Errorf("invalid output format: %s\nSupported formats: %s", output, dataexchange.GetSupportedExportFormats())
 					}
 
 					return nil
