@@ -6,15 +6,15 @@ package xhtml
 
 import "html/template"
 
-// HtmlTemplateData is the data structure for the HTML template output.
-type HtmlTemplateData struct {
+// HTMLTemplateData is the data structure for the HTML template output.
+type HTMLTemplateData struct {
 	Headers []string
 	Rows    [][]string
-	UseCss  bool
+	UseCSS  bool
 }
 
-// HtmlTemplate is the HTML template for the HTML exporter.
-const HtmlTemplate string = `
+// HTMLTemplate is the HTML template for the HTML exporter.
+const HTMLTemplate string = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -76,5 +76,5 @@ const HtmlTemplate string = `
 
 // GetTemplate loads the HTML template for the HTML exporter.
 func GetTemplate() *template.Template {
-	return template.Must(template.New("htmlExport").Parse(HtmlTemplate))
+	return template.Must(template.New("htmlExport").Parse(HTMLTemplate))
 }

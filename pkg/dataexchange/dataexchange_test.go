@@ -17,7 +17,7 @@ func TestGetSupportedExportFormats(t *testing.T) {
 	t.Parallel()
 
 	expectedFormats := []dataexchange.Format{
-		dataexchange.FormatCsv, dataexchange.FormatTsv, dataexchange.FormatJson, dataexchange.FormatHtml,
+		dataexchange.FormatCSV, dataexchange.FormatTSV, dataexchange.FormatJSON, dataexchange.FormatHTML,
 	}
 
 	supportedFormats := dataexchange.GetSupportedExportFormats()
@@ -34,10 +34,10 @@ func TestGetExporterRegistryEntry(t *testing.T) {
 		mimeType string
 		fileExt  string
 	}{
-		{"csv", dataexchange.FormatCsv, true, "text/csv", "csv"},
-		{"tsv", dataexchange.FormatTsv, true, "text/tab-separated-values", "tsv"},
-		{"json", dataexchange.FormatJson, true, "application/json", "json"},
-		{"html", dataexchange.FormatHtml, true, "text/html", "html"},
+		{"csv", dataexchange.FormatCSV, true, "text/csv", "csv"},
+		{"tsv", dataexchange.FormatTSV, true, "text/tab-separated-values", "tsv"},
+		{"json", dataexchange.FormatJSON, true, "application/json", "json"},
+		{"html", dataexchange.FormatHTML, true, "text/html", "html"},
 		{"Invalid", "invalid_format", false, "", ""},
 	}
 
@@ -65,7 +65,7 @@ func TestParseDataFromBytes_ValidJSON(t *testing.T) {
 
 	require.NoError(t, json.Unmarshal(data, &expected))
 
-	parsed, err := dataexchange.ParseDataFromBytes[[]map[string]any](data, dataexchange.FormatJson)
+	parsed, err := dataexchange.ParseDataFromBytes[[]map[string]any](data, dataexchange.FormatJSON)
 	require.NoError(t, err)
 	assert.Equal(t, expected, parsed)
 }
@@ -77,7 +77,7 @@ func TestParseDataFromBytes_InvalidJSON(t *testing.T) {
 
 	var zeroValue []map[string]any
 
-	parsed, err := dataexchange.ParseDataFromBytes[[]map[string]any](data, dataexchange.FormatJson)
+	parsed, err := dataexchange.ParseDataFromBytes[[]map[string]any](data, dataexchange.FormatJSON)
 	assert.Error(t, err)
 	assert.Equal(t, zeroValue, parsed)
 }

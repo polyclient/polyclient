@@ -17,38 +17,38 @@ import (
 	"github.com/polyclient/polyclient/pkg/stringify"
 )
 
-// HtmlExporter is a data exporter for HTML format.
-type HtmlExporter struct {
+// HTMLExporter is a data exporter for HTML format.
+type HTMLExporter struct {
 	// DateFormat is the format for date fields (default time.RFC3339).
 	DateFormat string
-	// UseCss is whether to use default CSS styles in the HTML output (default true).
-	UseCss bool
+	// UseCSS is whether to use default CSS styles in the HTML output (default true).
+	UseCSS bool
 	// template is the template for the HTML output.
 	template *template.Template
 }
 
-// HtmlExporterOption defines a functional option for configuring HTML output.
-type HtmlExporterOption func(*HtmlExporter)
+// HTMLExporterOption defines a functional option for configuring HTML output.
+type HTMLExporterOption func(*HTMLExporter)
 
 // WithDateFormat sets a custom date format for date fields.
-func WithDateFormat(format string) HtmlExporterOption {
-	return func(opts *HtmlExporter) {
+func WithDateFormat(format string) HTMLExporterOption {
+	return func(opts *HTMLExporter) {
 		opts.DateFormat = format
 	}
 }
 
-// WithUseCss sets whether to use default styles in the HTML output.
-func WithUseCss(useCss bool) HtmlExporterOption {
-	return func(opts *HtmlExporter) {
-		opts.UseCss = useCss
+// WithUseCSS sets whether to use default styles in the HTML output.
+func WithUseCSS(useCSS bool) HTMLExporterOption {
+	return func(opts *HTMLExporter) {
+		opts.UseCSS = useCSS
 	}
 }
 
-// NewHtmlExporter creates a new HtmlExporter with the specified options.
-func NewHtmlExporter(opts ...HtmlExporterOption) *HtmlExporter {
-	ex := &HtmlExporter{
+// NewHTMLExporter creates a new HtmlExporter with the specified options.
+func NewHTMLExporter(opts ...HTMLExporterOption) *HTMLExporter {
+	ex := &HTMLExporter{
 		DateFormat: time.RFC3339,
-		UseCss:     true,
+		UseCSS:     true,
 		template:   GetTemplate(),
 	}
 
@@ -60,7 +60,7 @@ func NewHtmlExporter(opts ...HtmlExporterOption) *HtmlExporter {
 }
 
 // Export writes a slice to HTML, supporting primitive types, structs, and maps.
-func (ex *HtmlExporter) Export(w io.Writer, data any) error {
+func (ex *HTMLExporter) Export(w io.Writer, data any) error {
 	if w == nil {
 		return errors.New("writer cannot be nil")
 	}
@@ -80,13 +80,13 @@ func (ex *HtmlExporter) Export(w io.Writer, data any) error {
 		return err
 	}
 
-	parsedData.UseCss = ex.UseCss
+	parsedData.UseCSS = ex.UseCSS
 
 	return ex.template.Execute(w, parsedData)
 }
 
 // formatSlice formats the data for the HTML template.
-func (ex *HtmlExporter) formatSlice(v reflect.Value) (*HtmlTemplateData, error) {
+func (ex *HTMLExporter) formatSlice(v reflect.Value) (*HTMLTemplateData, error) {
 	first := v.Index(0).Interface()
 
 	switch first.(type) {
@@ -102,9 +102,9 @@ func (ex *HtmlExporter) formatSlice(v reflect.Value) (*HtmlTemplateData, error) 
 }
 
 // formatMapSlice formats a slice of maps for HTML output.
-func (ex *HtmlExporter) formatMapSlice(v reflect.Value) (*HtmlTemplateData, error) {
-	parsed := &HtmlTemplateData{
-		Headers: make([]string, 0),
+func (ex *HTMLExporter) formatMapSlice(v reflect.Value) (*HTMLTemplateData, error) {
+	parsed := &HTMLTemplateData{
+		Headers: []string{},
 		Rows:    make([][]string, 0, v.Len()),
 	}
 
@@ -122,7 +122,7 @@ func (ex *HtmlExporter) formatMapSlice(v reflect.Value) (*HtmlTemplateData, erro
 		for j, header := range parsed.Headers {
 			row[j] = stringify.Stringify(record[header],
 				stringify.WithDateFormat(ex.DateFormat),
-				stringify.WithCustomFormatter(sanitizeHtml),
+				stringify.WithCustomFormatter(sanitizeHTML),
 			)
 		}
 
@@ -133,9 +133,9 @@ func (ex *HtmlExporter) formatMapSlice(v reflect.Value) (*HtmlTemplateData, erro
 }
 
 // formatStructSlice formats a slice of structs for HTML output.
-func (ex *HtmlExporter) formatStructSlice(v reflect.Value) (*HtmlTemplateData, error) {
-	parsed := &HtmlTemplateData{
-		Headers: make([]string, 0),
+func (ex *HTMLExporter) formatStructSlice(v reflect.Value) (*HTMLTemplateData, error) {
+	parsed := &HTMLTemplateData{
+		Headers: []string{},
 		Rows:    make([][]string, 0, v.Len()),
 	}
 
@@ -156,7 +156,7 @@ func (ex *HtmlExporter) formatStructSlice(v reflect.Value) (*HtmlTemplateData, e
 			if field.IsValid() && field.CanInterface() {
 				row[j] = stringify.Stringify(field.Interface(),
 					stringify.WithDateFormat(ex.DateFormat),
-					stringify.WithCustomFormatter(sanitizeHtml),
+					stringify.WithCustomFormatter(sanitizeHTML),
 				)
 			} else {
 				row[j] = ""
@@ -170,8 +170,8 @@ func (ex *HtmlExporter) formatStructSlice(v reflect.Value) (*HtmlTemplateData, e
 }
 
 // formatSingleColumnSlice writes `[]any` as a single-column HTML.
-func (ex *HtmlExporter) formatSingleColumnSlice(v reflect.Value) (*HtmlTemplateData, error) {
-	parsed := &HtmlTemplateData{
+func (ex *HTMLExporter) formatSingleColumnSlice(v reflect.Value) (*HTMLTemplateData, error) {
+	parsed := &HTMLTemplateData{
 		Headers: []string{"Value"},
 		Rows:    make([][]string, 0, v.Len()),
 	}
@@ -180,7 +180,7 @@ func (ex *HtmlExporter) formatSingleColumnSlice(v reflect.Value) (*HtmlTemplateD
 		parsed.Rows = append(parsed.Rows, []string{
 			stringify.Stringify(v.Index(i).Interface(),
 				stringify.WithDateFormat(ex.DateFormat),
-				stringify.WithCustomFormatter(sanitizeHtml),
+				stringify.WithCustomFormatter(sanitizeHTML),
 			),
 		})
 	}
@@ -188,7 +188,7 @@ func (ex *HtmlExporter) formatSingleColumnSlice(v reflect.Value) (*HtmlTemplateD
 	return parsed, nil
 }
 
-// sanitizeHtml escapes HTML characters in the provided string.
-func sanitizeHtml(v string) string {
+// sanitizeHTML escapes HTML characters in the provided string.
+func sanitizeHTML(v string) string {
 	return html.EscapeString(v)
 }

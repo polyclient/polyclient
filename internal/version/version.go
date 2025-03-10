@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
+// Package version provides information about the PolyClient build, including version,
 package version
 
 import "fmt"
@@ -17,7 +18,9 @@ var (
 	arch        = "unknown" // CPU architecture (e.g., "amd64")
 )
 
-// String returns a formatted multi-line string that displays the build metadata, including version, branch, short and full commit SHAs, build date, operating system, and CPU architecture.
+// String returns a formatted multi-line string that displays the build metadata,
+// including version, branch, short and full commit SHAs, build date, operating system,
+// and CPU architecture.
 func String() string {
 	return fmt.Sprintf(
 		"Version: %s\nBranch: %s\nShort commit: %s\nFull commit: %s\nBuild date: %s\nOS: %s\nArch: %s",

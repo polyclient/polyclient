@@ -17,9 +17,9 @@ import (
 
 var supportedManifestFiles = [...]string{"manifest.json"}
 
-// PluginManifest represents a PolyClient plugin manifest.
-type PluginManifest struct {
-	Id          string   `json:"id"          validate:"required,idPattern"`
+// Manifest represents a PolyClient plugin manifest.
+type Manifest struct {
+	ID          string   `json:"id"          validate:"required,idPattern"`
 	Name        string   `json:"name"        validate:"required,gte=1,lte=30"`
 	Scope       string   `json:"scope"       validate:"required,oneof=sql nosql ai theme"`
 	Version     string   `json:"version"     validate:"required,semver"`
@@ -41,7 +41,7 @@ type Author struct {
 
 // ValidateManifest verifies that a give manifest configuration
 // complies with all the defined validation rules.
-func ValidateManifest(m *PluginManifest) error {
+func ValidateManifest(m *Manifest) error {
 	v := validator.New(validator.WithRequiredStructEnabled())
 
 	// Register custom validation for id pattern
@@ -67,13 +67,13 @@ func ValidateManifest(m *PluginManifest) error {
 
 // LoadManifest reads and validates a plugin manifest from the
 // specified file path.
-func LoadManifest(path string) (*PluginManifest, error) {
+func LoadManifest(path string) (*Manifest, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load manifest: %w", err)
 	}
 
-	var manifest PluginManifest
+	var manifest Manifest
 	if err := json.Unmarshal(data, &manifest); err != nil {
 		return nil, fmt.Errorf("failed to load manifest: %w", err)
 	}

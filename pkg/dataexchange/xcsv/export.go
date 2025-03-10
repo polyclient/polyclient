@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
+// Package xcsv exports data as CSV.
 package xcsv
 
 import (
@@ -16,29 +17,35 @@ import (
 	"github.com/polyclient/polyclient/pkg/stringify"
 )
 
-// CsvExporter exports data as CSV.
-type CsvExporter struct {
+// CSVExporter exports data as CSV.
+type CSVExporter struct {
 	Comma      rune
 	UseCRLF    bool
 	DateFormat string
 }
 
-type CsvExporterOption func(*CsvExporter)
+// CSVExporterOption is a functional option type for configuring a CsvExporter.
+type CSVExporterOption func(*CSVExporter)
 
-func WithComma(comma rune) CsvExporterOption {
-	return func(opts *CsvExporter) { opts.Comma = comma }
+func WithComma(comma rune) CSVExporterOption {
+	return func(opts *CSVExporter) { opts.Comma = comma }
 }
 
-func WithCRLF(useCRLF bool) CsvExporterOption {
-	return func(opts *CsvExporter) { opts.UseCRLF = useCRLF }
+func WithCRLF(useCRLF bool) CSVExporterOption {
+	return func(opts *CSVExporter) { opts.UseCRLF = useCRLF }
 }
 
-func WithDateFormat(format string) CsvExporterOption {
-	return func(opts *CsvExporter) { opts.DateFormat = format }
+func WithDateFormat(format string) CSVExporterOption {
+	return func(opts *CSVExporter) { opts.DateFormat = format }
 }
 
-func NewCsvExporter(opts ...CsvExporterOption) *CsvExporter {
-	ex := &CsvExporter{Comma: ',', UseCRLF: false, DateFormat: time.RFC3339}
+func NewCSVExporter(opts ...CSVExporterOption) *CSVExporter {
+	ex := &CSVExporter{
+		Comma:      ',',
+		UseCRLF:    false,
+		DateFormat: time.RFC3339,
+	}
+
 	for _, opt := range opts {
 		opt(ex)
 	}
@@ -47,7 +54,7 @@ func NewCsvExporter(opts ...CsvExporterOption) *CsvExporter {
 }
 
 // Export writes a slice to CSV, supporting primitive types, structs, and maps.
-func (ex *CsvExporter) Export(w io.Writer, data any) error {
+func (ex *CSVExporter) Export(w io.Writer, data any) error {
 	if w == nil {
 		return errors.New("writer cannot be nil")
 	}
@@ -65,7 +72,7 @@ func (ex *CsvExporter) Export(w io.Writer, data any) error {
 }
 
 // formatSlice processes a slice and determines the CSV format.
-func (ex *CsvExporter) formatSlice(w io.Writer, v reflect.Value) error {
+func (ex *CSVExporter) formatSlice(w io.Writer, v reflect.Value) error {
 	writer := csv.NewWriter(w)
 	writer.Comma = ex.Comma
 	writer.UseCRLF = ex.UseCRLF
@@ -87,7 +94,7 @@ func (ex *CsvExporter) formatSlice(w io.Writer, v reflect.Value) error {
 }
 
 // formatMapSlice writes `[]map[string]any` as a CSV.
-func (ex *CsvExporter) formatMapSlice(w *csv.Writer, v reflect.Value) error {
+func (*CSVExporter) formatMapSlice(w *csv.Writer, v reflect.Value) error {
 	first := v.Index(0).Interface().(map[string]any)
 	headers := make([]string, 0, len(first))
 
@@ -118,7 +125,7 @@ func (ex *CsvExporter) formatMapSlice(w *csv.Writer, v reflect.Value) error {
 }
 
 // formatStructSlice writes `[]struct` as a CSV.
-func (ex *CsvExporter) formatStructSlice(w *csv.Writer, v reflect.Value) error {
+func (*CSVExporter) formatStructSlice(w *csv.Writer, v reflect.Value) error {
 	t := v.Index(0).Type()
 
 	var headers []string
@@ -158,7 +165,7 @@ func (ex *CsvExporter) formatStructSlice(w *csv.Writer, v reflect.Value) error {
 }
 
 // formatSingleColumnSlice writes `[]any` as a single-column CSV.
-func (ex *CsvExporter) formatSingleColumnSlice(w *csv.Writer, v reflect.Value) error {
+func (*CSVExporter) formatSingleColumnSlice(w *csv.Writer, v reflect.Value) error {
 	rows := make([][]string, v.Len())
 	for i := range v.Len() {
 		rows[i] = []string{stringify.Stringify(v.Index(i).Interface())}

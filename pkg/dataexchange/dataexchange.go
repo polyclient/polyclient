@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
+// Package dataexchange provide functions for exporting and importing data.
 package dataexchange
 
 import (
@@ -25,27 +26,37 @@ func (f Format) String() string {
 }
 
 const (
-	FormatCsv      = "csv"
-	FormatTsv      = "tsv"
-	FormatJson     = "json"
-	FormatHtml     = "html"
-	FormatXml      = "xml"
-	FormatYaml     = "yaml"
-	FormatToml     = "toml"
+	// FormatCSV represents the CSV format.
+	FormatCSV = "csv"
+	// FormatTSV represents the TSV format.
+	FormatTSV = "tsv"
+	// FormatJSON represents the JSON format.
+	FormatJSON = "json"
+	// FormatHTML represents the HTML format.
+	FormatHTML = "html"
+	// FormatXML represents the XML format.
+	FormatXML = "xml"
+	// FormatYAML represents the YAML format.
+	FormatYAML = "yaml"
+	// FormatTOML represents the TOML format.
+	FormatTOML = "toml"
+	// FormatMarkdown represents the Markdown format.
 	FormatMarkdown = "markdown"
 )
 
 // Importer represents the import data format interface.
 type Importer interface {
-	Import(r io.Reader) (any, error)
+	// Import reads data from a reader and returns a slice of type `[]any`.
+	Import(r io.Reader) ([]any, error)
 }
 
 // Exporter represents the export data format interface.
 type Exporter interface {
+	// Export writes a slice to a writer.
 	Export(w io.Writer, data any) error
 }
 
-// ExporterEntry contains details for a specific export format.
+// Entry contains details for a specific export format.
 type Entry struct {
 	MIMEType string
 	FileExt  string
@@ -55,25 +66,25 @@ type Entry struct {
 
 // registry maps supported import and export formats to their details.
 var registry = map[Format]Entry{
-	FormatCsv: {
+	FormatCSV: {
 		MIMEType: "text/csv",
 		FileExt:  "csv",
-		Exporter: xcsv.NewCsvExporter(),
+		Exporter: xcsv.NewCSVExporter(),
 	},
-	FormatTsv: {
+	FormatTSV: {
 		MIMEType: "text/tab-separated-values",
 		FileExt:  "tsv",
-		Exporter: xcsv.NewCsvExporter(xcsv.WithComma('\t')),
+		Exporter: xcsv.NewCSVExporter(xcsv.WithComma('\t')),
 	},
-	FormatJson: {
+	FormatJSON: {
 		MIMEType: "application/json",
 		FileExt:  "json",
-		Exporter: xjson.NewJsonExporter(),
+		Exporter: xjson.NewJSONExporter(),
 	},
-	FormatHtml: {
+	FormatHTML: {
 		MIMEType: "text/html",
 		FileExt:  "html",
-		Exporter: xhtml.NewHtmlExporter(),
+		Exporter: xhtml.NewHTMLExporter(),
 	},
 	// FormatXml: {
 	// 	MIMEType:  "application/xml",
