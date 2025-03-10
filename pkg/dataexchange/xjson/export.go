@@ -12,8 +12,8 @@ import (
 	"reflect"
 )
 
-// JsonExporter is a data exporter for JSON format.
-type JsonExporter struct {
+// JSONExporter is a data exporter for JSON format.
+type JSONExporter struct {
 	// IndentString is the indentation string used in the JSON output (default: "  ").
 	IndentString string
 	// EscapeHTML specifies whether to escape HTML characters in the JSON output
@@ -21,26 +21,26 @@ type JsonExporter struct {
 	EscapeHTML bool
 }
 
-// JsonExporterOption is a functional option for configuring JsonExporter.
-type JsonExporterOption func(*JsonExporter)
+// JSONExporterOption is a functional option for configuring JsonExporter.
+type JSONExporterOption func(*JSONExporter)
 
 // WithIndentString sets the indentation string for JsonExporter.
-func WithIndentString(indent string) JsonExporterOption {
-	return func(ex *JsonExporter) {
+func WithIndentString(indent string) JSONExporterOption {
+	return func(ex *JSONExporter) {
 		ex.IndentString = indent
 	}
 }
 
 // WithEscapeHTML sets whether to escape HTML characters in JsonExporter.
-func WithEscapeHTML(escape bool) JsonExporterOption {
-	return func(ex *JsonExporter) {
+func WithEscapeHTML(escape bool) JSONExporterOption {
+	return func(ex *JSONExporter) {
 		ex.EscapeHTML = escape
 	}
 }
 
-// NewJsonExporter creates a new instance of JsonExporter.
-func NewJsonExporter(opts ...JsonExporterOption) *JsonExporter {
-	ex := &JsonExporter{
+// NewJSONExporter creates a new instance of JsonExporter.
+func NewJSONExporter(opts ...JSONExporterOption) *JSONExporter {
+	ex := &JSONExporter{
 		IndentString: "  ",
 		EscapeHTML:   true,
 	}
@@ -53,7 +53,7 @@ func NewJsonExporter(opts ...JsonExporterOption) *JsonExporter {
 }
 
 // Export writes a slice to JSON, supporting primitive types, structs, and maps.
-func (ex *JsonExporter) Export(w io.Writer, data any) error {
+func (ex *JSONExporter) Export(w io.Writer, data any) error {
 	if w == nil {
 		return errors.New("writer cannot be nil")
 	}

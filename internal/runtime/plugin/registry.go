@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2025 The PolyClient Authors
 //
-// SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
+// SPDX-License-Identifier: Apache-2.0
 
 package plugin
 
@@ -16,8 +16,8 @@ import (
 	"github.com/tetratelabs/wazero"
 )
 
-// PluginRegistry manages discovery, loading, and execution of Wasm plugins.
-type PluginRegistry struct {
+// Registry manages discovery, loading, and execution of Wasm plugins.
+type Registry struct {
 	lookupDirs    []string
 	loadedPlugins map[string]*LoadedPlugin
 	mu            sync.RWMutex
@@ -27,19 +27,19 @@ type PluginRegistry struct {
 type LoadedPlugin struct {
 	wasmPath   string
 	wasmPlugin *extism.Plugin
-	manifest   *PluginManifest
+	manifest   *Manifest
 }
 
 // NewPluginRegistry initializes a registry with specified lookup directories.
-func NewPluginRegistry(lookupDirs []string) *PluginRegistry {
-	return &PluginRegistry{
+func NewPluginRegistry(lookupDirs []string) *Registry {
+	return &Registry{
 		lookupDirs:    lookupDirs,
-		loadedPlugins: make(map[string]*LoadedPlugin),
+		loadedPlugins: map[string]*LoadedPlugin{},
 	}
 }
 
 // GetWasmPath returns the Wasm file path for a plugin ID.
-func (pr *PluginRegistry) GetWasmPath(id string) (string, error) {
+func (pr *Registry) GetWasmPath(id string) (string, error) {
 	pr.mu.Lock()
 	defer pr.mu.Unlock()
 
@@ -52,7 +52,7 @@ func (pr *PluginRegistry) GetWasmPath(id string) (string, error) {
 }
 
 // GetWasmPlugin returns the extism.Plugin instance for a plugin ID.
-func (pr *PluginRegistry) GetWasmPlugin(id string) (*extism.Plugin, error) {
+func (pr *Registry) GetWasmPlugin(id string) (*extism.Plugin, error) {
 	pr.mu.Lock()
 	defer pr.mu.Unlock()
 
@@ -65,7 +65,7 @@ func (pr *PluginRegistry) GetWasmPlugin(id string) (*extism.Plugin, error) {
 }
 
 // GetManifest returns the manifest for a plugin ID.
-func (pr *PluginRegistry) GetManifest(id string) (*PluginManifest, error) {
+func (pr *Registry) GetManifest(id string) (*Manifest, error) {
 	pr.mu.Lock()
 	defer pr.mu.Unlock()
 
@@ -78,8 +78,8 @@ func (pr *PluginRegistry) GetManifest(id string) (*PluginManifest, error) {
 }
 
 // CallFunction executes a function in the specified Wasm plugin.
-func (pr *PluginRegistry) CallFunction(pluginId, functionName string, input []byte) ([]byte, error) {
-	plugin, err := pr.GetWasmPlugin(pluginId)
+func (pr *Registry) CallFunction(pluginID, functionName string, input []byte) ([]byte, error) {
+	plugin, err := pr.GetWasmPlugin(pluginID)
 	if err != nil {
 		return nil, err
 	}
@@ -93,8 +93,8 @@ func (pr *PluginRegistry) CallFunction(pluginId, functionName string, input []by
 }
 
 // CallFunctionWithContext executes a function in the specified Wasm plugin with a context.
-func (pr *PluginRegistry) CallFunctionWithContext(ctx context.Context, pluginId, functionName string, input []byte) ([]byte, error) {
-	plugin, err := pr.GetWasmPlugin(pluginId)
+func (pr *Registry) CallFunctionWithContext(ctx context.Context, pluginID, functionName string, input []byte) ([]byte, error) {
+	plugin, err := pr.GetWasmPlugin(pluginID)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +108,7 @@ func (pr *PluginRegistry) CallFunctionWithContext(ctx context.Context, pluginId,
 }
 
 // LoadPlugins scans lookup directories and loads available plugins.
-func (pr *PluginRegistry) LoadPlugins() error {
+func (pr *Registry) LoadPlugins() error {
 	var wg sync.WaitGroup
 
 	for _, lookupDir := range pr.lookupDirs {
@@ -136,7 +136,7 @@ func (pr *PluginRegistry) LoadPlugins() error {
 }
 
 // LoadPlugin loads a single plugin from a manifest file path.
-func (pr *PluginRegistry) LoadPlugin(manifestPath string) (*LoadedPlugin, error) {
+func (pr *Registry) LoadPlugin(manifestPath string) (*LoadedPlugin, error) {
 	manifest, err := LoadManifest(manifestPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load plugin: %w", err)
@@ -156,14 +156,14 @@ func (pr *PluginRegistry) LoadPlugin(manifestPath string) (*LoadedPlugin, error)
 	}
 
 	pr.mu.Lock()
-	pr.loadedPlugins[manifest.Id] = plugin
+	pr.loadedPlugins[manifest.ID] = plugin
 	pr.mu.Unlock()
 
 	return plugin, nil
 }
 
 // UnloadPlugin unloads a single plugin from the registry.
-func (pr *PluginRegistry) UnloadPlugin(id string) error {
+func (pr *Registry) UnloadPlugin(id string) error {
 	pr.mu.Lock()
 	defer pr.mu.Unlock()
 
@@ -174,7 +174,9 @@ func (pr *PluginRegistry) UnloadPlugin(id string) error {
 		return fmt.Errorf("failed to find plugin with id %s", id)
 	}
 
-	plugin.wasmPlugin.Close(ctx)
+	if err := plugin.wasmPlugin.Close(ctx); err != nil {
+		return fmt.Errorf("failed to close plugin: %w", err)
+	}
 
 	delete(pr.loadedPlugins, id)
 
@@ -182,15 +184,19 @@ func (pr *PluginRegistry) UnloadPlugin(id string) error {
 }
 
 // loadWasmPlugin loads a single Wasm plugin from a file path.
-func loadWasmPlugin(m *PluginManifest, wasmPath string) (*extism.Plugin, error) {
+func loadWasmPlugin(m *Manifest, wasmPath string) (*extism.Plugin, error) {
 	ctx := context.Background()
 	cache := wazero.NewCompilationCache()
-	defer cache.Close(ctx)
+	defer func() {
+		if err := cache.Close(ctx); err != nil {
+			log.Printf("Error closing cache: %v\n", err)
+		}
+	}()
 
 	manifest := extism.Manifest{
 		Wasm: []extism.Wasm{
 			extism.WasmFile{
-				Name: m.Id,
+				Name: m.ID,
 				Path: wasmPath,
 			},
 		},

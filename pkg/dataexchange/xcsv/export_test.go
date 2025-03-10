@@ -31,14 +31,14 @@ func TestNewCsvExporter(t *testing.T) {
 	t.Run("default configuration", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xcsv.NewCSVExporter()
 		assert.NotNil(t, exporter)
 	})
 
 	t.Run("custom configuration", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter(
+		exporter := xcsv.NewCSVExporter(
 			xcsv.WithComma(';'),
 			xcsv.WithCRLF(true),
 			xcsv.WithDateFormat("2006-01-02"),
@@ -53,7 +53,7 @@ func TestExport(t *testing.T) {
 	t.Run("nil writer", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xcsv.NewCSVExporter()
 		err := exporter.Export(nil, []string{"data"})
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "writer")
@@ -62,7 +62,7 @@ func TestExport(t *testing.T) {
 	t.Run("invalid input - non-slice", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xcsv.NewCSVExporter()
 
 		var buf bytes.Buffer
 		err := exporter.Export(&buf, "not a slice")
@@ -72,7 +72,7 @@ func TestExport(t *testing.T) {
 	t.Run("empty slice", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xcsv.NewCSVExporter()
 
 		var buf bytes.Buffer
 		err := exporter.Export(&buf, []string{})
@@ -83,7 +83,7 @@ func TestExport(t *testing.T) {
 	t.Run("slice of structs", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xcsv.NewCSVExporter()
 
 		var buf bytes.Buffer
 
@@ -112,7 +112,7 @@ func TestExport(t *testing.T) {
 	t.Run("slice of maps", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xcsv.NewCSVExporter()
 
 		var buf bytes.Buffer
 
@@ -136,7 +136,7 @@ func TestExport(t *testing.T) {
 	t.Run("slice of primitive types", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xcsv.NewCSVExporter()
 
 		var buf bytes.Buffer
 
@@ -152,7 +152,7 @@ func TestExport(t *testing.T) {
 	t.Run("custom separator", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter(xcsv.WithComma(';'))
+		exporter := xcsv.NewCSVExporter(xcsv.WithComma(';'))
 
 		var buf bytes.Buffer
 
@@ -173,7 +173,7 @@ func TestExport(t *testing.T) {
 	t.Run("CRLF line endings", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter(xcsv.WithCRLF(true))
+		exporter := xcsv.NewCSVExporter(xcsv.WithCRLF(true))
 
 		var buf bytes.Buffer
 
@@ -189,7 +189,7 @@ func TestExport(t *testing.T) {
 	t.Run("null values in maps", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xcsv.NewCSVExporter()
 
 		var buf bytes.Buffer
 
@@ -211,7 +211,7 @@ func TestExport(t *testing.T) {
 	t.Run("special characters", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xcsv.NewCSVExporter()
 
 		var buf bytes.Buffer
 
@@ -233,7 +233,7 @@ func TestExport(t *testing.T) {
 	t.Run("unicode characters", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xcsv.NewCSVExporter()
 
 		var buf bytes.Buffer
 
@@ -251,7 +251,7 @@ func TestExport(t *testing.T) {
 	t.Run("private fields in struct", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xcsv.NewCSVExporter()
 
 		var buf bytes.Buffer
 
@@ -272,7 +272,7 @@ func TestExport(t *testing.T) {
 	t.Run("missing map fields", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xcsv.NewCSVExporter()
 
 		var buf bytes.Buffer
 
@@ -293,7 +293,7 @@ func TestExport(t *testing.T) {
 	t.Run("empty map slice", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCsvExporter()
+		exporter := xcsv.NewCSVExporter()
 
 		var buf bytes.Buffer
 

@@ -17,7 +17,7 @@ import (
 )
 
 // NewDatabaseCommand returns a new database command for managing databases from the CLI.
-func NewDatabaseCommand(pr *plugin.PluginRegistry) *cli.Command {
+func NewDatabaseCommand(pr *plugin.Registry) *cli.Command {
 	return &cli.Command{
 		Name:  "database",
 		Usage: "Manage databases from the CLI",
@@ -36,7 +36,8 @@ func NewDatabaseCommand(pr *plugin.PluginRegistry) *cli.Command {
 }
 
 // newQueryCommand returns a new query command that can be used to query a database from the CLI.
-func newQueryCommand(pr *plugin.PluginRegistry) *cli.Command {
+func newQueryCommand(pr *plugin.Registry) *cli.Command {
+	outputFormats := dataexchange.GetSupportedExportFormats()
 	return &cli.Command{
 		Name:  "query",
 		Usage: "Execute a query against a database (SQL or NoSQL)",
@@ -49,14 +50,14 @@ func newQueryCommand(pr *plugin.PluginRegistry) *cli.Command {
 			},
 			&cli.StringFlag{
 				Name:        "output",
-				Usage:       fmt.Sprintf("Output format (%s)", dataexchange.GetSupportedExportFormats()),
+				Usage:       fmt.Sprintf("Output format (%s)", outputFormats),
 				Aliases:     []string{"o"},
 				Value:       "json",
 				DefaultText: "json",
 				Validator: func(output string) error {
 					_, ok := dataexchange.GetRegistryEntry(dataexchange.Format(output))
 					if !ok {
-						return fmt.Errorf("invalid output format: %s\nSupported formats: %s", output, dataexchange.GetSupportedExportFormats())
+						return fmt.Errorf("invalid output format: %s\nSupported formats: %s", output, outputFormats)
 					}
 
 					return nil
@@ -77,7 +78,7 @@ func newQueryCommand(pr *plugin.PluginRegistry) *cli.Command {
 				},
 			},
 		},
-		Action: func(ctx context.Context, cmd *cli.Command) error {
+		Action: func(_ context.Context, cmd *cli.Command) error {
 			query := cmd.String("query")
 			output := cmd.String("output")
 			destination := cmd.String("destination")

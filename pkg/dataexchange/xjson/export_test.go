@@ -32,14 +32,14 @@ func TestNewJsonExporter(t *testing.T) {
 	t.Run("default configuration", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xjson.NewJsonExporter()
+		exporter := xjson.NewJSONExporter()
 		assert.NotNil(t, exporter)
 	})
 
 	t.Run("custom configuration", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xjson.NewJsonExporter(
+		exporter := xjson.NewJSONExporter(
 			xjson.WithIndentString("\t"),
 			xjson.WithEscapeHTML(false),
 		)
@@ -53,7 +53,7 @@ func TestExport(t *testing.T) {
 	t.Run("nil writer", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xjson.NewJsonExporter()
+		exporter := xjson.NewJSONExporter()
 		err := exporter.Export(nil, []string{"test"})
 		assert.Error(t, err)
 	})
@@ -61,7 +61,7 @@ func TestExport(t *testing.T) {
 	t.Run("empty slice", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xjson.NewJsonExporter()
+		exporter := xjson.NewJSONExporter()
 
 		var buf bytes.Buffer
 
@@ -73,7 +73,7 @@ func TestExport(t *testing.T) {
 	t.Run("slice of structs", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xjson.NewJsonExporter()
+		exporter := xjson.NewJSONExporter()
 
 		var buf bytes.Buffer
 
@@ -95,7 +95,7 @@ func TestExport(t *testing.T) {
 	t.Run("slice of maps", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xjson.NewJsonExporter()
+		exporter := xjson.NewJSONExporter()
 
 		var buf bytes.Buffer
 
@@ -132,7 +132,7 @@ func TestExport(t *testing.T) {
 	t.Run("null values in maps", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xjson.NewJsonExporter()
+		exporter := xjson.NewJSONExporter()
 
 		var buf bytes.Buffer
 
@@ -153,7 +153,7 @@ func TestExport(t *testing.T) {
 	t.Run("html escaping enabled", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xjson.NewJsonExporter(xjson.WithEscapeHTML(true))
+		exporter := xjson.NewJSONExporter(xjson.WithEscapeHTML(true))
 
 		var buf bytes.Buffer
 
@@ -175,7 +175,7 @@ func TestExport(t *testing.T) {
 	t.Run("html escaping disabled", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xjson.NewJsonExporter(xjson.WithEscapeHTML(false))
+		exporter := xjson.NewJSONExporter(xjson.WithEscapeHTML(false))
 
 		var buf bytes.Buffer
 
@@ -197,7 +197,7 @@ func TestExport(t *testing.T) {
 	t.Run("custom indentation", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xjson.NewJsonExporter(xjson.WithIndentString("\t"))
+		exporter := xjson.NewJSONExporter(xjson.WithIndentString("\t"))
 
 		var buf bytes.Buffer
 
@@ -213,7 +213,7 @@ func TestExport(t *testing.T) {
 	t.Run("unicode characters", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xjson.NewJsonExporter()
+		exporter := xjson.NewJSONExporter()
 
 		var buf bytes.Buffer
 
@@ -231,7 +231,7 @@ func TestExport(t *testing.T) {
 	t.Run("private fields in struct", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xjson.NewJsonExporter()
+		exporter := xjson.NewJSONExporter()
 
 		var buf bytes.Buffer
 

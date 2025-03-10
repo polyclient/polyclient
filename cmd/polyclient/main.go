@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
+// Package main is the main entry point for the PolyClient CLI.
 package main
 
 import (
@@ -9,7 +10,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path"
 
 	pCli "github.com/polyclient/polyclient/cli"
 	"github.com/polyclient/polyclient/internal/env"
@@ -20,7 +20,7 @@ import (
 
 // main initializes and runs the PolyClient CLI application.
 func main() {
-	if err := setupUserEnvironment(); err != nil {
+	if err := env.Setup(); err != nil {
 		log.Fatal("Error setting up environment:", err)
 	}
 
@@ -39,7 +39,7 @@ func main() {
 			pCli.NewVersionCommand(),
 			pCli.NewDatabaseCommand(pr),
 			pCli.NewPluginCommand(pr),
-			pCli.NewGuiCommand(),
+			pCli.NewGUICommand(),
 		},
 	}
 
@@ -48,40 +48,9 @@ func main() {
 	}
 }
 
-// setupUserEnvironment sets up the environment for PolyClient by creating the
-// necessary config directories and setting the environment variables.
-func setupUserEnvironment() error {
-	if version.Version() == "dev" {
-		return nil
-	}
-
-	userConfigDir, err := os.UserConfigDir()
-	if err != nil {
-		return fmt.Errorf("failed to determine config directory: %w", err)
-	}
-
-	polyClientDir := path.Join(userConfigDir, ".polyclient")
-	os.Setenv(env.EnvVarPolyClientDir, polyClientDir)
-	os.Setenv(env.EnvVarPolyClientPluginsDir, path.Join(polyClientDir, "plugins"))
-	os.Setenv(env.EnvVarPolyClientSettingsFile, path.Join(polyClientDir, "settings.json"))
-	os.Setenv(env.EnvVarPolyClientKeymapFile, path.Join(polyClientDir, "keymap.json"))
-
-	const dirPerm = 0755
-
-	if err := os.MkdirAll(polyClientDir, dirPerm); err != nil {
-		return fmt.Errorf("failed to create config directory: %w", err)
-	}
-
-	if err := os.MkdirAll(path.Join(polyClientDir, "plugins"), dirPerm); err != nil {
-		return fmt.Errorf("failed to create plugins directory: %w", err)
-	}
-
-	return nil
-}
-
 // loadBuiltinPlugins loads the built-in PolyClient plugins into the plugin registry.
 // The built-in plugins are loaded from the POLYCLIENT_PLUGINS_DIR environment variable.
-func loadPlugins() (*plugin.PluginRegistry, error) {
+func loadPlugins() (*plugin.Registry, error) {
 	lookupPaths := []string{}
 
 	if version.Version() == "dev" {

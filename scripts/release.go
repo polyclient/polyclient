@@ -37,9 +37,8 @@ func main() {
 
 	if err := cmd.Run(); err != nil {
 		log.Fatalf("❌ Error creating tag: %v\n", err)
-	} else {
-		log.Printf("✅ Tag %s created successfully\n", tag)
 	}
+	log.Printf("✅ Tag %s created successfully\n", tag)
 
 	cmd = exec.Command("git", "push", "origin", tag)
 	cmd.Stdout = os.Stdout
@@ -47,7 +46,6 @@ func main() {
 
 	if err := cmd.Run(); err != nil {
 		log.Fatalf("❌ Error pushing tag: %v\n", err)
-	} else {
-		log.Printf("✅ Tag %s pushed successfully\n", tag)
 	}
+	log.Printf("✅ Tag %s pushed successfully\n", tag)
 }

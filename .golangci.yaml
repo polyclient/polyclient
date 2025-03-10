@@ -5,62 +5,52 @@ run:
 linters:
   disable-all: true
   enable:
-    - asasalint
-    - asciicheck
-    - bidichk
-    - bodyclose
-    - dupword
-    - durationcheck
-    - errcheck
-    - errname
-    - copyloopvar
-    - fatcontext
-    - forbidigo
-    - gocognit
-    - goconst
-    - gocritic
-    - gocyclo
-    - godot
-    - godox
-    - gofmt
-    - gomodguard
-    - goprintffuncname
-    - gosec
-    - gosimple
-    - gosmopolitan
-    - govet
-    - importas
-    - importas
-    - inamedparam
-    - ineffassign
-    - interfacebloat
-    - loggercheck
-    - maintidx
-    - mirror
-    - misspell
-    - mnd
-    - nakedret
-    - nestif
-    - nilerr
-    - nilnil
-    - noctx
-    - nolintlint
-    - paralleltest
-    - perfsprint
-    - prealloc
-    - sqlclosecheck
-    - staticcheck
-    - tagalign
-    - typecheck
-    - unconvert
-    - unparam
-    - unused
-    - usestdlibvars
-    - wastedassign
-    - whitespace
-    - wsl
+    # Primary linter
+    - revive # Main linter for style, naming, and best practices
+
+    # Critical safety and correctness
+    - govet # Reports suspicious constructs
+    - staticcheck # Advanced static analysis
+    - gosec # Security-related checks
+
+    # Code quality
+    - gocognit # Cognitive complexity
+    - nilnil # Checks for redundant nil checks
+    - nilerr # Finds incorrect error handling
+    - noctx # Finds sending HTTP requests without context
+
+    # Performance and efficiency
+    - bodyclose # Ensures HTTP response bodies are closed
+    - prealloc # Finds slice preallocation opportunities
+    - perfsprint # Performance optimizations for string operations
+
+    # Code cleanliness
+    - gofmt # Standard formatting
+    - whitespace # Whitespace issues
+    - misspell # Spelling mistakes
+    - godot # Dot in comments
+
+    # Modern Go practices
+    - gomodguard # Module usage rules
+    - wastedassign # Find wasted assignments
+    - unused # Find unused code
+
+    # Context and concurrency
+    - fatcontext # Finds inappropriate context usage
+    - copyloopvar # Prevents common loop variable capture issues
+
+    # Testing
+    - predeclared # Prevent shadowing of built-in identifiers
+    - thelper # Test helper functions
+    - tparallel # Test parallelization checks
 
 issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  include:
+    - EXC0013 # exported type without comment
+    - EXC0014 # exported function without comment
   exclude-rules:
     - path: _test\.go
       linters:
@@ -71,6 +61,199 @@ issues:
         - noctx
 
 linters-settings:
+  revive:
+    severity: error
+    confidence: 0.8
+    rules:
+      - name: line-length-limit
+        arguments: [200]
+      - name: var-naming
+        arguments:
+          [
+            [],
+            [
+              "AES",
+              "API",
+              "ASCII",
+              "AWS",
+              "BOM",
+              "CLI",
+              "CPU",
+              "CSS",
+              "CSV",
+              "DNS",
+              "DOM",
+              "DOML",
+              "EOF",
+              "FTP",
+              "GUI",
+              "HTML",
+              "HTTP",
+              "HTTP",
+              "HTTPS",
+              "ID",
+              "IDE",
+              "IP",
+              "IPv4",
+              "IPv6",
+              "IRC",
+              "ISO",
+              "JPEG",
+              "JSON",
+              "JWT",
+              "KPI",
+              "LDAP",
+              "MAC",
+              "MD5",
+              "MIME",
+              "MVC",
+              "NTP",
+              "OAuth",
+              "PCI",
+              "PDF",
+              "PNG",
+              "REST",
+              "RSA",
+              "S3",
+              "SAML",
+              "SHA",
+              "SMTP",
+              "SOAP",
+              "SQL",
+              "SQL",
+              "SSH",
+              "SSH",
+              "SSL",
+              "TCP",
+              "TLS",
+              "TOML",
+              "TSV",
+              "UDP",
+              "UI",
+              "UID",
+              "UIX",
+              "URI",
+              "URL",
+              "UTF8",
+              "UUID",
+              "VPN",
+              "Wasm",
+              "WebGL",
+              "WebRTC",
+              "WebSocket",
+              "WebWorker",
+              "XML",
+              "XML",
+              "XSS",
+              "YAML",
+              "ZIP",
+            ],
+          ]
+      - name: package-comments
+      - name: dot-imports
+      - name: duplicated-imports
+      - name: blank-imports
+      - name: exported
+        arguments:
+          - "checkPrivateReceivers"
+          - "disableStutteringCheck"
+          - "checkPublicInterface"
+          - "disableChecksOnFunctions"
+      - name: receiver-naming
+      - name: increment-decrement
+      - name: indent-error-flow
+      - name: empty-lines
+      - name: early-return
+      - name: filename-format
+        arguments:
+          - "^[_a-z][_a-z0-9]*\\.go$" # Override the default pattern to forbid .go files with uppercase letters and dashes.
+      # - name: file-header
+      #   arguments:
+      #     - |
+      #       // SPDX-FileCopyrightText: 2025 The PolyClient Authors
+      #       //
+      #       // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
+      - name: confusing-naming
+      - name: confusing-results
+      - name: function-length
+        arguments: [50, 0] # max lines in function, max lines in method
+      - name: empty-block
+        arguments:
+          - "if"
+          - "else"
+          - "for"
+          - "switch"
+      - name: superfluous-else
+      - name: unused-parameter
+      - name: unused-receiver
+      - name: unreachable-code
+      - name: error-naming # Error variables should be prefixed with 'err'
+      - name: error-return # Errors should be the last in the list of returned values
+      - name: error-strings # Error strings should not be capitalized
+      - name: errorf
+      - name: use-errors-new
+      - name: unhandled-error
+        arguments:
+          - "fmt.Printf"
+          - "fmt.Println"
+          - "fmt.Print"
+          - "log.Print"
+          - "log.Printf"
+          - "log.Println"
+          - "strings.Builder.WriteString"
+          - "file.Close"
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: enforce-map-style
+        arguments: ["literal"]
+      - name: enforce-slice-style
+        arguments: ["literal"]
+      - name: enforce-repeated-arg-type-style
+        arguments: ["short"]
+      - name: var-declaration # Prevents redundant var declarations
+      - name: time-naming # Enforces time unit suffix in variable names
+      - name: use-any
+      - name: identical-branches
+      - name: if-return
+      - name: increment-decrement
+      - name: indent-error-flow
+      - name: unexported-return # Warns when unexported type is returned from exported function
+      - name: unexported-naming # Warns on wrongly named unexported symbols
+      - name: atomic # Ensures atomic operation safety
+      - name: waitgroup-by-value # Ensures WaitGroup is not passed by value
+      - name: bool-literal-in-expr # Warns against direct boolean comparisons
+      - name: constant-logical-expr # Finds constant logical expressions
+      - name: datarace # Potential data races caused by goroutines
+      - name: deep-exit # Prevents deep returns/breaks/continues
+      - name: defer # Warns about defer usage issues
+      - name: flag-parameter # Discourages boolean parameters
+      - name: import-shadowing # Prevents import aliases shadowing other names
+      - name: modifies-parameter # Warns when a function modifies its parameters
+      - name: modifies-value-receiver # Warns when a method modifies its value receiver
+      - name: range
+      - name: range-val-in-closure # Prevents common range variable capture issues
+      - name: range-val-address # Prevents common range variable address issues
+      - name: string-format # Consistent string formatting
+      - name: struct-tag # Validates struct tags
+      - name: unconditional-recursion # Detects infinite recursion
+      - name: unnecessary-stmt # Detects unnecessary statements
+      - name: useless-break # Detects useless break statements
+      - name: comment-spacings # Consistent comment spacing
+      - name: cyclomatic # Cyclomatic complexity
+        arguments: [15]
+
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - hugeParam # Can be too strict
+      - rangeExprCopy # Often not worth the complexity
+      - rangeValCopy # Often not worth the complexity
+
   mnd:
     checks:
       - argument
@@ -78,5 +261,6 @@ linters-settings:
       - condition
       - operation
       - return
+
   misspell:
     locale: "US"

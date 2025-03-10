@@ -31,16 +31,16 @@ func TestNewHtmlExporter(t *testing.T) {
 	t.Run("default configuration", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xhtml.NewHtmlExporter()
+		exporter := xhtml.NewHTMLExporter()
 		assert.NotNil(t, exporter)
 	})
 
 	t.Run("custom configuration", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xhtml.NewHtmlExporter(
+		exporter := xhtml.NewHTMLExporter(
 			xhtml.WithDateFormat("2006-01-02"),
-			xhtml.WithUseCss(false),
+			xhtml.WithUseCSS(false),
 		)
 		assert.NotNil(t, exporter)
 	})
@@ -52,7 +52,7 @@ func TestExport(t *testing.T) {
 	t.Run("nil writer", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xhtml.NewHtmlExporter()
+		exporter := xhtml.NewHTMLExporter()
 		err := exporter.Export(nil, []string{"data"})
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "writer")
@@ -61,7 +61,7 @@ func TestExport(t *testing.T) {
 	t.Run("invalid input - non-slice", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xhtml.NewHtmlExporter()
+		exporter := xhtml.NewHTMLExporter()
 
 		var buf bytes.Buffer
 		err := exporter.Export(&buf, "not a slice")
@@ -71,7 +71,7 @@ func TestExport(t *testing.T) {
 	t.Run("empty slice", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xhtml.NewHtmlExporter()
+		exporter := xhtml.NewHTMLExporter()
 
 		var buf bytes.Buffer
 		err := exporter.Export(&buf, []string{})
@@ -82,7 +82,7 @@ func TestExport(t *testing.T) {
 	t.Run("slice of structs", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xhtml.NewHtmlExporter()
+		exporter := xhtml.NewHTMLExporter()
 
 		var buf bytes.Buffer
 
@@ -111,7 +111,7 @@ func TestExport(t *testing.T) {
 	t.Run("slice of maps", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xhtml.NewHtmlExporter()
+		exporter := xhtml.NewHTMLExporter()
 
 		var buf bytes.Buffer
 
@@ -135,7 +135,7 @@ func TestExport(t *testing.T) {
 	t.Run("slice of primitive types", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xhtml.NewHtmlExporter()
+		exporter := xhtml.NewHTMLExporter()
 
 		var buf bytes.Buffer
 
@@ -156,7 +156,7 @@ func TestExport(t *testing.T) {
 	t.Run("null values in maps", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xhtml.NewHtmlExporter()
+		exporter := xhtml.NewHTMLExporter()
 
 		var buf bytes.Buffer
 
@@ -177,7 +177,7 @@ func TestExport(t *testing.T) {
 	t.Run("html escaping enabled", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xhtml.NewHtmlExporter()
+		exporter := xhtml.NewHTMLExporter()
 
 		var buf bytes.Buffer
 
@@ -198,7 +198,7 @@ func TestExport(t *testing.T) {
 	t.Run("unicode characters", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xhtml.NewHtmlExporter()
+		exporter := xhtml.NewHTMLExporter()
 
 		var buf bytes.Buffer
 
@@ -220,7 +220,7 @@ func TestExport(t *testing.T) {
 	t.Run("private fields in struct", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xhtml.NewHtmlExporter()
+		exporter := xhtml.NewHTMLExporter()
 
 		var buf bytes.Buffer
 
@@ -241,7 +241,7 @@ func TestExport(t *testing.T) {
 	t.Run("css disabled", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xhtml.NewHtmlExporter(xhtml.WithUseCss(false))
+		exporter := xhtml.NewHTMLExporter(xhtml.WithUseCSS(false))
 
 		var buf bytes.Buffer
 
@@ -260,7 +260,7 @@ func TestExport(t *testing.T) {
 	t.Run("custom date format", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xhtml.NewHtmlExporter(xhtml.WithDateFormat("2006-01-02"))
+		exporter := xhtml.NewHTMLExporter(xhtml.WithDateFormat("2006-01-02"))
 
 		var buf bytes.Buffer
 
