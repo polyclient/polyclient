@@ -25,7 +25,6 @@ type JsonExporter struct {
 type JsonExporterOption func(*JsonExporter)
 
 // WithIndentString sets the indentation string for JsonExporter.
-// Common values are "  " (two spaces) or "\t" (tab).
 func WithIndentString(indent string) JsonExporterOption {
 	return func(ex *JsonExporter) {
 		ex.IndentString = indent
@@ -33,7 +32,6 @@ func WithIndentString(indent string) JsonExporterOption {
 }
 
 // WithEscapeHTML sets whether to escape HTML characters in JsonExporter.
-// When true, &, <, and > are escaped to \u0026, \u003c, and \u003e respectively.
 func WithEscapeHTML(escape bool) JsonExporterOption {
 	return func(ex *JsonExporter) {
 		ex.EscapeHTML = escape
@@ -54,27 +52,19 @@ func NewJsonExporter(opts ...JsonExporterOption) *JsonExporter {
 	return ex
 }
 
-// Export writes the provided data to the given writer in JSON format.
-// The data can be any JSON-serializable type, including:
-// - structs (exported fields only)
-// - maps with string keys
-// - slices and arrays
-// - primitive types
-// Returns an error if:
-// - writer is nil
-// - data cannot be marshaled to JSON
-// - writing to the writer fails.
+// Export writes a slice to JSON, supporting primitive types, structs, and maps.
 func (ex *JsonExporter) Export(w io.Writer, data any) error {
 	if w == nil {
 		return errors.New("writer cannot be nil")
 	}
 
-	if data == nil {
+	v := reflect.ValueOf(data)
+
+	if !v.IsValid() || (v.Kind() == reflect.Pointer && v.IsNil()) {
 		return errors.New("data cannot be nil")
 	}
 
-	// Handle empty slices specially to ensure consistent output
-	v := reflect.ValueOf(data)
+	// Handle empty slices explicitly to ensure consistent output
 	if v.Kind() == reflect.Slice && v.Len() == 0 {
 		_, err := w.Write([]byte("[]\n"))
 		return err
