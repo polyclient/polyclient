@@ -1,66 +1,68 @@
 run:
-  concurrency: 4
-  timeout: "5m"
+  allow-parallel-runners: true
+  timeout: 5m
 
 linters:
   disable-all: true
   enable:
-    # Primary linter
-    - revive # Main linter for style, naming, and best practices
+    # General
+    - goheader # https://golangci-lint.run/usage/linters/#goheader
+    - revive # https://golangci-lint.run/usage/linters/#revive
 
     # Critical safety and correctness
-    - govet # Reports suspicious constructs
-    - staticcheck # Advanced static analysis
-    - gosec # Security-related checks
+    - gosec # https://golangci-lint.run/usage/linters/#gosec
+    - govet # https://golangci-lint.run/usage/linters/#govet
+    - staticcheck # https://golangci-lint.run/usage/linters/#staticcheck
+    - gocritic # https://golangci-lint.run/usage/linters/#gocritic
 
     # Code quality
-    - gocognit # Cognitive complexity
-    - nilnil # Checks for redundant nil checks
-    - nilerr # Finds incorrect error handling
-    - noctx # Finds sending HTTP requests without context
+    - gocognit # https://golangci-lint.run/usage/linters/#gocognit
+    - nilerr # https://golangci-lint.run/usage/linters/#nilerr
+    - nilnil # https://golangci-lint.run/usage/linters/#nilnil
+    - noctx # https://golangci-lint.run/usage/linters/#noctx
+    - unconvert # https://golangci-lint.run/usage/linters/#unconvert
 
     # Performance and efficiency
-    - bodyclose # Ensures HTTP response bodies are closed
-    - prealloc # Finds slice preallocation opportunities
-    - perfsprint # Performance optimizations for string operations
+    - bodyclose # https://golangci-lint.run/usage/linters/#bodyclose
+    - perfsprint # https://golangci-lint.run/usage/linters/#perfsprint
+    - prealloc # https://golangci-lint.run/usage/linters/#prealloc
 
     # Code cleanliness
-    - gofmt # Standard formatting
-    - whitespace # Whitespace issues
-    - misspell # Spelling mistakes
-    - godot # Dot in comments
+    - godot # https://golangci-lint.run/usage/linters/#godot
+    - godox # https://golangci-lint.run/usage/linters/#godox
+    - gofmt # https://golangci-lint.run/usage/linters/#gofmt
+    - gosimple # https://golangci-lint.run/usage/linters/#gosimple
+    - grouper # https://golangci-lint.run/usage/linters/#grouper
+    - dupword # https://golangci-lint.run/usage/linters/#dupword
+    - mnd # https://golangci-lint.run/usage/linters/#mnd
+    - whitespace # https://golangci-lint.run/usage/linters/#whitespace
+    - wsl # https://golangci-lint.run/usage/linters/#wsl
 
     # Modern Go practices
-    - gomodguard # Module usage rules
-    - wastedassign # Find wasted assignments
-    - unused # Find unused code
+    - gomodguard # https://golangci-lint.run/usage/linters/#gomodguard
+    - wastedassign # https://golangci-lint.run/usage/linters/#wastedassign
 
     # Context and concurrency
-    - fatcontext # Finds inappropriate context usage
-    - copyloopvar # Prevents common loop variable capture issues
+    - copyloopvar # https://golangci-lint.run/usage/linters/#copyloopvar
+    - fatcontext # https://golangci-lint.run/usage/linters/#fatcontext
 
     # Testing
-    - predeclared # Prevent shadowing of built-in identifiers
-    - thelper # Test helper functions
-    - tparallel # Test parallelization checks
-
-issues:
-  exclude-use-default: false
-  max-issues-per-linter: 0
-  max-same-issues: 0
-  include:
-    - EXC0013 # exported type without comment
-    - EXC0014 # exported function without comment
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - gocritic
-        - gocyclo
-        - gosec
-        - govet
-        - noctx
+    - predeclared # https://golangci-lint.run/usage/linters/#predeclared
+    - testifylint # https://golangci-lint.run/usage/linters/#testifylint
+    - testpackage # https://golangci-lint.run/usage/linters/#testpackage
+    - thelper # https://golangci-lint.run/usage/linters/#thelper
+    - tparallel # https://golangci-lint.run/usage/linters/#tparallel
 
 linters-settings:
+  goheader:
+    values:
+      regexp:
+        copyright-holder: "{{mod-year}} The PolyClient Authors"
+    template: |-
+      SPDX-FileCopyrightText: {{copyright-holder}}
+
+      SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
+
   revive:
     severity: error
     confidence: 0.8
@@ -75,6 +77,7 @@ linters-settings:
               "AES",
               "API",
               "ASCII",
+              "AST",
               "AWS",
               "BOM",
               "CLI",
@@ -103,6 +106,7 @@ linters-settings:
               "JWT",
               "KPI",
               "LDAP",
+              "LSP",
               "MAC",
               "MD5",
               "MIME",
@@ -167,12 +171,6 @@ linters-settings:
       - name: filename-format
         arguments:
           - "^[_a-z][_a-z0-9]*\\.go$" # Override the default pattern to forbid .go files with uppercase letters and dashes.
-      # - name: file-header
-      #   arguments:
-      #     - |
-      #       // SPDX-FileCopyrightText: 2025 The PolyClient Authors
-      #       //
-      #       // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
       - name: confusing-naming
       - name: confusing-results
       - name: function-length
@@ -261,6 +259,44 @@ linters-settings:
       - condition
       - operation
       - return
+      - assign
+    ignored-functions:
+      - '^math\.'
+      - '^http\.StatusText$'
+      - '^os\.Mkdir$'
+      - '^os\.MkdirAll$'
+      - '^os\.Chmod$'
+      - '^os\.OpenFile$'
+      - '^os\.WriteFile$'
+      - '^os\.Lstat$'
+      - '^os\.Stat$'
+      - '^os\.Fchmod$'
+      - '^os\.Fchmodat$'
+      - '^syscall\.Mkfifo$'
+      - '^syscall\.Mknod$'
+      - '^syscall\.Open$'
+      - '^syscall\.Fchmod$'
+      - '^ioutil\.WriteFile$'
 
-  misspell:
-    locale: "US"
+  whitespace:
+    multi-if: true
+    multi-func: true
+
+  wsl:
+    allow-cuddle-declarations: true
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  include:
+    - EXC0013 # exported type without comment
+    - EXC0014 # exported function without comment
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gocritic
+        - gocyclo
+        - gosec
+        - govet
+        - noctx

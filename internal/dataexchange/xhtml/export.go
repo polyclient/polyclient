@@ -14,7 +14,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/polyclient/polyclient/pkg/stringify"
+	"github.com/polyclient/polyclient/internal/stringutil"
 )
 
 // HTMLExporter is a data exporter for HTML format.
@@ -37,8 +37,8 @@ func WithDateFormat(format string) HTMLExporterOption {
 	}
 }
 
-// WithUseCSS sets whether to use default styles in the HTML output.
-func WithUseCSS(useCSS bool) HTMLExporterOption {
+// WithCSS sets whether to use default CSS styles in the HTML output.
+func WithCSS(useCSS bool) HTMLExporterOption {
 	return func(opts *HTMLExporter) {
 		opts.UseCSS = useCSS
 	}
@@ -92,6 +92,7 @@ func (ex *HTMLExporter) formatSlice(v reflect.Value) (*HTMLTemplateData, error) 
 	switch first.(type) {
 	case map[string]any:
 		return ex.formatMapSlice(v)
+
 	default:
 		if v.Index(0).Kind() == reflect.Struct {
 			return ex.formatStructSlice(v)
@@ -120,9 +121,9 @@ func (ex *HTMLExporter) formatMapSlice(v reflect.Value) (*HTMLTemplateData, erro
 		row := make([]string, len(parsed.Headers))
 
 		for j, header := range parsed.Headers {
-			row[j] = stringify.Stringify(record[header],
-				stringify.WithDateFormat(ex.DateFormat),
-				stringify.WithCustomFormatter(sanitizeHTML),
+			row[j] = stringutil.Stringify(record[header],
+				stringutil.WithDateFormat(ex.DateFormat),
+				stringutil.WithCustomFormatter(sanitizeHTML),
 			)
 		}
 
@@ -154,9 +155,9 @@ func (ex *HTMLExporter) formatStructSlice(v reflect.Value) (*HTMLTemplateData, e
 		for j, header := range parsed.Headers {
 			field := value.FieldByName(header)
 			if field.IsValid() && field.CanInterface() {
-				row[j] = stringify.Stringify(field.Interface(),
-					stringify.WithDateFormat(ex.DateFormat),
-					stringify.WithCustomFormatter(sanitizeHTML),
+				row[j] = stringutil.Stringify(field.Interface(),
+					stringutil.WithDateFormat(ex.DateFormat),
+					stringutil.WithCustomFormatter(sanitizeHTML),
 				)
 			} else {
 				row[j] = ""
@@ -178,9 +179,9 @@ func (ex *HTMLExporter) formatSingleColumnSlice(v reflect.Value) (*HTMLTemplateD
 
 	for i := range v.Len() {
 		parsed.Rows = append(parsed.Rows, []string{
-			stringify.Stringify(v.Index(i).Interface(),
-				stringify.WithDateFormat(ex.DateFormat),
-				stringify.WithCustomFormatter(sanitizeHTML),
+			stringutil.Stringify(v.Index(i).Interface(),
+				stringutil.WithDateFormat(ex.DateFormat),
+				stringutil.WithCustomFormatter(sanitizeHTML),
 			),
 		})
 	}

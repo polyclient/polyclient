@@ -11,8 +11,8 @@ import (
 	"io"
 	"os"
 
+	"github.com/polyclient/polyclient/internal/dataexchange"
 	"github.com/polyclient/polyclient/internal/runtime/plugin"
-	"github.com/polyclient/polyclient/pkg/dataexchange"
 	"github.com/urfave/cli/v3"
 )
 
@@ -38,6 +38,7 @@ func NewDatabaseCommand(pr *plugin.Registry) *cli.Command {
 // newQueryCommand returns a new query command that can be used to query a database from the CLI.
 func newQueryCommand(pr *plugin.Registry) *cli.Command {
 	outputFormats := dataexchange.GetSupportedExportFormats()
+
 	return &cli.Command{
 		Name:  "query",
 		Usage: "Execute a query against a database (SQL or NoSQL)",

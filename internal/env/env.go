@@ -42,23 +42,24 @@ func Setup() error {
 	if err := os.Setenv(EnvVarPolyClientDir, polyClientDir); err != nil {
 		return fmt.Errorf("failed to set PolyClient directory: %w", err)
 	}
+
 	if err := os.Setenv(EnvVarPolyClientPluginsDir, path.Join(polyClientDir, "plugins")); err != nil {
 		return fmt.Errorf("failed to set plugins directory: %w", err)
 	}
+
 	if err := os.Setenv(EnvVarPolyClientSettingsFile, path.Join(polyClientDir, "settings.json")); err != nil {
 		return fmt.Errorf("failed to set settings file path: %w", err)
 	}
+
 	if err := os.Setenv(EnvVarPolyClientKeymapFile, path.Join(polyClientDir, "keymap.json")); err != nil {
 		return fmt.Errorf("failed to set keymap file path: %w", err)
 	}
 
-	const dirPerm = 0755
-
-	if err := os.MkdirAll(polyClientDir, dirPerm); err != nil {
+	if err := os.MkdirAll(polyClientDir, 0o750); err != nil {
 		return fmt.Errorf("failed to create config directory: %w", err)
 	}
 
-	if err := os.MkdirAll(path.Join(polyClientDir, "plugins"), dirPerm); err != nil {
+	if err := os.MkdirAll(path.Join(polyClientDir, "plugins"), 0o750); err != nil {
 		return fmt.Errorf("failed to create plugins directory: %w", err)
 	}
 

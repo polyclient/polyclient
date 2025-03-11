@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 The PolyClient Authors
+//
+// SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
+
 package main
 
 import (
@@ -38,6 +42,7 @@ func main() {
 	if err := cmd.Run(); err != nil {
 		log.Fatalf("❌ Error creating tag: %v\n", err)
 	}
+
 	log.Printf("✅ Tag %s created successfully\n", tag)
 
 	cmd = exec.Command("git", "push", "origin", tag)
@@ -47,5 +52,6 @@ func main() {
 	if err := cmd.Run(); err != nil {
 		log.Fatalf("❌ Error pushing tag: %v\n", err)
 	}
+
 	log.Printf("✅ Tag %s pushed successfully\n", tag)
 }

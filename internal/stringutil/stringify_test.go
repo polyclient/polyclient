@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
-package stringify_test
+package stringutil_test
 
 import (
 	"errors"
@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/go-playground/assert/v2"
-	"github.com/polyclient/polyclient/pkg/stringify"
+	"github.com/polyclient/polyclient/internal/stringutil"
 	"github.com/polyclient/polyclient/test/mocks"
 )
 
@@ -23,7 +23,7 @@ func TestStringify(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    any
-		opts     []stringify.Option
+		opts     []stringutil.StringifyOption
 		expected string
 	}{
 		{
@@ -54,19 +54,19 @@ func TestStringify(t *testing.T) {
 		{
 			name:     "time.Time with RFC3339",
 			input:    mockTime,
-			opts:     []stringify.Option{stringify.WithDateFormat(time.RFC3339)},
+			opts:     []stringutil.StringifyOption{stringutil.WithDateFormat(time.RFC3339)},
 			expected: "2025-03-09T14:30:00Z",
 		},
 		{
 			name:     "time.Time with RFC822",
 			input:    mockTime,
-			opts:     []stringify.Option{stringify.WithDateFormat(time.RFC822)},
+			opts:     []stringutil.StringifyOption{stringutil.WithDateFormat(time.RFC822)},
 			expected: "09 Mar 25 14:30 UTC",
 		},
 		{
 			name:     "*time.Time with RFC3339",
 			input:    &mockTime,
-			opts:     []stringify.Option{stringify.WithDateFormat(time.RFC3339)},
+			opts:     []stringutil.StringifyOption{stringutil.WithDateFormat(time.RFC3339)},
 			expected: "2025-03-09T14:30:00Z",
 		},
 		{
@@ -102,22 +102,22 @@ func TestStringify(t *testing.T) {
 		{
 			name:     "custom nil value",
 			input:    nil,
-			opts:     []stringify.Option{stringify.WithNilValue("N/A")},
+			opts:     []stringutil.StringifyOption{stringutil.WithNilValue("N/A")},
 			expected: "N/A",
 		},
 		{
 			name:  "custom formatter - greeter",
 			input: "Jane",
-			opts: []stringify.Option{
-				stringify.WithCustomFormatter(func(v string) string { return "hello " + v }),
+			opts: []stringutil.StringifyOption{
+				stringutil.WithCustomFormatter(func(v string) string { return "hello " + v }),
 			},
 			expected: "hello Jane",
 		},
 		{
 			name:  "custom formatter - HTML escape",
 			input: "<script>alert('xss')</script>",
-			opts: []stringify.Option{
-				stringify.WithCustomFormatter(html.EscapeString),
+			opts: []stringutil.StringifyOption{
+				stringutil.WithCustomFormatter(html.EscapeString),
 			},
 			expected: "&lt;script&gt;alert(&#39;xss&#39;)&lt;/script&gt;",
 		},
@@ -127,7 +127,7 @@ func TestStringify(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			result := stringify.Stringify(tt.input, tt.opts...)
+			result := stringutil.Stringify(tt.input, tt.opts...)
 			assert.Equal(t, tt.expected, result)
 		})
 	}

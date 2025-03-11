@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
-package stringify
+package stringutil
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ import (
 )
 
 // Config holds configuration options for converting values to strings.
-type Config struct {
+type StringifyConfig struct {
 	// DateFormat specifies the format for time values (default: RFC3339).
 	DateFormat string
 	// CustomFormatter allows specifying a custom conversion function (default: fmt.Sprintf).
@@ -26,8 +26,8 @@ type Config struct {
 }
 
 // DefaultConfig returns the default configuration.
-func DefaultConfig() *Config {
-	return &Config{
+func StringifyDefaultConfig() *StringifyConfig {
+	return &StringifyConfig{
 		DateFormat:      time.RFC3339,
 		CustomFormatter: func(v string) string { return v },
 		NilValue:        "",
@@ -36,33 +36,33 @@ func DefaultConfig() *Config {
 	}
 }
 
-// Option modifies the behavior of the Stringify function.
-type Option func(*Config)
+// StringifyOption modifies the behavior of the Stringify function.
+type StringifyOption func(*StringifyConfig)
 
 // WithDateFormat specifies the format for time values.
-func WithDateFormat(format string) Option {
-	return func(cfg *Config) {
+func WithDateFormat(format string) StringifyOption {
+	return func(cfg *StringifyConfig) {
 		cfg.DateFormat = format
 	}
 }
 
 // WithCustomFormatter allows specifying a custom conversion function.
-func WithCustomFormatter(f func(string) string) Option {
-	return func(cfg *Config) {
+func WithCustomFormatter(f func(string) string) StringifyOption {
+	return func(cfg *StringifyConfig) {
 		cfg.CustomFormatter = f
 	}
 }
 
 // WithNilValue sets the string representation for nil values.
-func WithNilValue(val string) Option {
-	return func(cfg *Config) {
+func WithNilValue(val string) StringifyOption {
+	return func(cfg *StringifyConfig) {
 		cfg.NilValue = val
 	}
 }
 
 // Stringify converts any value to a string, respecting the provided configuration.
-func Stringify(v any, opts ...Option) string {
-	cfg := DefaultConfig()
+func Stringify(v any, opts ...StringifyOption) string {
+	cfg := StringifyDefaultConfig()
 	for _, opt := range opts {
 		opt(cfg)
 	}
@@ -75,7 +75,7 @@ func Stringify(v any, opts ...Option) string {
 }
 
 // stringifyInternal is the internal implementation for string conversion.
-func stringifyInternal(v any, cfg *Config) string {
+func stringifyInternal(v any, cfg *StringifyConfig) string {
 	if v == nil {
 		return cfg.NilValue
 	}
@@ -83,14 +83,17 @@ func stringifyInternal(v any, cfg *Config) string {
 	switch v := v.(type) {
 	case time.Time:
 		return v.Format(cfg.DateFormat)
+
 	case *time.Time:
 		if v == nil {
 			return cfg.NilValue
 		}
 
 		return v.Format(cfg.DateFormat)
+
 	case fmt.Stringer:
 		return v.String()
+
 	case error:
 		return v.Error()
 	}
@@ -113,6 +116,7 @@ func stringifyInternal(v any, cfg *Config) string {
 		b.WriteString(cfg.SliceDelimiters[1])
 
 		return b.String()
+
 	case reflect.Map:
 		var b strings.Builder
 
@@ -135,8 +139,9 @@ func stringifyInternal(v any, cfg *Config) string {
 		b.WriteString(cfg.MapDelimiters[1])
 
 		return b.String()
+
 	case reflect.Chan, reflect.Func, reflect.UnsafePointer:
-		return fmt.Sprintf("%v", rv.Type())
+		return rv.Type().String()
 	}
 
 	return cfg.CustomFormatter(fmt.Sprintf("%v", v))

@@ -14,12 +14,12 @@ import (
 	"sort"
 	"time"
 
-	"github.com/polyclient/polyclient/pkg/stringify"
+	"github.com/polyclient/polyclient/internal/stringutil"
 )
 
 // CSVExporter exports data as CSV.
 type CSVExporter struct {
-	Comma      rune
+	Delimiter  rune
 	UseCRLF    bool
 	DateFormat string
 }
@@ -27,21 +27,25 @@ type CSVExporter struct {
 // CSVExporterOption is a functional option type for configuring a CsvExporter.
 type CSVExporterOption func(*CSVExporter)
 
-func WithComma(comma rune) CSVExporterOption {
-	return func(opts *CSVExporter) { opts.Comma = comma }
+// WithDelimiter sets the delimiter for CSV columns.
+func WithDelimiter(delimiter rune) CSVExporterOption {
+	return func(opts *CSVExporter) { opts.Delimiter = delimiter }
 }
 
+// WithCRLF sets whether to use CRLF for CSV.
 func WithCRLF(useCRLF bool) CSVExporterOption {
 	return func(opts *CSVExporter) { opts.UseCRLF = useCRLF }
 }
 
+// WithDateFormat sets a custom date format for date fields.
 func WithDateFormat(format string) CSVExporterOption {
 	return func(opts *CSVExporter) { opts.DateFormat = format }
 }
 
+// NewCSVExporter creates a new CsvExporter with the specified options.
 func NewCSVExporter(opts ...CSVExporterOption) *CSVExporter {
 	ex := &CSVExporter{
-		Comma:      ',',
+		Delimiter:  ',',
 		UseCRLF:    false,
 		DateFormat: time.RFC3339,
 	}
@@ -74,7 +78,7 @@ func (ex *CSVExporter) Export(w io.Writer, data any) error {
 // formatSlice processes a slice and determines the CSV format.
 func (ex *CSVExporter) formatSlice(w io.Writer, v reflect.Value) error {
 	writer := csv.NewWriter(w)
-	writer.Comma = ex.Comma
+	writer.Comma = ex.Delimiter
 	writer.UseCRLF = ex.UseCRLF
 
 	defer writer.Flush()
@@ -84,6 +88,7 @@ func (ex *CSVExporter) formatSlice(w io.Writer, v reflect.Value) error {
 	switch first.(type) {
 	case map[string]any:
 		return ex.formatMapSlice(writer, v)
+
 	default:
 		if reflect.TypeOf(first).Kind() == reflect.Struct {
 			return ex.formatStructSlice(writer, v)
@@ -113,7 +118,7 @@ func (*CSVExporter) formatMapSlice(w *csv.Writer, v reflect.Value) error {
 		row := make([]string, len(headers))
 
 		for j, header := range headers {
-			row[j] = stringify.Stringify(record[header])
+			row[j] = stringutil.Stringify(record[header])
 		}
 
 		if err := w.Write(row); err != nil {
@@ -152,7 +157,7 @@ func (*CSVExporter) formatStructSlice(w *csv.Writer, v reflect.Value) error {
 		for j, idx := range fieldIndices {
 			field := record.Field(idx)
 			if field.CanInterface() {
-				row[j] = stringify.Stringify(field.Interface())
+				row[j] = stringutil.Stringify(field.Interface())
 			}
 		}
 
@@ -168,7 +173,7 @@ func (*CSVExporter) formatStructSlice(w *csv.Writer, v reflect.Value) error {
 func (*CSVExporter) formatSingleColumnSlice(w *csv.Writer, v reflect.Value) error {
 	rows := make([][]string, v.Len())
 	for i := range v.Len() {
-		rows[i] = []string{stringify.Stringify(v.Index(i).Interface())}
+		rows[i] = []string{stringutil.Stringify(v.Index(i).Interface())}
 	}
 
 	if err := w.WriteAll(rows); err != nil {

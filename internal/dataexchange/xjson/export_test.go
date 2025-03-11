@@ -10,8 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/polyclient/polyclient/pkg/dataexchange/xjson"
+	"github.com/polyclient/polyclient/internal/dataexchange/xjson"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type TestPerson struct {
@@ -55,7 +56,7 @@ func TestExport(t *testing.T) {
 
 		exporter := xjson.NewJSONExporter()
 		err := exporter.Export(nil, []string{"test"})
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("empty slice", func(t *testing.T) {
@@ -66,7 +67,8 @@ func TestExport(t *testing.T) {
 		var buf bytes.Buffer
 
 		err := exporter.Export(&buf, []string{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
+
 		assert.Equal(t, "[]\n", buf.String())
 	})
 
@@ -84,11 +86,13 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		var result []TestPerson
+
 		err = json.Unmarshal(buf.Bytes(), &result)
-		assert.NoError(t, err)
+		require.NoError(t, err)
+
 		assert.Equal(t, data, result)
 	})
 
@@ -105,11 +109,13 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		var result []map[string]any
+
 		err = json.Unmarshal(buf.Bytes(), &result)
-		assert.NoError(t, err)
+		require.NoError(t, err)
+
 		assert.Len(t, result, 2)
 
 		foundAlice := false
@@ -142,11 +148,13 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		var result []map[string]any
+
 		err = json.Unmarshal(buf.Bytes(), &result)
-		assert.NoError(t, err)
+		require.NoError(t, err)
+
 		assert.Equal(t, data, result)
 	})
 
@@ -163,7 +171,7 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, `\u003cscript\u003e`)
@@ -185,7 +193,7 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, "<script>")
@@ -204,7 +212,7 @@ func TestExport(t *testing.T) {
 		data := map[string]string{"key": "value"}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, "\t\"key\":")
@@ -220,11 +228,13 @@ func TestExport(t *testing.T) {
 		data := []string{"🌟", "世界", "über"}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		var result []string
+
 		err = json.Unmarshal(buf.Bytes(), &result)
-		assert.NoError(t, err)
+		require.NoError(t, err)
+
 		assert.Equal(t, data, result)
 	})
 
@@ -240,11 +250,13 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		var result []map[string]any
+
 		err = json.Unmarshal(buf.Bytes(), &result)
-		assert.NoError(t, err)
+		require.NoError(t, err)
+
 		assert.Equal(t, "visible", result[0]["Public"])
 		assert.NotContains(t, result[0], "private")
 	})

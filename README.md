@@ -28,13 +28,6 @@ Refer to the [contributor's guide](CONTRIBUTING.md) for more in-depth informatio
 
 ## License
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpolyclient%2Fpolyclient.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpolyclient%2Fpolyclient?ref=badge_large&issueType=license)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpolyclient%2Fpolyclient.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpolyclient%2Fpolyclient?ref=badge_large&issueType=license)  
 
-This project is distributed under multiple licenses, following the [SPDX](https://spdx.dev/) standard:
-
-- The core is licensed under [GPL-3.0-or-later](LICENSES/GPL-3.0-or-later.txt) with a [Plugin Exception](LICENSES/LicenseRef-PolyClient-Plugin-Exception.txt).  
-- Plugins are licensed under [Apache-2.0](LICENSES/Apache-2.0.txt).  
-- The website and documentation are licensed under [CC-BY-4.0](LICENSES/CC-BY-4.0.txt).  
-- Some configuration files and metadata are licensed under [CC0-1.0](LICENSES/CC0-1.0.txt).  
-
-This project follows the [REUSE Specification](https://reuse.software/) to ensure clear and consistent licensing.
+This project is distributed under multiple licenses following the [SPDX](https://spdx.dev/) standard. The primary codebase is licensed under [GPL-3.0-or-later](LICENSES/GPL-3.0-or-later.txt) with a [Plugin Exception](LICENSES/LicenseRef-PolyClient-Plugin-Exception.txt), while plugins are licensed under [Apache-2.0](LICENSES/Apache-2.0.txt). The website and documentation are licensed under [CC-BY-4.0](LICENSES/CC-BY-4.0.txt). This project follows the [REUSE Specification](https://reuse.software/) to ensure clear and consistent licensing.
