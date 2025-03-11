@@ -9,8 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/polyclient/polyclient/pkg/dataexchange/xcsv"
+	"github.com/polyclient/polyclient/internal/dataexchange/xcsv"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type TestPerson struct {
@@ -39,7 +40,7 @@ func TestNewCsvExporter(t *testing.T) {
 		t.Parallel()
 
 		exporter := xcsv.NewCSVExporter(
-			xcsv.WithComma(';'),
+			xcsv.WithDelimiter(';'),
 			xcsv.WithCRLF(true),
 			xcsv.WithDateFormat("2006-01-02"),
 		)
@@ -55,7 +56,8 @@ func TestExport(t *testing.T) {
 
 		exporter := xcsv.NewCSVExporter()
 		err := exporter.Export(nil, []string{"data"})
-		assert.Error(t, err)
+		require.Error(t, err)
+
 		assert.Contains(t, err.Error(), "writer")
 	})
 
@@ -65,8 +67,9 @@ func TestExport(t *testing.T) {
 		exporter := xcsv.NewCSVExporter()
 
 		var buf bytes.Buffer
+
 		err := exporter.Export(&buf, "not a slice")
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("empty slice", func(t *testing.T) {
@@ -75,8 +78,10 @@ func TestExport(t *testing.T) {
 		exporter := xcsv.NewCSVExporter()
 
 		var buf bytes.Buffer
+
 		err := exporter.Export(&buf, []string{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
+
 		assert.Empty(t, buf.String())
 	})
 
@@ -94,7 +99,7 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, "Name")
@@ -122,7 +127,7 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, "name")
@@ -143,16 +148,16 @@ func TestExport(t *testing.T) {
 		data := []int{1, 2, 3, 4, 5}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Equal(t, "1\n2\n3\n4\n5\n", result)
 	})
 
-	t.Run("custom separator", func(t *testing.T) {
+	t.Run("custom delimiter", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xcsv.NewCSVExporter(xcsv.WithComma(';'))
+		exporter := xcsv.NewCSVExporter(xcsv.WithDelimiter(';'))
 
 		var buf bytes.Buffer
 
@@ -162,12 +167,10 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
-		assert.Contains(t, result, ";")
-		assert.Contains(t, result, "name")
-		assert.Contains(t, result, "age")
+		assert.Equal(t, "age;name\n30;Alice\n25;Bob\n", result)
 	})
 
 	t.Run("CRLF line endings", func(t *testing.T) {
@@ -180,7 +183,7 @@ func TestExport(t *testing.T) {
 		data := []string{"a", "b", "c"}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, "\r\n")
@@ -199,7 +202,7 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, "Alice")
@@ -222,7 +225,7 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, "\"contains,comma\"")
@@ -240,7 +243,7 @@ func TestExport(t *testing.T) {
 		data := []string{"🌟", "世界", "über"}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, "🌟")
@@ -260,7 +263,7 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, "Public")
@@ -282,7 +285,7 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, "Alice")
@@ -300,7 +303,8 @@ func TestExport(t *testing.T) {
 		data := []map[string]any{}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
+
 		assert.Empty(t, buf.String())
 	})
 }

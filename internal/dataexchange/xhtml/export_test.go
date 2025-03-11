@@ -9,8 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/polyclient/polyclient/pkg/dataexchange/xhtml"
+	"github.com/polyclient/polyclient/internal/dataexchange/xhtml"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type TestPerson struct {
@@ -40,7 +41,7 @@ func TestNewHtmlExporter(t *testing.T) {
 
 		exporter := xhtml.NewHTMLExporter(
 			xhtml.WithDateFormat("2006-01-02"),
-			xhtml.WithUseCSS(false),
+			xhtml.WithCSS(false),
 		)
 		assert.NotNil(t, exporter)
 	})
@@ -54,7 +55,8 @@ func TestExport(t *testing.T) {
 
 		exporter := xhtml.NewHTMLExporter()
 		err := exporter.Export(nil, []string{"data"})
-		assert.Error(t, err)
+		require.Error(t, err)
+
 		assert.Contains(t, err.Error(), "writer")
 	})
 
@@ -64,8 +66,9 @@ func TestExport(t *testing.T) {
 		exporter := xhtml.NewHTMLExporter()
 
 		var buf bytes.Buffer
+
 		err := exporter.Export(&buf, "not a slice")
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("empty slice", func(t *testing.T) {
@@ -74,8 +77,10 @@ func TestExport(t *testing.T) {
 		exporter := xhtml.NewHTMLExporter()
 
 		var buf bytes.Buffer
+
 		err := exporter.Export(&buf, []string{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
+
 		assert.Empty(t, buf.String())
 	})
 
@@ -93,7 +98,7 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, "<th>Name</th>")
@@ -121,7 +126,7 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, "<th>name</th>")
@@ -142,7 +147,7 @@ func TestExport(t *testing.T) {
 		data := []int{1, 2, 3, 4, 5}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, "<th>Value</th>")
@@ -166,7 +171,7 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, "<td>Alice</td>")
@@ -187,7 +192,7 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, "&amp;lt;script&amp;gt;")
@@ -209,7 +214,7 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, "🌟")
@@ -229,7 +234,7 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, "<th>Public</th>")
@@ -241,7 +246,7 @@ func TestExport(t *testing.T) {
 	t.Run("css disabled", func(t *testing.T) {
 		t.Parallel()
 
-		exporter := xhtml.NewHTMLExporter(xhtml.WithUseCSS(false))
+		exporter := xhtml.NewHTMLExporter(xhtml.WithCSS(false))
 
 		var buf bytes.Buffer
 
@@ -250,7 +255,7 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.NotContains(t, result, "<style>")
@@ -270,7 +275,7 @@ func TestExport(t *testing.T) {
 		}
 
 		err := exporter.Export(&buf, data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		result := buf.String()
 		assert.Contains(t, result, "2025-03-14")

@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/polyclient/polyclient/pkg/dataexchange"
+	"github.com/polyclient/polyclient/internal/dataexchange"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -67,6 +67,7 @@ func TestParseDataFromBytes_ValidJSON(t *testing.T) {
 
 	parsed, err := dataexchange.ParseDataFromBytes[[]map[string]any](data, dataexchange.FormatJSON)
 	require.NoError(t, err)
+
 	assert.Equal(t, expected, parsed)
 }
 
@@ -78,7 +79,8 @@ func TestParseDataFromBytes_InvalidJSON(t *testing.T) {
 	var zeroValue []map[string]any
 
 	parsed, err := dataexchange.ParseDataFromBytes[[]map[string]any](data, dataexchange.FormatJSON)
-	assert.Error(t, err)
+	require.Error(t, err)
+
 	assert.Equal(t, zeroValue, parsed)
 }
 
@@ -90,6 +92,7 @@ func TestParseDataFromBytes_UnsupportedFormat(t *testing.T) {
 	var zeroValue []map[string]any
 
 	parsed, err := dataexchange.ParseDataFromBytes[[]map[string]any](data, "unsupported")
-	assert.Error(t, err)
+	require.Error(t, err)
+
 	assert.Equal(t, zeroValue, parsed)
 }

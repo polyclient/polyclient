@@ -12,9 +12,9 @@ import (
 	"maps"
 	"slices"
 
-	"github.com/polyclient/polyclient/pkg/dataexchange/xcsv"
-	"github.com/polyclient/polyclient/pkg/dataexchange/xhtml"
-	"github.com/polyclient/polyclient/pkg/dataexchange/xjson"
+	"github.com/polyclient/polyclient/internal/dataexchange/xcsv"
+	"github.com/polyclient/polyclient/internal/dataexchange/xhtml"
+	"github.com/polyclient/polyclient/internal/dataexchange/xjson"
 )
 
 // Format represents supported export formats.
@@ -74,7 +74,7 @@ var registry = map[Format]Entry{
 	FormatTSV: {
 		MIMEType: "text/tab-separated-values",
 		FileExt:  "tsv",
-		Exporter: xcsv.NewCSVExporter(xcsv.WithComma('\t')),
+		Exporter: xcsv.NewCSVExporter(xcsv.WithDelimiter('\t')),
 	},
 	FormatJSON: {
 		MIMEType: "application/json",

@@ -1,6 +1,6 @@
 // SPDX-FileCopyrightText: 2025 The PolyClient Authors
 //
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
 package plugin
 
@@ -187,6 +187,7 @@ func (pr *Registry) UnloadPlugin(id string) error {
 func loadWasmPlugin(m *Manifest, wasmPath string) (*extism.Plugin, error) {
 	ctx := context.Background()
 	cache := wazero.NewCompilationCache()
+
 	defer func() {
 		if err := cache.Close(ctx); err != nil {
 			log.Printf("Error closing cache: %v\n", err)
