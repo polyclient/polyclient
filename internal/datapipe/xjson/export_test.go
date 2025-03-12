@@ -10,16 +10,16 @@ import (
 	"testing"
 	"time"
 
-	"github.com/polyclient/polyclient/internal/dataexchange/xjson"
+	"github.com/polyclient/polyclient/internal/datapipe/xjson"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 type TestPerson struct {
-	Name     string
-	Age      int
-	Active   bool
-	JoinedAt time.Time
+	Name     string    `json:"name"`
+	Age      int       `json:"age"`
+	Active   bool      `json:"active"`
+	JoinedAt time.Time `json:"joined_at"`
 }
 
 type PrivateFieldStruct struct {

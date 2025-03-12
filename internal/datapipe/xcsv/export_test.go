@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/polyclient/polyclient/internal/dataexchange/xcsv"
+	"github.com/polyclient/polyclient/internal/datapipe/xcsv"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

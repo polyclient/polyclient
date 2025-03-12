@@ -68,7 +68,13 @@ func ValidateManifest(m *Manifest) error {
 // LoadManifest reads and validates a plugin manifest from the
 // specified file path.
 func LoadManifest(path string) (*Manifest, error) {
-	data, err := os.ReadFile(path)
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return nil, fmt.Errorf("invalid manifest path: %w", err)
+	}
+
+	data, err := os.ReadFile(absPath)
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to load manifest: %w", err)
 	}
@@ -146,7 +152,7 @@ func FindManifestPaths(lookupPath string) ([]string, error) {
 		return nil
 	})
 	if err != nil || len(foundPaths) == 0 {
-		return []string{}, fmt.Errorf("failed to find plugins manifests in %s", err)
+		return []string{}, fmt.Errorf("failed to find plugins manifests in %v: %w", lookupPath, err)
 	}
 
 	return foundPaths, nil

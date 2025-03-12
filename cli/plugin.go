@@ -7,7 +7,7 @@ package cli
 import (
 	"context"
 
-	"github.com/polyclient/polyclient/internal/runtime/plugin"
+	"github.com/polyclient/polyclient/internal/plugin"
 	"github.com/urfave/cli/v3"
 )
 
