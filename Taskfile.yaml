@@ -35,6 +35,8 @@ tasks:
     desc: Build the plugins for WASM target
     cmds:
       - GOOS=wasip1 GOARCH=wasm go build -buildmode=c-shared -o ./plugins/sqlite/sqlite-plugin.wasm ./plugins/sqlite/main.go
+      - mkdir -p .polyclientdev/plugins/sqlite
+      - cp ./plugins/sqlite/manifest.json ./plugins/sqlite/sqlite-plugin.wasm .polyclientdev/plugins/sqlite/
 
   release:
     desc: Create a new release (e.g., task release 0.1.0-beta.1)

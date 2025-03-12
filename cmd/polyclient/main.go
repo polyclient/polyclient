@@ -13,14 +13,14 @@ import (
 
 	pCli "github.com/polyclient/polyclient/cli"
 	"github.com/polyclient/polyclient/internal/env"
-	"github.com/polyclient/polyclient/internal/runtime/plugin"
+	"github.com/polyclient/polyclient/internal/plugin"
 	"github.com/polyclient/polyclient/internal/version"
 	"github.com/urfave/cli/v3"
 )
 
 // main initializes and runs the PolyClient CLI application.
 func main() {
-	if err := env.Setup(); err != nil {
+	if err := env.GetEnvManager().Setup(); err != nil {
 		log.Fatal("Error setting up environment:", err)
 	}
 
@@ -51,13 +51,12 @@ func main() {
 // loadBuiltinPlugins loads the built-in PolyClient plugins into the plugin registry.
 // The built-in plugins are loaded from the POLYCLIENT_PLUGINS_DIR environment variable.
 func loadPlugins() (*plugin.Registry, error) {
-	lookupPaths := []string{}
-
-	if version.Version() == "dev" {
-		lookupPaths = append(lookupPaths, "plugins")
-	} else {
-		lookupPaths = append(lookupPaths, os.Getenv(env.EnvVarPolyClientPluginsDir))
+	pluginsDir, err := env.GetEnvManager().Get(env.EnvPolyClientPluginsDir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get PolyClient plugins directory: %w", err)
 	}
+
+	lookupPaths := []string{pluginsDir}
 
 	pr := plugin.NewPluginRegistry(lookupPaths)
 

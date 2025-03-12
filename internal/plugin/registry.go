@@ -114,7 +114,7 @@ func (pr *Registry) LoadPlugins() error {
 	for _, lookupDir := range pr.lookupDirs {
 		manifestPaths, err := FindManifestPaths(lookupDir)
 		if err != nil {
-			return fmt.Errorf("failed to load plugins: %s", err)
+			return fmt.Errorf("failed to load plugins: %w", err)
 		}
 
 		for _, manifestPath := range manifestPaths {
@@ -211,7 +211,7 @@ func loadWasmPlugin(m *Manifest, wasmPath string) (*extism.Plugin, error) {
 
 	plugin, err := extism.NewPlugin(ctx, manifest, config, []extism.HostFunction{})
 	if err != nil {
-		return nil, fmt.Errorf("failed to load Wasm plugin: %v", err)
+		return nil, fmt.Errorf("failed to load Wasm plugin: %w", err)
 	}
 
 	return plugin, nil

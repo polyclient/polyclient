@@ -11,8 +11,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/polyclient/polyclient/internal/dataexchange"
-	"github.com/polyclient/polyclient/internal/runtime/plugin"
+	"github.com/polyclient/polyclient/internal/datapipe"
+	"github.com/polyclient/polyclient/internal/plugin"
 	"github.com/urfave/cli/v3"
 )
 
@@ -37,7 +37,7 @@ func NewDatabaseCommand(pr *plugin.Registry) *cli.Command {
 
 // newQueryCommand returns a new query command that can be used to query a database from the CLI.
 func newQueryCommand(pr *plugin.Registry) *cli.Command {
-	outputFormats := dataexchange.GetSupportedExportFormats()
+	exportFormats := datapipe.GetAvailableExportFormats()
 
 	return &cli.Command{
 		Name:  "query",
@@ -51,14 +51,14 @@ func newQueryCommand(pr *plugin.Registry) *cli.Command {
 			},
 			&cli.StringFlag{
 				Name:        "output",
-				Usage:       fmt.Sprintf("Output format (%s)", outputFormats),
+				Usage:       fmt.Sprintf("Output format (%s)", exportFormats),
 				Aliases:     []string{"o"},
 				Value:       "json",
 				DefaultText: "json",
 				Validator: func(output string) error {
-					_, ok := dataexchange.GetRegistryEntry(dataexchange.Format(output))
+					_, ok := datapipe.GetRegistryEntry(datapipe.Format(output))
 					if !ok {
-						return fmt.Errorf("invalid output format: %s\nSupported formats: %s", output, outputFormats)
+						return fmt.Errorf("invalid output format: %s\nSupported formats: %s", output, exportFormats)
 					}
 
 					return nil
@@ -101,12 +101,12 @@ func newQueryCommand(pr *plugin.Registry) *cli.Command {
 				return fmt.Errorf("failed to execute query: %w", err)
 			}
 
-			result, err := dataexchange.ParseDataFromBytes[any](resultBytes, dataexchange.Format(output))
+			result, err := datapipe.ParseDataFromBytes[any](resultBytes, datapipe.Format(output))
 			if err != nil {
 				return fmt.Errorf("failed to parse data: %w", err)
 			}
 
-			entry, ok := dataexchange.GetRegistryEntry(dataexchange.Format(output))
+			entry, ok := datapipe.GetRegistryEntry(datapipe.Format(output))
 			if !ok {
 				return fmt.Errorf("output format %s is not supported", output)
 			}

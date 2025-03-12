@@ -8,18 +8,19 @@ linters:
     # General
     - goheader # https://golangci-lint.run/usage/linters/#goheader
     - revive # https://golangci-lint.run/usage/linters/#revive
+    - misspell # https://golangci-lint.run/usage/linters/#misspell
 
-    # Critical safety and correctness
+    # Code quality, correctness and security
+    - errorlint # https://golangci-lint.run/usage/linters/#errorlint
+    - gocognit # https://golangci-lint.run/usage/linters/#gocognit
+    - gocritic # https://golangci-lint.run/usage/linters/#gocritic
     - gosec # https://golangci-lint.run/usage/linters/#gosec
     - govet # https://golangci-lint.run/usage/linters/#govet
-    - staticcheck # https://golangci-lint.run/usage/linters/#staticcheck
-    - gocritic # https://golangci-lint.run/usage/linters/#gocritic
-
-    # Code quality
-    - gocognit # https://golangci-lint.run/usage/linters/#gocognit
+    - musttag # https://golangci-lint.run/usage/linters/#musttag
     - nilerr # https://golangci-lint.run/usage/linters/#nilerr
     - nilnil # https://golangci-lint.run/usage/linters/#nilnil
     - noctx # https://golangci-lint.run/usage/linters/#noctx
+    - staticcheck # https://golangci-lint.run/usage/linters/#staticcheck
     - unconvert # https://golangci-lint.run/usage/linters/#unconvert
 
     # Performance and efficiency
@@ -92,7 +93,6 @@ linters-settings:
               "GUI",
               "HTML",
               "HTTP",
-              "HTTP",
               "HTTPS",
               "ID",
               "IDE",
@@ -124,8 +124,6 @@ linters-settings:
               "SMTP",
               "SOAP",
               "SQL",
-              "SQL",
-              "SSH",
               "SSH",
               "SSL",
               "TCP",
@@ -147,22 +145,15 @@ linters-settings:
               "WebSocket",
               "WebWorker",
               "XML",
-              "XML",
               "XSS",
               "YAML",
               "ZIP",
             ],
           ]
-      - name: package-comments
       - name: dot-imports
       - name: duplicated-imports
       - name: blank-imports
       - name: exported
-        arguments:
-          - "checkPrivateReceivers"
-          - "disableStutteringCheck"
-          - "checkPublicInterface"
-          - "disableChecksOnFunctions"
       - name: receiver-naming
       - name: increment-decrement
       - name: indent-error-flow
@@ -170,11 +161,9 @@ linters-settings:
       - name: early-return
       - name: filename-format
         arguments:
-          - "^[_a-z][_a-z0-9]*\\.go$" # Override the default pattern to forbid .go files with uppercase letters and dashes.
+          - "^[_a-z][_a-z0-9]*\\.go$"
       - name: confusing-naming
       - name: confusing-results
-      - name: function-length
-        arguments: [50, 0] # max lines in function, max lines in method
       - name: empty-block
         arguments:
           - "if"
@@ -185,9 +174,9 @@ linters-settings:
       - name: unused-parameter
       - name: unused-receiver
       - name: unreachable-code
-      - name: error-naming # Error variables should be prefixed with 'err'
-      - name: error-return # Errors should be the last in the list of returned values
-      - name: error-strings # Error strings should not be capitalized
+      - name: error-naming
+      - name: error-return
+      - name: error-strings
       - name: errorf
       - name: use-errors-new
       - name: unhandled-error
@@ -195,11 +184,12 @@ linters-settings:
           - "fmt.Printf"
           - "fmt.Println"
           - "fmt.Print"
+          - "fmt.Fprintf"
           - "log.Print"
           - "log.Printf"
           - "log.Println"
-          - "strings.Builder.WriteString"
           - "file.Close"
+          - "strings.Builder.WriteString"
       - name: context-as-argument
       - name: context-keys-type
       - name: enforce-map-style
@@ -208,36 +198,36 @@ linters-settings:
         arguments: ["literal"]
       - name: enforce-repeated-arg-type-style
         arguments: ["short"]
-      - name: var-declaration # Prevents redundant var declarations
-      - name: time-naming # Enforces time unit suffix in variable names
+      - name: var-declaration
+      - name: time-naming
       - name: use-any
       - name: identical-branches
       - name: if-return
       - name: increment-decrement
       - name: indent-error-flow
-      - name: unexported-return # Warns when unexported type is returned from exported function
-      - name: unexported-naming # Warns on wrongly named unexported symbols
-      - name: atomic # Ensures atomic operation safety
-      - name: waitgroup-by-value # Ensures WaitGroup is not passed by value
-      - name: bool-literal-in-expr # Warns against direct boolean comparisons
-      - name: constant-logical-expr # Finds constant logical expressions
-      - name: datarace # Potential data races caused by goroutines
-      - name: deep-exit # Prevents deep returns/breaks/continues
-      - name: defer # Warns about defer usage issues
-      - name: flag-parameter # Discourages boolean parameters
-      - name: import-shadowing # Prevents import aliases shadowing other names
-      - name: modifies-parameter # Warns when a function modifies its parameters
-      - name: modifies-value-receiver # Warns when a method modifies its value receiver
+      - name: unexported-return
+      - name: unexported-naming
+      - name: atomic
+      - name: waitgroup-by-value
+      - name: bool-literal-in-expr
+      - name: constant-logical-expr
+      - name: datarace
+      - name: deep-exit
+      - name: defer
+      - name: flag-parameter
+      - name: import-shadowing
+      - name: modifies-parameter
+      - name: modifies-value-receiver
       - name: range
-      - name: range-val-in-closure # Prevents common range variable capture issues
-      - name: range-val-address # Prevents common range variable address issues
-      - name: string-format # Consistent string formatting
-      - name: struct-tag # Validates struct tags
-      - name: unconditional-recursion # Detects infinite recursion
-      - name: unnecessary-stmt # Detects unnecessary statements
-      - name: useless-break # Detects useless break statements
-      - name: comment-spacings # Consistent comment spacing
-      - name: cyclomatic # Cyclomatic complexity
+      - name: range-val-in-closure
+      - name: range-val-address
+      - name: string-format
+      - name: struct-tag
+      - name: unconditional-recursion
+      - name: unnecessary-stmt
+      - name: useless-break
+      - name: comment-spacings
+      - name: cyclomatic
         arguments: [15]
 
   gocritic:
@@ -247,10 +237,13 @@ linters-settings:
       - opinionated
       - performance
       - style
-    disabled-checks:
-      - hugeParam # Can be too strict
-      - rangeExprCopy # Often not worth the complexity
-      - rangeValCopy # Often not worth the complexity
+
+  govet:
+    enable:
+      - nilness
+      - reflectvaluecompare
+      - sortslice
+      - unusedwrite
 
   mnd:
     checks:
@@ -276,7 +269,6 @@ linters-settings:
       - '^syscall\.Mknod$'
       - '^syscall\.Open$'
       - '^syscall\.Fchmod$'
-      - '^ioutil\.WriteFile$'
 
   whitespace:
     multi-if: true
@@ -286,9 +278,9 @@ linters-settings:
     allow-cuddle-declarations: true
 
 issues:
-  exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
+  exclude-use-default: false
   include:
     - EXC0013 # exported type without comment
     - EXC0014 # exported function without comment

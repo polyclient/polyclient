@@ -13,8 +13,6 @@ import (
 	"reflect"
 	"sort"
 	"time"
-
-	"github.com/polyclient/polyclient/internal/stringutil"
 )
 
 // HTMLExporter is a data exporter for HTML format.
@@ -46,21 +44,21 @@ func WithCSS(useCSS bool) HTMLExporterOption {
 
 // NewHTMLExporter creates a new HtmlExporter with the specified options.
 func NewHTMLExporter(opts ...HTMLExporterOption) *HTMLExporter {
-	ex := &HTMLExporter{
+	exporter := &HTMLExporter{
 		DateFormat: time.RFC3339,
 		UseCSS:     true,
 		template:   GetTemplate(),
 	}
 
 	for _, opt := range opts {
-		opt(ex)
+		opt(exporter)
 	}
 
-	return ex
+	return exporter
 }
 
 // Export writes a slice to HTML, supporting primitive types, structs, and maps.
-func (ex *HTMLExporter) Export(w io.Writer, data any) error {
+func (exp *HTMLExporter) Export(w io.Writer, data any) error {
 	if w == nil {
 		return errors.New("writer cannot be nil")
 	}
@@ -75,35 +73,35 @@ func (ex *HTMLExporter) Export(w io.Writer, data any) error {
 		return nil
 	}
 
-	parsedData, err := ex.formatSlice(v)
+	parsedData, err := exp.formatSlice(v)
 	if err != nil {
 		return err
 	}
 
-	parsedData.UseCSS = ex.UseCSS
+	parsedData.UseCSS = exp.UseCSS
 
-	return ex.template.Execute(w, parsedData)
+	return exp.template.Execute(w, parsedData)
 }
 
 // formatSlice formats the data for the HTML template.
-func (ex *HTMLExporter) formatSlice(v reflect.Value) (*HTMLTemplateData, error) {
+func (exp *HTMLExporter) formatSlice(v reflect.Value) (*HTMLTemplateData, error) {
 	first := v.Index(0).Interface()
 
 	switch first.(type) {
 	case map[string]any:
-		return ex.formatMapSlice(v)
+		return exp.formatMapSlice(v)
 
 	default:
 		if v.Index(0).Kind() == reflect.Struct {
-			return ex.formatStructSlice(v)
+			return exp.formatStructSlice(v)
 		}
 
-		return ex.formatSingleColumnSlice(v)
+		return exp.formatSingleColumnSlice(v)
 	}
 }
 
 // formatMapSlice formats a slice of maps for HTML output.
-func (ex *HTMLExporter) formatMapSlice(v reflect.Value) (*HTMLTemplateData, error) {
+func (exp *HTMLExporter) formatMapSlice(v reflect.Value) (*HTMLTemplateData, error) {
 	parsed := &HTMLTemplateData{
 		Headers: []string{},
 		Rows:    make([][]string, 0, v.Len()),
@@ -121,10 +119,7 @@ func (ex *HTMLExporter) formatMapSlice(v reflect.Value) (*HTMLTemplateData, erro
 		row := make([]string, len(parsed.Headers))
 
 		for j, header := range parsed.Headers {
-			row[j] = stringutil.Stringify(record[header],
-				stringutil.WithDateFormat(ex.DateFormat),
-				stringutil.WithCustomFormatter(sanitizeHTML),
-			)
+			row[j] = exp.formatValue(record[header])
 		}
 
 		parsed.Rows = append(parsed.Rows, row)
@@ -134,7 +129,7 @@ func (ex *HTMLExporter) formatMapSlice(v reflect.Value) (*HTMLTemplateData, erro
 }
 
 // formatStructSlice formats a slice of structs for HTML output.
-func (ex *HTMLExporter) formatStructSlice(v reflect.Value) (*HTMLTemplateData, error) {
+func (exp *HTMLExporter) formatStructSlice(v reflect.Value) (*HTMLTemplateData, error) {
 	parsed := &HTMLTemplateData{
 		Headers: []string{},
 		Rows:    make([][]string, 0, v.Len()),
@@ -154,11 +149,9 @@ func (ex *HTMLExporter) formatStructSlice(v reflect.Value) (*HTMLTemplateData, e
 
 		for j, header := range parsed.Headers {
 			field := value.FieldByName(header)
+
 			if field.IsValid() && field.CanInterface() {
-				row[j] = stringutil.Stringify(field.Interface(),
-					stringutil.WithDateFormat(ex.DateFormat),
-					stringutil.WithCustomFormatter(sanitizeHTML),
-				)
+				row[j] = exp.formatValue(field.Interface())
 			} else {
 				row[j] = ""
 			}
@@ -171,25 +164,29 @@ func (ex *HTMLExporter) formatStructSlice(v reflect.Value) (*HTMLTemplateData, e
 }
 
 // formatSingleColumnSlice writes `[]any` as a single-column HTML.
-func (ex *HTMLExporter) formatSingleColumnSlice(v reflect.Value) (*HTMLTemplateData, error) {
+func (exp *HTMLExporter) formatSingleColumnSlice(v reflect.Value) (*HTMLTemplateData, error) {
 	parsed := &HTMLTemplateData{
 		Headers: []string{"Value"},
 		Rows:    make([][]string, 0, v.Len()),
 	}
 
 	for i := range v.Len() {
-		parsed.Rows = append(parsed.Rows, []string{
-			stringutil.Stringify(v.Index(i).Interface(),
-				stringutil.WithDateFormat(ex.DateFormat),
-				stringutil.WithCustomFormatter(sanitizeHTML),
-			),
-		})
+		row := exp.formatValue(v.Index(i).Interface())
+		parsed.Rows = append(parsed.Rows, []string{row})
 	}
 
 	return parsed, nil
 }
 
-// sanitizeHTML escapes HTML characters in the provided string.
-func sanitizeHTML(v string) string {
-	return html.EscapeString(v)
+// formatValue returns the string representation of the value.
+func (exp *HTMLExporter) formatValue(v any) string {
+	if v == nil {
+		return ""
+	}
+
+	if t, ok := v.(time.Time); ok {
+		return t.Format(exp.DateFormat)
+	}
+
+	return html.EscapeString(fmt.Sprintf("%v", v))
 }

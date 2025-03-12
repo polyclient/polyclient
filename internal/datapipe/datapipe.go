@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
-// Package dataexchange provide functions for exporting and importing data.
-package dataexchange
+// Package datapipe provide functions for exporting and importing data.
+package datapipe
 
 import (
 	"encoding/json"
@@ -12,9 +12,9 @@ import (
 	"maps"
 	"slices"
 
-	"github.com/polyclient/polyclient/internal/dataexchange/xcsv"
-	"github.com/polyclient/polyclient/internal/dataexchange/xhtml"
-	"github.com/polyclient/polyclient/internal/dataexchange/xjson"
+	"github.com/polyclient/polyclient/internal/datapipe/xcsv"
+	"github.com/polyclient/polyclient/internal/datapipe/xhtml"
+	"github.com/polyclient/polyclient/internal/datapipe/xjson"
 )
 
 // Format represents supported export formats.
@@ -108,8 +108,8 @@ var registry = map[Format]Entry{
 	// },
 }
 
-// GetSupportedFormats returns a list of supported export formats as strings.
-func GetSupportedExportFormats() []Format {
+// GetAvailableExportFormats returns a list of supported export formats as strings.
+func GetAvailableExportFormats() []Format {
 	return slices.Collect(maps.Keys(registry))
 }
 

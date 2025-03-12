@@ -26,34 +26,34 @@ type JSONExporterOption func(*JSONExporter)
 
 // WithIndentString sets the indentation string for JsonExporter.
 func WithIndentString(indent string) JSONExporterOption {
-	return func(ex *JSONExporter) {
-		ex.IndentString = indent
+	return func(exp *JSONExporter) {
+		exp.IndentString = indent
 	}
 }
 
 // WithEscapeHTML sets whether to escape HTML characters in JsonExporter.
 func WithEscapeHTML(escape bool) JSONExporterOption {
-	return func(ex *JSONExporter) {
-		ex.EscapeHTML = escape
+	return func(exp *JSONExporter) {
+		exp.EscapeHTML = escape
 	}
 }
 
 // NewJSONExporter creates a new instance of JsonExporter.
 func NewJSONExporter(opts ...JSONExporterOption) *JSONExporter {
-	ex := &JSONExporter{
+	exporter := &JSONExporter{
 		IndentString: "  ",
 		EscapeHTML:   true,
 	}
 
 	for _, opt := range opts {
-		opt(ex)
+		opt(exporter)
 	}
 
-	return ex
+	return exporter
 }
 
 // Export writes a slice to JSON, supporting primitive types, structs, and maps.
-func (ex *JSONExporter) Export(w io.Writer, data any) error {
+func (exp *JSONExporter) Export(w io.Writer, data any) error {
 	if w == nil {
 		return errors.New("writer cannot be nil")
 	}
@@ -71,8 +71,8 @@ func (ex *JSONExporter) Export(w io.Writer, data any) error {
 	}
 
 	enc := json.NewEncoder(w)
-	enc.SetIndent("", ex.IndentString)
-	enc.SetEscapeHTML(ex.EscapeHTML)
+	enc.SetIndent("", exp.IndentString)
+	enc.SetEscapeHTML(exp.EscapeHTML)
 
 	if err := enc.Encode(data); err != nil {
 		return fmt.Errorf("failed to encode JSON: %w", err)

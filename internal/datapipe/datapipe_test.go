@@ -2,13 +2,13 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
-package dataexchange_test
+package datapipe_test
 
 import (
 	"encoding/json"
 	"testing"
 
-	"github.com/polyclient/polyclient/internal/dataexchange"
+	"github.com/polyclient/polyclient/internal/datapipe"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -16,11 +16,11 @@ import (
 func TestGetSupportedExportFormats(t *testing.T) {
 	t.Parallel()
 
-	expectedFormats := []dataexchange.Format{
-		dataexchange.FormatCSV, dataexchange.FormatTSV, dataexchange.FormatJSON, dataexchange.FormatHTML,
+	expectedFormats := []datapipe.Format{
+		datapipe.FormatCSV, datapipe.FormatTSV, datapipe.FormatJSON, datapipe.FormatHTML,
 	}
 
-	supportedFormats := dataexchange.GetSupportedExportFormats()
+	supportedFormats := datapipe.GetAvailableExportFormats()
 	assert.ElementsMatch(t, expectedFormats, supportedFormats)
 }
 
@@ -29,15 +29,15 @@ func TestGetExporterRegistryEntry(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		format   dataexchange.Format
+		format   datapipe.Format
 		exists   bool
 		mimeType string
 		fileExt  string
 	}{
-		{"csv", dataexchange.FormatCSV, true, "text/csv", "csv"},
-		{"tsv", dataexchange.FormatTSV, true, "text/tab-separated-values", "tsv"},
-		{"json", dataexchange.FormatJSON, true, "application/json", "json"},
-		{"html", dataexchange.FormatHTML, true, "text/html", "html"},
+		{"csv", datapipe.FormatCSV, true, "text/csv", "csv"},
+		{"tsv", datapipe.FormatTSV, true, "text/tab-separated-values", "tsv"},
+		{"json", datapipe.FormatJSON, true, "application/json", "json"},
+		{"html", datapipe.FormatHTML, true, "text/html", "html"},
 		{"Invalid", "invalid_format", false, "", ""},
 	}
 
@@ -45,7 +45,7 @@ func TestGetExporterRegistryEntry(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			entry, exists := dataexchange.GetRegistryEntry(tt.format)
+			entry, exists := datapipe.GetRegistryEntry(tt.format)
 			assert.Equal(t, tt.exists, exists)
 
 			if exists {
@@ -65,7 +65,7 @@ func TestParseDataFromBytes_ValidJSON(t *testing.T) {
 
 	require.NoError(t, json.Unmarshal(data, &expected))
 
-	parsed, err := dataexchange.ParseDataFromBytes[[]map[string]any](data, dataexchange.FormatJSON)
+	parsed, err := datapipe.ParseDataFromBytes[[]map[string]any](data, datapipe.FormatJSON)
 	require.NoError(t, err)
 
 	assert.Equal(t, expected, parsed)
@@ -78,7 +78,7 @@ func TestParseDataFromBytes_InvalidJSON(t *testing.T) {
 
 	var zeroValue []map[string]any
 
-	parsed, err := dataexchange.ParseDataFromBytes[[]map[string]any](data, dataexchange.FormatJSON)
+	parsed, err := datapipe.ParseDataFromBytes[[]map[string]any](data, datapipe.FormatJSON)
 	require.Error(t, err)
 
 	assert.Equal(t, zeroValue, parsed)
@@ -91,7 +91,7 @@ func TestParseDataFromBytes_UnsupportedFormat(t *testing.T) {
 
 	var zeroValue []map[string]any
 
-	parsed, err := dataexchange.ParseDataFromBytes[[]map[string]any](data, "unsupported")
+	parsed, err := datapipe.ParseDataFromBytes[[]map[string]any](data, "unsupported")
 	require.Error(t, err)
 
 	assert.Equal(t, zeroValue, parsed)

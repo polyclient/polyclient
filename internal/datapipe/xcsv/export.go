@@ -13,8 +13,6 @@ import (
 	"reflect"
 	"sort"
 	"time"
-
-	"github.com/polyclient/polyclient/internal/stringutil"
 )
 
 // CSVExporter exports data as CSV.
@@ -44,21 +42,21 @@ func WithDateFormat(format string) CSVExporterOption {
 
 // NewCSVExporter creates a new CsvExporter with the specified options.
 func NewCSVExporter(opts ...CSVExporterOption) *CSVExporter {
-	ex := &CSVExporter{
+	exporter := &CSVExporter{
 		Delimiter:  ',',
 		UseCRLF:    false,
 		DateFormat: time.RFC3339,
 	}
 
 	for _, opt := range opts {
-		opt(ex)
+		opt(exporter)
 	}
 
-	return ex
+	return exporter
 }
 
 // Export writes a slice to CSV, supporting primitive types, structs, and maps.
-func (ex *CSVExporter) Export(w io.Writer, data any) error {
+func (exp *CSVExporter) Export(w io.Writer, data any) error {
 	if w == nil {
 		return errors.New("writer cannot be nil")
 	}
@@ -72,14 +70,14 @@ func (ex *CSVExporter) Export(w io.Writer, data any) error {
 		return nil
 	}
 
-	return ex.formatSlice(w, v)
+	return exp.formatSlice(w, v)
 }
 
 // formatSlice processes a slice and determines the CSV format.
-func (ex *CSVExporter) formatSlice(w io.Writer, v reflect.Value) error {
+func (exp *CSVExporter) formatSlice(w io.Writer, v reflect.Value) error {
 	writer := csv.NewWriter(w)
-	writer.Comma = ex.Delimiter
-	writer.UseCRLF = ex.UseCRLF
+	writer.Comma = exp.Delimiter
+	writer.UseCRLF = exp.UseCRLF
 
 	defer writer.Flush()
 
@@ -87,19 +85,19 @@ func (ex *CSVExporter) formatSlice(w io.Writer, v reflect.Value) error {
 
 	switch first.(type) {
 	case map[string]any:
-		return ex.formatMapSlice(writer, v)
+		return exp.formatMapSlice(writer, v)
 
 	default:
 		if reflect.TypeOf(first).Kind() == reflect.Struct {
-			return ex.formatStructSlice(writer, v)
+			return exp.formatStructSlice(writer, v)
 		}
 
-		return ex.formatSingleColumnSlice(writer, v)
+		return exp.formatSingleColumnSlice(writer, v)
 	}
 }
 
 // formatMapSlice writes `[]map[string]any` as a CSV.
-func (*CSVExporter) formatMapSlice(w *csv.Writer, v reflect.Value) error {
+func (exp *CSVExporter) formatMapSlice(w *csv.Writer, v reflect.Value) error {
 	first := v.Index(0).Interface().(map[string]any)
 	headers := make([]string, 0, len(first))
 
@@ -118,7 +116,7 @@ func (*CSVExporter) formatMapSlice(w *csv.Writer, v reflect.Value) error {
 		row := make([]string, len(headers))
 
 		for j, header := range headers {
-			row[j] = stringutil.Stringify(record[header])
+			row[j] = exp.formatValue(record[header])
 		}
 
 		if err := w.Write(row); err != nil {
@@ -130,14 +128,13 @@ func (*CSVExporter) formatMapSlice(w *csv.Writer, v reflect.Value) error {
 }
 
 // formatStructSlice writes `[]struct` as a CSV.
-func (*CSVExporter) formatStructSlice(w *csv.Writer, v reflect.Value) error {
+func (exp *CSVExporter) formatStructSlice(w *csv.Writer, v reflect.Value) error {
 	t := v.Index(0).Type()
 
 	var headers []string
 
 	var fieldIndices []int
 
-	// Filter out private fields
 	for i := range t.NumField() {
 		field := t.Field(i)
 		if field.PkgPath == "" {
@@ -157,7 +154,7 @@ func (*CSVExporter) formatStructSlice(w *csv.Writer, v reflect.Value) error {
 		for j, idx := range fieldIndices {
 			field := record.Field(idx)
 			if field.CanInterface() {
-				row[j] = stringutil.Stringify(field.Interface())
+				row[j] = exp.formatValue(field.Interface())
 			}
 		}
 
@@ -170,10 +167,12 @@ func (*CSVExporter) formatStructSlice(w *csv.Writer, v reflect.Value) error {
 }
 
 // formatSingleColumnSlice writes `[]any` as a single-column CSV.
-func (*CSVExporter) formatSingleColumnSlice(w *csv.Writer, v reflect.Value) error {
+func (exp *CSVExporter) formatSingleColumnSlice(w *csv.Writer, v reflect.Value) error {
 	rows := make([][]string, v.Len())
+
 	for i := range v.Len() {
-		rows[i] = []string{stringutil.Stringify(v.Index(i).Interface())}
+		row := exp.formatValue(v.Index(i).Interface())
+		rows[i] = []string{row}
 	}
 
 	if err := w.WriteAll(rows); err != nil {
@@ -181,4 +180,17 @@ func (*CSVExporter) formatSingleColumnSlice(w *csv.Writer, v reflect.Value) erro
 	}
 
 	return nil
+}
+
+// formatValue returns the string representation of the value.
+func (exp *CSVExporter) formatValue(v any) string {
+	if v == nil {
+		return ""
+	}
+
+	if t, ok := v.(time.Time); ok {
+		return t.Format(exp.DateFormat)
+	}
+
+	return fmt.Sprintf("%v", v)
 }
