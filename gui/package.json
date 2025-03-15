@@ -1,0 +1,18 @@
+{
+  "name": "gui",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun index.html",
+    "build": "bun run build.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "bun-plugin-svelte": "^0.0.5",
+    "svelte": "^5.23.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
