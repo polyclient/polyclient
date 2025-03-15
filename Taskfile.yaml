@@ -41,7 +41,7 @@ tasks:
   release:
     desc: Create a new release (e.g., task release 0.1.0-beta.1)
     cmds:
-      - go run ./scripts/release.go {{ .CLI_ARGS }}
+      - ./scripts/release.sh {{ .CLI_ARGS }}
 
   lint:
     desc: Check code quality and identify potential issues

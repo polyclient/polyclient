@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 
 	"github.com/polyclient/polyclient/internal/datapipe"
 	"github.com/polyclient/polyclient/internal/plugin"
@@ -88,7 +89,7 @@ func newQueryCommand(pr *plugin.Registry) *cli.Command {
 			if destination == "stdout" {
 				w = os.Stdout
 			} else {
-				file, err := os.Create(destination)
+				file, err := os.Create(path.Clean(destination))
 				if err != nil {
 					return fmt.Errorf("failed to create file '%s': %w", destination, err)
 				}

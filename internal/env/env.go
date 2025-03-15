@@ -16,46 +16,50 @@ import (
 )
 
 const (
-	// Environment variables used by PolyClient.
-	EnvPolyClientPluginsDir   = "POLYCLIENT_PLUGINS_DIR"
+	// EnvPolyClientPluginsDir controls the PolyClient plugins directory.
+	EnvPolyClientPluginsDir = "POLYCLIENT_PLUGINS_DIR"
+
+	// EnvPolyClientSettingsFile controls the PolyClient settings file.
 	EnvPolyClientSettingsFile = "POLYCLIENT_SETTINGS_FILE"
-	EnvPolyClientKeymapFile   = "POLYCLIENT_KEYMAP_FILE"
+
+	// EnvPolyClientKeymapFile controls the PolyClient keymap file.
+	EnvPolyClientKeymapFile = "POLYCLIENT_KEYMAP_FILE"
 )
 
-// EnvVar represents a PolyClient environment variable with associated functionality.
-type EnvVar struct {
+// Variable represents a PolyClient environment variable and its configuration.
+type Variable struct {
 	Name  string
 	IsDir bool
 }
 
-// EnvManager manages environment variables and their initialization.
-type EnvManager struct {
-	vars map[string]EnvVar
+// Manager manages environment variables and their initialization.
+type Manager struct {
+	vars map[string]Variable
 }
 
 var (
-	globalEnvManager *EnvManager
-	once             sync.Once
+	globalManager *Manager
+	once          sync.Once
 )
 
-// GetEnvManager returns the singleton instance of EnvManager, ensuring it is initialized only once.
-func GetEnvManager() *EnvManager {
+// GetManager returns the singleton instance of Manager, ensuring it is initialized only once.
+func GetManager() *Manager {
 	once.Do(func() {
-		globalEnvManager = &EnvManager{
-			vars: map[string]EnvVar{
+		globalManager = &Manager{
+			vars: map[string]Variable{
 				EnvPolyClientPluginsDir:   {EnvPolyClientPluginsDir, true},
 				EnvPolyClientSettingsFile: {EnvPolyClientSettingsFile, false},
 				EnvPolyClientKeymapFile:   {EnvPolyClientKeymapFile, false},
 			},
 		}
-		_ = globalEnvManager.Setup()
+		_ = globalManager.Setup()
 	})
 
-	return globalEnvManager
+	return globalManager
 }
 
 // Setup initializes environment variables with default values where necessary.
-func (m *EnvManager) Setup() error {
+func (m *Manager) Setup() error {
 	var errs []error
 
 	for name, envVar := range m.vars {
@@ -65,21 +69,36 @@ func (m *EnvManager) Setup() error {
 			continue
 		}
 
-		if err := ensureEnvVarSet(name, defaultPath, envVar.IsDir); err != nil {
+		if err := ensureEnvVarSet(name, defaultPath); err != nil {
 			errs = append(errs, fmt.Errorf("failed to setup %s: %w", name, err))
+		}
+
+		if envVar.IsDir {
+			if err := ensureDirExists(defaultPath); err != nil {
+				errs = append(errs, fmt.Errorf("failed to create directory %s: %w", defaultPath, err))
+			}
 		}
 	}
 
 	return errors.Join(errs...)
 }
 
-// Get retrieves the value of an environment variable.
-func (m *EnvManager) Get(name string) (string, error) {
+// Get retrieves the value of a PolyClient environment variable.
+func (m *Manager) Get(name string) (string, error) {
 	if _, exists := m.vars[name]; !exists {
 		return "", fmt.Errorf("unknown environment variable: %s", name)
 	}
 
-	return getEnvPath(name)
+	path, err := getEnvPath(name)
+	if err != nil {
+		return "", fmt.Errorf("failed to get %s: %w", name, err)
+	}
+
+	if path == "" {
+		return "", fmt.Errorf("environment variable %s is not set", name)
+	}
+
+	return path, nil
 }
 
 // getDefaultPath determines the default path based on the environment.
@@ -147,22 +166,28 @@ func getEnvPath(envVar string) (string, error) {
 }
 
 // ensureEnvVarSet sets an environment variable if it is not already set.
-func ensureEnvVarSet(envVar, defaultValue string, isDir bool) error {
-	if os.Getenv(envVar) == "" {
-		if err := os.Setenv(envVar, defaultValue); err != nil {
-			return fmt.Errorf("failed to set %s: %w", envVar, err)
-		}
+func ensureEnvVarSet(envVar, defaultValue string) error {
+	if val, exists := os.LookupEnv(envVar); exists {
+		fmt.Println("Skipping setting", envVar, "because it is already set to:", val)
+		return nil
 	}
 
-	absPath, err := filepath.Abs(defaultValue)
+	if err := os.Setenv(envVar, defaultValue); err != nil {
+		return fmt.Errorf("failed to set %s: %w", envVar, err)
+	}
+
+	return nil
+}
+
+// ensureDirExists creates a directory if it does not exist.
+func ensureDirExists(path string) error {
+	absPath, err := filepath.Abs(path)
 	if err != nil {
 		return fmt.Errorf("invalid path: %w", err)
 	}
 
-	if isDir {
-		if err := os.MkdirAll(absPath, 0o750); err != nil {
-			return fmt.Errorf("failed to create directory %s: %w", absPath, err)
-		}
+	if err := os.MkdirAll(absPath, 0o750); err != nil {
+		return fmt.Errorf("failed to create directory %s: %w", absPath, err)
 	}
 
 	return nil

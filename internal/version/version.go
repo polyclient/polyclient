@@ -32,9 +32,19 @@ func Version() string {
 	return version
 }
 
+// SetVersion sets the build version of the application (for testing purposes only).
+func SetVersion(v string) {
+	version = v
+}
+
 // Branch returns the Git branch name used during the build.
 func Branch() string {
 	return branch
+}
+
+// SetBranch sets the Git branch name used during the build (for testing purposes only).
+func SetBranch(b string) {
+	branch = b
 }
 
 // ShortCommit returns the abbreviated Git Commit SHA from which the binary was built.
@@ -42,9 +52,19 @@ func ShortCommit() string {
 	return shortCommit
 }
 
+// SetShortCommit sets the abbreviated Git Commit SHA from which the binary was built (for testing purposes only).
+func SetShortCommit(s string) {
+	shortCommit = s
+}
+
 // FullCommit returns the full Git commit SHA from which the binary was built.
 func FullCommit() string {
 	return fullCommit
+}
+
+// SetFullCommit sets the full Git commit SHA from which the binary was built (for testing purposes only).
+func SetFullCommit(f string) {
+	fullCommit = f
 }
 
 // Date returns the build date in RFC3339 format.
@@ -52,12 +72,27 @@ func Date() string {
 	return date
 }
 
-// Os returns the operating system of target binary recorded at build time.
-func Os() string {
+// SetDate sets the build date in RFC3339 format (for testing purposes only).
+func SetDate(d string) {
+	date = d
+}
+
+// OS returns the operating system of target binary recorded at build time.
+func OS() string {
 	return os
+}
+
+// SetOS sets the operating system of target binary recorded at build time (for testing purposes only).
+func SetOS(o string) {
+	os = o
 }
 
 // Arch returns the CPU architecture of target binary recorded at build time.
 func Arch() string {
 	return arch
+}
+
+// SetArch sets the CPU architecture of target binary recorded at build time (for testing purposes only).
+func SetArch(a string) {
+	arch = a
 }
