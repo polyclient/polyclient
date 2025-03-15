@@ -73,8 +73,7 @@ func LoadManifest(path string) (*Manifest, error) {
 		return nil, fmt.Errorf("invalid manifest path: %w", err)
 	}
 
-	data, err := os.ReadFile(absPath)
-
+	data, err := os.ReadFile(filepath.Clean(absPath))
 	if err != nil {
 		return nil, fmt.Errorf("failed to load manifest: %w", err)
 	}

@@ -20,7 +20,7 @@ import (
 
 // main initializes and runs the PolyClient CLI application.
 func main() {
-	if err := env.GetEnvManager().Setup(); err != nil {
+	if err := env.GetManager().Setup(); err != nil {
 		log.Fatal("Error setting up environment:", err)
 	}
 
@@ -51,7 +51,7 @@ func main() {
 // loadBuiltinPlugins loads the built-in PolyClient plugins into the plugin registry.
 // The built-in plugins are loaded from the POLYCLIENT_PLUGINS_DIR environment variable.
 func loadPlugins() (*plugin.Registry, error) {
-	pluginsDir, err := env.GetEnvManager().Get(env.EnvPolyClientPluginsDir)
+	pluginsDir, err := env.GetManager().Get(env.EnvPolyClientPluginsDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get PolyClient plugins directory: %w", err)
 	}

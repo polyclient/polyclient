@@ -113,6 +113,7 @@ linters-settings:
               "MVC",
               "NTP",
               "OAuth",
+              "OS",
               "PCI",
               "PDF",
               "PNG",

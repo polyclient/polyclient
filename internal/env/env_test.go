@@ -1,218 +1,236 @@
+// SPDX-FileCopyrightText: 2025 The PolyClient Authors
 //
+// SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
-package env_test
+//nolint:testpackage  // Using same package name to be able to reset singleton manager
+package env
 
 import (
 	"os"
+	"path"
 	"path/filepath"
+	"sync"
 	"testing"
 
-	"github.com/polyclient/polyclient/internal/env"
 	"github.com/polyclient/polyclient/internal/version"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestGetEnvManager(t *testing.T) {
-	t.Parallel()
+func resetManagerForTest() {
+	globalManager = nil
+	once = sync.Once{}
+}
 
-	t.Run("singleton instance", func(t *testing.T) {
-		t.Parallel()
-		t.Parallel()
+func TestManagerSingleton(t *testing.T) {
+	resetManagerForTest()
 
-		manager1 := env.GetEnvManager()
-		manager2 := env.GetEnvManager()
+	manager1 := GetManager()
+	manager2 := GetManager()
 
-		assert.NotNil(t, manager1)
-		assert.Same(t, manager1, manager2, "Expected the same instance from multiple calls")
+	assert.Same(t, manager1, manager2, "GetManager should return the same instance")
+}
+
+func TestManagerGet(t *testing.T) {
+	resetManagerForTest()
+
+	manager := GetManager()
+
+	t.Run("Valid environment variables", func(t *testing.T) {
+		variables := []string{
+			EnvPolyClientPluginsDir,
+			EnvPolyClientSettingsFile,
+			EnvPolyClientKeymapFile,
+		}
+
+		for _, varName := range variables {
+			value, err := manager.Get(varName)
+			require.NoError(t, err, "Getting %s should not error", varName)
+			assert.NotEmpty(t, value, "Value for %s should not be empty", varName)
+		}
+	})
+
+	t.Run("Unknown environment variable", func(t *testing.T) {
+		_, err := manager.Get("UNKNOWN_VAR")
+		require.Error(t, err, "Getting unknown var should return error")
+		assert.Contains(t, err.Error(), "unknown environment variable", "Error message should be descriptive")
 	})
 }
 
-func TestEnvManagerGet(t *testing.T) {
-	t.Parallel()
+func TestCustomEnvironmentValues(t *testing.T) {
+	origPluginsDir := os.Getenv(EnvPolyClientPluginsDir)
+	origSettingsFile := os.Getenv(EnvPolyClientSettingsFile)
+	origKeymapFile := os.Getenv(EnvPolyClientKeymapFile)
 
-	t.Run("known environment variable", func(t *testing.T) {
-		t.Parallel()
+	defer func() {
+		t.Setenv(EnvPolyClientPluginsDir, origPluginsDir)
+		t.Setenv(EnvPolyClientSettingsFile, origSettingsFile)
+		t.Setenv(EnvPolyClientKeymapFile, origKeymapFile)
+	}()
 
-		testKey := env.EnvPolyClientPluginsDir
-		expectedValue := "/test/plugins/dir"
-		t.Setenv(testKey, expectedValue)
+	customPluginsDir := path.Join(t.TempDir(), "plugins")
+	customSettingsFile := path.Join(t.TempDir(), "settings.json")
+	customKeymapFile := path.Join(t.TempDir(), "keymap.json")
 
-		manager := env.GetEnvManager()
-		value, err := manager.Get(testKey)
+	t.Setenv(EnvPolyClientPluginsDir, customPluginsDir)
+	t.Setenv(EnvPolyClientSettingsFile, customSettingsFile)
+	t.Setenv(EnvPolyClientKeymapFile, customKeymapFile)
 
-		require.NoError(t, err)
-		assert.Equal(t, expectedValue, value)
-	})
+	resetManagerForTest()
 
-	t.Run("unknown environment variable", func(t *testing.T) {
-		t.Parallel()
+	manager := GetManager()
 
-		manager := env.GetEnvManager()
-		value, err := manager.Get("UNKNOWN_ENV_VAR")
-
-		require.Error(t, err)
-		assert.Contains(t, err.Error(), "unknown environment variable")
-		assert.Empty(t, value)
-	})
-
-	t.Run("unset environment variable", func(t *testing.T) {
-		t.Parallel()
-
-		testKey := env.EnvPolyClientSettingsFile
-		t.Setenv(testKey, "")
-
-		manager := env.GetEnvManager()
-		value, err := manager.Get(testKey)
-
-		require.Error(t, err)
-		assert.Contains(t, err.Error(), "is not set")
-		assert.Empty(t, value)
-	})
-}
-
-func TestEnvManagerSetup(t *testing.T) {
-	t.Run("default values set", func(t *testing.T) {
-		t.Parallel()
-		t.Setenv(env.EnvPolyClientPluginsDir, "")
-		t.Setenv(env.EnvPolyClientSettingsFile, "")
-		t.Setenv(env.EnvPolyClientKeymapFile, "")
-
-		manager := env.GetEnvManager()
-		err := manager.Setup()
-
-		require.NoError(t, err)
-
-		pluginsDir := os.Getenv(env.EnvPolyClientPluginsDir)
-		settingsFile := os.Getenv(env.EnvPolyClientSettingsFile)
-		keymapFile := os.Getenv(env.EnvPolyClientKeymapFile)
-
-		assert.NotEmpty(t, pluginsDir)
-		assert.NotEmpty(t, settingsFile)
-		assert.NotEmpty(t, keymapFile)
-
-		pluginsDirInfo, err := os.Stat(pluginsDir)
-		require.NoError(t, err)
-		assert.True(t, pluginsDirInfo.IsDir())
-	})
-
-	t.Run("existing values preserved", func(t *testing.T) {
-		t.Parallel()
-		expectedPluginsDir := filepath.Join(t.TempDir(), "custom-plugins")
-		expectedSettingsFile := "/custom/settings.json"
-		expectedKeymapFile := "/custom/keymap.json"
-
-		t.Setenv(env.EnvPolyClientPluginsDir, expectedPluginsDir)
-		t.Setenv(env.EnvPolyClientSettingsFile, expectedSettingsFile)
-		t.Setenv(env.EnvPolyClientKeymapFile, expectedKeymapFile)
-
-		manager := env.GetEnvManager()
-		err := manager.Setup()
-
-		require.NoError(t, err)
-
-		assert.Equal(t, expectedPluginsDir, os.Getenv(env.EnvPolyClientPluginsDir))
-		assert.Equal(t, expectedSettingsFile, os.Getenv(env.EnvPolyClientSettingsFile))
-		assert.Equal(t, expectedKeymapFile, os.Getenv(env.EnvPolyClientKeymapFile))
-
-		pluginsDirInfo, err := os.Stat(expectedPluginsDir)
-		require.NoError(t, err)
-		assert.True(t, pluginsDirInfo.IsDir())
-	})
-}
-
-func mockVersion(t *testing.T, mockValue string) func() {
-	originalVersion := version.Version()
-
-	t.Setenv("MOCK_VERSION", mockValue)
-
-	return func() {
-		t.Setenv("MOCK_VERSION", originalVersion)
-	}
-}
-
-func TestDevMode(t *testing.T) {
-	restore := mockVersion(t, "dev")
-	defer restore()
-
-	assert.Equal(t, "dev", version.Version())
-
-	t.Setenv(env.EnvPolyClientPluginsDir, "")
-	t.Setenv(env.EnvPolyClientSettingsFile, "")
-	t.Setenv(env.EnvPolyClientKeymapFile, "")
-
-	manager := env.GetEnvManager()
-	err := manager.Setup()
+	pluginsDir, err := manager.Get(EnvPolyClientPluginsDir)
 	require.NoError(t, err)
+	assert.Equal(t, customPluginsDir, pluginsDir)
+
+	settingsFile, err := manager.Get(EnvPolyClientSettingsFile)
+	require.NoError(t, err)
+	assert.Equal(t, customSettingsFile, settingsFile)
+
+	keymapFile, err := manager.Get(EnvPolyClientKeymapFile)
+	require.NoError(t, err)
+	assert.Equal(t, customKeymapFile, keymapFile)
+}
+
+func TestDevModeConfigPath(t *testing.T) {
+	origVersionFunc := version.Version
+	origVersion := origVersionFunc()
+
+	defer func() {
+		version.SetVersion(origVersion)
+	}()
+
+	version.SetVersion("dev")
+
+	_ = os.Unsetenv(EnvPolyClientPluginsDir)
+	_ = os.Unsetenv(EnvPolyClientSettingsFile)
+	_ = os.Unsetenv(EnvPolyClientKeymapFile)
+
+	resetManagerForTest()
+
+	manager := GetManager()
 
 	cwd, err := os.Getwd()
 	require.NoError(t, err)
 
 	expectedDevDir := filepath.Join(cwd, ".polyclientdev")
+	expectedPluginsDir := filepath.Join(expectedDevDir, "plugins")
+	expectedSettingsFile := filepath.Join(expectedDevDir, "settings.json")
+	expectedKeymapFile := filepath.Join(expectedDevDir, "keymap.json")
 
-	pluginsDir := os.Getenv(env.EnvPolyClientPluginsDir)
-	settingsFile := os.Getenv(env.EnvPolyClientSettingsFile)
-	keymapFile := os.Getenv(env.EnvPolyClientKeymapFile)
-
-	assert.Equal(t, filepath.Join(expectedDevDir, "plugins"), pluginsDir)
-	assert.Equal(t, filepath.Join(expectedDevDir, "settings.json"), settingsFile)
-	assert.Equal(t, filepath.Join(expectedDevDir, "keymap.json"), keymapFile)
-
-	devDirInfo, err := os.Stat(expectedDevDir)
+	pluginsDir, err := manager.Get(EnvPolyClientPluginsDir)
 	require.NoError(t, err)
-	assert.True(t, devDirInfo.IsDir())
+	assert.Equal(t, expectedPluginsDir, pluginsDir)
 
-	err = os.RemoveAll(expectedDevDir)
+	settingsFile, err := manager.Get(EnvPolyClientSettingsFile)
 	require.NoError(t, err)
+	assert.Equal(t, expectedSettingsFile, settingsFile)
+
+	keymapFile, err := manager.Get(EnvPolyClientKeymapFile)
+	require.NoError(t, err)
+	assert.Equal(t, expectedKeymapFile, keymapFile)
+
+	_, err = os.Stat(expectedDevDir)
+	require.NoError(t, err, "Dev directory should be created")
+
+	_ = os.RemoveAll(expectedDevDir)
 }
 
-func TestProductionMode(t *testing.T) {
-	restore := mockVersion(t, "1.0.0")
-	defer restore()
+func TestProdModeConfigPath(t *testing.T) {
+	origVersionFunc := version.Version
+	origVersion := origVersionFunc()
 
-	assert.Equal(t, "1.0.0", version.Version())
+	defer func() {
+		version.SetVersion(origVersion)
+	}()
 
-	t.Setenv(env.EnvPolyClientPluginsDir, "")
-	t.Setenv(env.EnvPolyClientSettingsFile, "")
-	t.Setenv(env.EnvPolyClientKeymapFile, "")
+	version.SetVersion("1.0.0")
 
-	manager := env.GetEnvManager()
-	err := manager.Setup()
-	require.NoError(t, err)
+	_ = os.Unsetenv(EnvPolyClientPluginsDir)
+	_ = os.Unsetenv(EnvPolyClientSettingsFile)
+	_ = os.Unsetenv(EnvPolyClientKeymapFile)
+
+	resetManagerForTest()
+
+	manager := GetManager()
 
 	userConfigDir, err := os.UserConfigDir()
 	require.NoError(t, err)
 
-	expectedConfigDir := filepath.Join(userConfigDir, "polyclient")
+	expectedPluginsDir := filepath.Join(userConfigDir, "polyclient", "plugins")
+	expectedSettingsFile := filepath.Join(userConfigDir, "polyclient", "settings.json")
+	expectedKeymapFile := filepath.Join(userConfigDir, "polyclient", "keymap.json")
 
-	pluginsDir := os.Getenv(env.EnvPolyClientPluginsDir)
-	settingsFile := os.Getenv(env.EnvPolyClientSettingsFile)
-	keymapFile := os.Getenv(env.EnvPolyClientKeymapFile)
-
-	assert.Equal(t, filepath.Join(expectedConfigDir, "plugins"), pluginsDir)
-	assert.Equal(t, filepath.Join(expectedConfigDir, "settings.json"), settingsFile)
-	assert.Equal(t, filepath.Join(expectedConfigDir, "keymap.json"), keymapFile)
-
-	configDirInfo, err := os.Stat(expectedConfigDir)
+	pluginsDir, err := manager.Get(EnvPolyClientPluginsDir)
 	require.NoError(t, err)
-	assert.True(t, configDirInfo.IsDir())
+	assert.Equal(t, expectedPluginsDir, pluginsDir)
 
-	err = os.RemoveAll(expectedConfigDir)
+	settingsFile, err := manager.Get(EnvPolyClientSettingsFile)
 	require.NoError(t, err)
+	assert.Equal(t, expectedSettingsFile, settingsFile)
+
+	keymapFile, err := manager.Get(EnvPolyClientKeymapFile)
+	require.NoError(t, err)
+	assert.Equal(t, expectedKeymapFile, keymapFile)
+
+	_, err = os.Stat(expectedPluginsDir)
+	require.NoError(t, err, "Config directory should be created")
+
+	_ = os.RemoveAll(expectedPluginsDir)
 }
 
-func TestMain(m *testing.M) {
-	exitCode := m.Run()
+func TestSetupEnsuresDirExists(t *testing.T) {
+	_ = os.Unsetenv(EnvPolyClientPluginsDir)
 
-	userConfigDir, err := os.UserConfigDir()
-	if err == nil {
-		os.RemoveAll(filepath.Join(userConfigDir, "polyclient"))
-	}
+	resetManagerForTest()
 
-	cwd, err := os.Getwd()
-	if err == nil {
-		os.RemoveAll(filepath.Join(cwd, ".polyclientdev"))
-	}
+	manager := GetManager()
 
-	os.Exit(exitCode)
+	pluginsDir, err := manager.Get(EnvPolyClientPluginsDir)
+	require.NoError(t, err)
+
+	info, err := os.Stat(pluginsDir)
+	require.NoError(t, err, "Plugins directory should exist")
+	assert.True(t, info.IsDir(), "Plugins path should be a directory")
+}
+
+func TestVariableDefinitions(t *testing.T) {
+	resetManagerForTest()
+
+	manager := GetManager()
+
+	assert.Contains(t, manager.vars, EnvPolyClientPluginsDir)
+	assert.Contains(t, manager.vars, EnvPolyClientSettingsFile)
+	assert.Contains(t, manager.vars, EnvPolyClientKeymapFile)
+
+	assert.True(t, manager.vars[EnvPolyClientPluginsDir].IsDir)
+	assert.False(t, manager.vars[EnvPolyClientSettingsFile].IsDir)
+	assert.False(t, manager.vars[EnvPolyClientKeymapFile].IsDir)
+}
+
+func TestEnvVarFallbacks(t *testing.T) {
+	_ = os.Unsetenv(EnvPolyClientPluginsDir)
+	_ = os.Unsetenv(EnvPolyClientSettingsFile)
+	_ = os.Unsetenv(EnvPolyClientKeymapFile)
+
+	resetManagerForTest()
+
+	manager := GetManager()
+
+	pluginsDir, err := manager.Get(EnvPolyClientPluginsDir)
+	require.NoError(t, err)
+	assert.NotEmpty(t, pluginsDir)
+
+	settingsFile, err := manager.Get(EnvPolyClientSettingsFile)
+	require.NoError(t, err)
+	assert.NotEmpty(t, settingsFile)
+
+	keymapFile, err := manager.Get(EnvPolyClientKeymapFile)
+	require.NoError(t, err)
+	assert.NotEmpty(t, keymapFile)
+
+	assert.Equal(t, pluginsDir, os.Getenv(EnvPolyClientPluginsDir))
+	assert.Equal(t, settingsFile, os.Getenv(EnvPolyClientSettingsFile))
+	assert.Equal(t, keymapFile, os.Getenv(EnvPolyClientKeymapFile))
 }
