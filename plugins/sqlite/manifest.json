@@ -4,7 +4,7 @@
   "name": "SQLite Plugin",
   "scope": "sql",
   "version": "0.0.1",
-  "description": "Provides SQLite database access for PolyClient.",
+  "description": "SQLite database support for PolyClient.",
   "authors": [
     {
       "name": "Juan Mesa",

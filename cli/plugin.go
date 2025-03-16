@@ -32,7 +32,7 @@ func newLoadCommand(pr *plugin.Registry) *cli.Command {
 			&cli.StringFlag{
 				Name:     "path",
 				Aliases:  []string{"p"},
-				Usage:    "Path to the plugin directory or WASM file",
+				Usage:    "Path to the plugin directory or Wasm file",
 				Required: true,
 			},
 		},

@@ -97,7 +97,7 @@ func newQueryCommand(pr *plugin.Registry) *cli.Command {
 				w = file
 			}
 
-			resultBytes, err := pr.CallFunction("sqlite", "query", []byte(query))
+			resultBytes, err := pr.CallFunction("sqlite", "query", query)
 			if err != nil {
 				return fmt.Errorf("failed to execute query: %w", err)
 			}

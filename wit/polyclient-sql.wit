@@ -1,0 +1,158 @@
+// polyclient.wit
+
+// Namespace and versioning following semantic versioning
+package polyclient:sql@0.1.0;
+
+// Common types shared across interfaces
+interface common-types {
+  // Core SQL value types
+  variant sql-value {
+    null, 
+    boolean(bool),
+    integer(s64),
+    float(f64),
+    text(string),
+    blob(list<u8>),
+    timestamp(u64),
+  }
+
+  // Error handling
+  variant error-kind {
+    connection-failed,
+    query-failed,
+    transaction-failed,
+    invalid-parameter,
+    timeout,
+    permission-denied,
+    not-supported,
+    other,
+  }
+
+  record error {
+    kind: error-kind,
+    message: string,
+    code: option<string>,
+  }
+}
+
+// Connection-related types and functions
+interface connection {
+  use common-types.{sql-value, error};
+
+  // Connection types
+  record connection-options {
+    url: string,
+    username: option<string>,
+    password: option<string>,
+    parameters: list<tuple<string, string>>,
+    timeout-ms: option<u32>,
+  }
+
+  // Connection operations
+  connect: func(options: connection-options) -> result<u32, error>;
+  disconnect: func(conn-id: u32) -> result<_, error>;
+  is-connected: func(conn-id: u32) -> bool;
+}
+
+// Query-related types and functions
+interface query {
+  use common-types.{sql-value, error};
+    
+  record column-info {
+    name: string,
+    type-name: string,
+    is-primary-key: bool,
+    is-auto-increment: bool,
+    is-unique: bool,
+    is-nullable: bool,
+    default-value: option<sql-value>,
+    precision: option<u32>,
+    scale: option<f32>,
+    comment: option<string>,
+    length: option<u32>,
+    collation: option<string>,     
+    ordinal-position: option<u32>,
+  }
+
+  record result-metadata {
+    columns: list<column-info>,
+    affected-rows: option<u64>,
+  } 
+
+  type row = list<sql-value>;
+
+  record result-set {
+    metadata: result-metadata,
+    rows: list<row>,
+  }
+
+  // Query execution
+  execute: func(conn-id: u32, query-text: string, params: list<sql-value>) -> result<result-set, error>;
+  execute-batch: func(conn-id: u32, queries: list<string>) -> result<list<result-set>, error>;
+  
+  // Prepared statements
+  prepare: func(conn-id: u32, query-text: string) -> result<u32, error>;
+  execute-prepared: func(conn-id: u32, stmt-id: u32, params: list<sql-value>) -> result<result-set, error>;
+  close-prepared: func(conn-id: u32, stmt-id: u32) -> result<_, error>;
+}
+
+// Transaction-related types and functions
+interface transaction {
+  use common-types.{error};
+  
+  // Transaction types
+  enum isolation-level {
+    read-uncommitted,
+    read-committed,
+    repeatable-read,
+    serializable,
+  }
+
+  // Transaction operations
+  begin-transaction: func(conn-id: u32, isolation: option<isolation-level>) -> result<u32, error>;
+  commit-transaction: func(conn-id: u32, transaction-id: u32) -> result<_, error>;
+  rollback-transaction: func(conn-id: u32, transaction-id: u32) -> result<_, error>;
+}
+
+// Schema-related types and functions
+interface schema {
+  use common-types.{error};
+  use query.{column-info};
+  
+  // Schema operations
+  get-tables: func(conn-id: u32, schema-name: option<string>) -> result<list<string>, error>;
+  get-columns: func(conn-id: u32, table: string, schema-name: option<string>) -> result<list<column-info>, error>;
+}
+
+// Metadata-related types and functions
+interface metadata {
+  use transaction.{isolation-level};
+  
+  // Feature support
+  supports-transactions: func() -> bool;
+  supports-prepared-statements: func() -> bool;
+  supports-batch-operations: func() -> bool;
+  supports-isolation-level: func(level: isolation-level) -> bool;
+
+  // Database-specific capabilities
+  get-capabilities: func() -> list<tuple<string, string>>;
+}
+
+// Performance-related types and functions
+interface performance {
+  use common-types.{error};
+
+  // Performance operations
+  get-performance-statistics: func(conn-id: u32) -> result<list<tuple<string, string>>, error>;
+}
+
+// Export the world that SQL plugins must implement
+world sql-plugin {
+  export common-types;
+  export connection;
+  export query;
+  export transaction;
+  export schema;
+  export metadata;
+  export performance;
+}
