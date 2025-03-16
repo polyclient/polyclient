@@ -5,37 +5,48 @@
 package plugin
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"path/filepath"
 	"strings"
 	"sync"
 
-	extism "github.com/extism/go-sdk"
-	"github.com/tetratelabs/wazero"
+	"github.com/bytecodealliance/wasmtime-go/v30"
 )
 
 // Registry manages discovery, loading, and execution of Wasm plugins.
 type Registry struct {
 	lookupDirs    []string
 	loadedPlugins map[string]*LoadedPlugin
+	engine        *wasmtime.Engine
+	linker        *wasmtime.Linker
 	mu            sync.RWMutex
 }
 
 // LoadedPlugin represents a loaded Wasm plugin.
 type LoadedPlugin struct {
-	wasmPath   string
-	wasmPlugin *extism.Plugin
-	manifest   *Manifest
+	wasmPath string
+	instance *wasmtime.Instance
+	store    *wasmtime.Store
+	manifest *Manifest
 }
 
 // NewPluginRegistry initializes a registry with specified lookup directories.
-func NewPluginRegistry(lookupDirs []string) *Registry {
+func NewPluginRegistry(lookupDirs []string) (*Registry, error) {
+	engine := wasmtime.NewEngine()
+	linker := wasmtime.NewLinker(engine)
+
+	err := linker.DefineWasi()
+	if err != nil {
+		return nil, fmt.Errorf("failed to define wasi: %w", err)
+	}
+
 	return &Registry{
 		lookupDirs:    lookupDirs,
 		loadedPlugins: map[string]*LoadedPlugin{},
-	}
+		engine:        engine,
+		linker:        linker,
+	}, nil
 }
 
 // GetWasmPath returns the Wasm file path for a plugin ID.
@@ -52,16 +63,16 @@ func (pr *Registry) GetWasmPath(id string) (string, error) {
 }
 
 // GetWasmPlugin returns the extism.Plugin instance for a plugin ID.
-func (pr *Registry) GetWasmPlugin(id string) (*extism.Plugin, error) {
+func (pr *Registry) GetWasmPlugin(id string) (*wasmtime.Instance, *wasmtime.Store, error) {
 	pr.mu.Lock()
 	defer pr.mu.Unlock()
 
 	plugin, ok := pr.loadedPlugins[id]
 	if !ok {
-		return nil, fmt.Errorf("failed to find plugin with id %s", id)
+		return nil, nil, fmt.Errorf("failed to find plugin with id %s", id)
 	}
 
-	return plugin.wasmPlugin, nil
+	return plugin.instance, plugin.store, nil
 }
 
 // GetManifest returns the manifest for a plugin ID.
@@ -78,30 +89,25 @@ func (pr *Registry) GetManifest(id string) (*Manifest, error) {
 }
 
 // CallFunction executes a function in the specified Wasm plugin.
-func (pr *Registry) CallFunction(pluginID, functionName string, input []byte) ([]byte, error) {
-	plugin, err := pr.GetWasmPlugin(pluginID)
+func (pr *Registry) CallFunction(pluginID, functionName, input string) ([]byte, error) {
+	instance, store, err := pr.GetWasmPlugin(pluginID)
 	if err != nil {
 		return nil, err
 	}
 
-	_, result, err := plugin.Call(functionName, input)
+	funcExport := instance.GetFunc(store, functionName)
+	if funcExport == nil {
+		return nil, fmt.Errorf("function %s not found", functionName)
+	}
+
+	val, err := funcExport.Call(store, input)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call function %s: %w", functionName, err)
 	}
 
-	return result, nil
-}
-
-// CallFunctionWithContext executes a function in the specified Wasm plugin with a context.
-func (pr *Registry) CallFunctionWithContext(ctx context.Context, pluginID, functionName string, input []byte) ([]byte, error) {
-	plugin, err := pr.GetWasmPlugin(pluginID)
-	if err != nil {
-		return nil, err
-	}
-
-	_, result, err := plugin.CallWithContext(ctx, functionName, input)
-	if err != nil {
-		return nil, fmt.Errorf("failed to call function %s: %w", functionName, err)
+	result, ok := val.([]byte)
+	if !ok {
+		return nil, fmt.Errorf("unexpected result type for function %s", functionName)
 	}
 
 	return result, nil
@@ -144,15 +150,28 @@ func (pr *Registry) LoadPlugin(manifestPath string) (*LoadedPlugin, error) {
 
 	wasmPath := filepath.Join(filepath.Dir(manifestPath), strings.TrimPrefix(manifest.Entrypoint, "./"))
 
-	wasmPlugin, err := loadWasmPlugin(manifest, wasmPath)
+	wasiConfig := wasmtime.NewWasiConfig()
+	wasiConfig.InheritStdout()
+	wasiConfig.InheritStderr()
+
+	store := wasmtime.NewStore(pr.engine)
+	store.SetWasi(wasiConfig)
+
+	module, err := wasmtime.NewModuleFromFile(pr.engine, wasmPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load plugin: %w", err)
+	}
+
+	wasmPlugin, err := pr.linker.Instantiate(store, module)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load plugin: %w", err)
 	}
 
 	plugin := &LoadedPlugin{
-		wasmPath,
-		wasmPlugin,
-		manifest,
+		wasmPath: wasmPath,
+		instance: wasmPlugin,
+		store:    store,
+		manifest: manifest,
 	}
 
 	pr.mu.Lock()
@@ -167,52 +186,12 @@ func (pr *Registry) UnloadPlugin(id string) error {
 	pr.mu.Lock()
 	defer pr.mu.Unlock()
 
-	ctx := context.Background()
-
-	plugin, ok := pr.loadedPlugins[id]
+	_, ok := pr.loadedPlugins[id]
 	if !ok {
 		return fmt.Errorf("failed to find plugin with id %s", id)
-	}
-
-	if err := plugin.wasmPlugin.Close(ctx); err != nil {
-		return fmt.Errorf("failed to close plugin: %w", err)
 	}
 
 	delete(pr.loadedPlugins, id)
 
 	return nil
-}
-
-// loadWasmPlugin loads a single Wasm plugin from a file path.
-func loadWasmPlugin(m *Manifest, wasmPath string) (*extism.Plugin, error) {
-	ctx := context.Background()
-	cache := wazero.NewCompilationCache()
-
-	defer func() {
-		if err := cache.Close(ctx); err != nil {
-			log.Printf("Error closing cache: %v\n", err)
-		}
-	}()
-
-	manifest := extism.Manifest{
-		Wasm: []extism.Wasm{
-			extism.WasmFile{
-				Name: m.ID,
-				Path: wasmPath,
-			},
-		},
-	}
-
-	config := extism.PluginConfig{
-		EnableWasi:    true,
-		ModuleConfig:  wazero.NewModuleConfig(),
-		RuntimeConfig: wazero.NewRuntimeConfig().WithCompilationCache(cache),
-	}
-
-	plugin, err := extism.NewPlugin(ctx, manifest, config, []extism.HostFunction{})
-	if err != nil {
-		return nil, fmt.Errorf("failed to load Wasm plugin: %w", err)
-	}
-
-	return plugin, nil
 }

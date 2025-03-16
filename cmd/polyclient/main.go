@@ -58,7 +58,10 @@ func loadPlugins() (*plugin.Registry, error) {
 
 	lookupPaths := []string{pluginsDir}
 
-	pr := plugin.NewPluginRegistry(lookupPaths)
+	pr, err := plugin.NewPluginRegistry(lookupPaths)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create plugin registry: %w", err)
+	}
 
 	if err := pr.LoadPlugins(); err != nil {
 		return nil, fmt.Errorf("failed to load plugins: %w", err)
