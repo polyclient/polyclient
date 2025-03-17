@@ -9,7 +9,7 @@ path = [
     "*.yaml",
     "*.toml",
     ".github/**/*",
-    "scripts/*",
+    "scripts/**/*",
     "gui/**/*",
     "wit/**/*",
     "bindings/**/*",
@@ -28,8 +28,3 @@ path = [
 ]
 SPDX-FileCopyrightText = "2025 The PolyClient Authors"
 SPDX-License-Identifier = "Apache-2.0"
-
-[[annotations]]
-path = "website/**/*"
-SPDX-FileCopyrightText = "2025 The PolyClient Authors"
-SPDX-License-Identifier = "CC-BY-4.0"
