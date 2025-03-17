@@ -46,7 +46,7 @@ checksum:
 nfpms:
   - maintainer: Juan Mesa <ju4n97@proton.me>
     package_name: polyclient
-    description: A versatile database client with support for SQL and NoSQL.
+    description: Modern SQL/NoSQL database client
     homepage: https://github.com/polyclient/polyclient
     license: GPL-3.0-or-later
     file_name_template: >-
