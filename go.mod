@@ -31,8 +31,8 @@ require (
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/tetratelabs/wabin v0.0.0-20230304001439-f6f874872834 // indirect
 	github.com/ulikunitz/xz v0.5.12 // indirect
-	go.bytecodealliance.org v0.6.0 // indirect
-	go.bytecodealliance.org/cm v0.2.0 // indirect
+	go.bytecodealliance.org v0.6.2 // indirect
+	go.bytecodealliance.org/cm v0.2.2 // indirect
 	go.opentelemetry.io/proto/otlp v1.3.1 // indirect
 	golang.org/x/crypto v0.33.0 // indirect
 	golang.org/x/mod v0.23.0 // indirect
