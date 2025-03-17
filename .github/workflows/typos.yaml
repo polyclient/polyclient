@@ -10,6 +10,9 @@ permissions:
 on:
   pull_request:
     types: [opened, reopened, synchronize]
+  push:
+    branches:
+      - master
 
 jobs:
   spelling:
@@ -21,3 +24,5 @@ jobs:
 
       - name: Spell check
         uses: crate-ci/typos@v1.30.0
+        with:
+          config: .typos.toml
