@@ -6,7 +6,7 @@ linters:
   disable-all: true
   enable:
     # General
-    - goheader # https://golangci-lint.run/usage/linters/#goheader
+    # - goheader # https://golangci-lint.run/usage/linters/#goheader // TODO: still not possible to have multiple headers (https://github.com/denis-tingaikin/go-header/issues/34)
     - revive # https://golangci-lint.run/usage/linters/#revive
     - misspell # https://golangci-lint.run/usage/linters/#misspell
 
@@ -55,14 +55,14 @@ linters:
     - tparallel # https://golangci-lint.run/usage/linters/#tparallel
 
 linters-settings:
-  goheader:
-    values:
-      regexp:
-        copyright-holder: "{{mod-year}} The PolyClient Authors"
-    template: |-
-      SPDX-FileCopyrightText: {{copyright-holder}}
+  # goheader:
+  #   values:
+  #     regexp:
+  #       copyright-holder: "{{mod-year}} The PolyClient Authors"
+  #   template: |-
+  #     SPDX-FileCopyrightText: {{copyright-holder}}
 
-      SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
+  #     SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
   revive:
     severity: error
