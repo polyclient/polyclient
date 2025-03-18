@@ -7,7 +7,7 @@ Closes: #ISSUE_NUMBER
 - [ ] I've checked the [contributing guidelines](../CONTRIBUTING.md).
 - [ ] I've added sufficient tests to cover my changes.
 - [ ] I've documented my code according to [Go Doc comments](https://go.dev/doc/comment).
-- [ ] I've updated the documentation on <https://polyclient.pages.dev/docs> **if necessary**.
+- [ ] I've updated the documentation on <https://polyclient.pages.dev/docs> ([Source](../docs)) **if necessary**.
 
 ## Additional notes (optional)
 

@@ -145,6 +145,7 @@ linters-settings:
               "WebRTC",
               "WebSocket",
               "WebWorker",
+              "WSL",
               "XML",
               "XSS",
               "YAML",
