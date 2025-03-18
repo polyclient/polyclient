@@ -120,7 +120,8 @@ TBD
 - Install:
   - [Go >= 1.24](https://go.dev)
   - [Task](https://taskfile.dev)
-  - [Bun](https://bun.sh)
+  - (optional) [Bun](https://bun.sh) to run the GUI.
+  - (optional) [mdBook](https://rust-lang.github.io/mdBook/) and [mdBook-mermaid](https://crates.io/crates/mdbook-mermaid/) to run the documentation.
 - Run `task install` to install the project dependencies.
 - Run `task --list` to list all the available tasks.
 
@@ -141,4 +142,4 @@ Refer to the [contributor's guide](CONTRIBUTING.md) for more in-depth informatio
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fpolyclient%2Fpolyclient.svg?type=large&issueType=license)](https://app.fossa.com/projects/git%2Bgithub.com%2Fpolyclient%2Fpolyclient?ref=badge_large&issueType=license)
 
-This project adheres to the [SPDX](https://spdx.dev/) standard. Plugins are licensed under [Apache-2.0](LICENSES/Apache-2.0.txt). Everything else is licensed under [GPL-3.0-or-later](LICENSES/GPL-3.0-or-later.txt) with a [Plugin Exception](LICENSES/LicenseRef-PolyClient-Plugin-Exception.txt). License management is handled according to the [REUSE Specification](https://reuse.software/spec-3.3/).
+This project adheres to the [SPDX](https://spdx.dev/) standard. Plugins and documentation are licensed under [Apache-2.0](LICENSES/Apache-2.0.txt). Everything else is licensed under [GPL-3.0-or-later](LICENSES/GPL-3.0-or-later.txt) with a [Plugin Exception](LICENSES/LicenseRef-PolyClient-Plugin-Exception.txt). License management is handled according to the [REUSE Specification](https://reuse.software/spec-3.3/).

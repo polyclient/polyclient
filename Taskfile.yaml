@@ -23,6 +23,10 @@ tasks:
     deps:
       - build:plugins
 
+  dev:docs:
+    desc: Run the documentation server for local development
+    cmd: mdbook serve docs
+
   build:
     desc: Build the CLI binary
     cmd: goreleaser build --snapshot --clean
@@ -30,6 +34,10 @@ tasks:
   build:single-target:
     desc: Build the CLI binary
     cmd: goreleaser build --snapshot --clean --single-target
+
+  build:docs:
+    desc: Build the documentation static site
+    cmd: mdbook build docs
 
   build:plugins:
     desc: Build the plugins for Wasm target

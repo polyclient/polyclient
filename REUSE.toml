@@ -25,6 +25,7 @@ path = [
     "plugins/**/LICENSE.txt",
     "plugins/**/README.md",
     "schema/plugin-manifest.json",
+    "docs/**/*",
 ]
 SPDX-FileCopyrightText = "2025 The PolyClient Authors"
 SPDX-License-Identifier = "Apache-2.0"
