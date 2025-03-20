@@ -81,7 +81,7 @@ PolyClient is a fast, extensible, and cross-platform database management platfor
   - ⚠️ Limited: Partial functionality, potential issues.
   - 🚧 Developing: Actively being developed, may have changes.
   - 🗓️ Upcoming: Scheduled for future release.
-- **First Available Version:** Version `x.y.z` where support was introduced.
+- **Version:** Version `x.y.z` where support was introduced.
 
 | Database        | Type        | Support Status | Version | Reference                                                                                           |
 | :-------------- | :---------- | :------------- | :------ | :-------------------------------------------------------------------------------------------------- |
