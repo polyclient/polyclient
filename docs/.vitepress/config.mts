@@ -1,4 +1,9 @@
 import { DefaultTheme, defineConfig } from "vitepress";
+import { resolve } from "path";
+import { readFileSync } from "fs";
+
+const versionFilePath = resolve(__dirname, "../../version.txt");
+const version = readFileSync(versionFilePath, "utf-8").trim();
 
 const sidebarGuide = [
 	{
@@ -146,7 +151,7 @@ export default defineConfig({
 			{ text: "API", link: "/api" },
 			{ text: "Plugins", link: "/plugins" },
 			{
-				text: "v0.0.0",
+				text: `v${version}`,
 				items: [
 					{
 						text: "Releases",

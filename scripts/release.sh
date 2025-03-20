@@ -25,6 +25,9 @@ is_semver "$VERSION"
 
 TAG="v$VERSION"
 
+echo "Updating version.txt"
+printf "%s" "$VERSION" | tee version.txt >/dev/null
+
 echo "Creating tag: $TAG"
 git tag -a "$TAG" -m "publish $TAG"
 echo "✅ Tag $TAG created successfully"

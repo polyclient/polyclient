@@ -11,6 +11,7 @@
     "vitepress": "^1.6.3"
   },
   "devDependencies": {
+    "@types/bun": "^1.2.5",
     "unocss": "^66.1.0-beta.6"
   }
 }
