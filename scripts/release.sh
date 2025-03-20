@@ -16,12 +16,20 @@ function is_semver() {
 	fi
 }
 
+function ensure_clean_git() {
+	if ! git diff-index --quiet HEAD --; then
+		echo "❌ Uncommitted changes detected. Commit or stash them before proceeding."
+		exit 1
+	fi
+}
+
 if [[ $# -ne 1 ]]; then
 	usage
 fi
 
 VERSION=$1
 is_semver "$VERSION"
+ensure_clean_git
 
 TAG="v$VERSION"
 
