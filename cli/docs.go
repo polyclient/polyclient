@@ -19,7 +19,7 @@ func NewDocsCommand() *cli.Command {
 		Name:  "docs",
 		Usage: "Launch PolyClient's documentation website",
 		Action: func(context.Context, *cli.Command) error {
-			url := "https://polyclient.pages.dev/docs"
+			url := "https://polyclient.pages.dev"
 
 			if runtime.GOOS == "windows" {
 				return exec.Command("cmd", "/c", "start", url).Start()

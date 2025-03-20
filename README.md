@@ -12,7 +12,7 @@
 
 ---
 
-[**Website**](https://polyclient.pages.dev) · [**Documentation**](https://polyclient.pages.dev/docs) · [**Blog**](https://polyclient.pages.dev/blog) · [**Plugins**](https://polyclient.pages.dev/plugins)
+[**Documentation**](https://polyclient.pages.dev) · [**Plugins**](https://polyclient.pages.dev/plugins)
 
 ---
 
@@ -120,8 +120,7 @@ TBD
 - Install:
   - [Go >= 1.24](https://go.dev)
   - [Task](https://taskfile.dev)
-  - (optional) [Bun](https://bun.sh) to run the GUI.
-  - (optional) [mdBook](https://rust-lang.github.io/mdBook/) and [mdBook-mermaid](https://crates.io/crates/mdbook-mermaid/) to run the documentation.
+  - [Bun](https://bun.sh) to run the GUI and documentation.  
 - Run `task install` to install the project dependencies.
 - Run `task --list` to list all the available tasks.
 

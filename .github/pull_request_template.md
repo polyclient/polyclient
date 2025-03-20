@@ -1,13 +1,13 @@
-<!-- If this PR resolves an issue, please include 'Closes #ISSUE_NUMBER'. For example: Closes #123 -->
+<!-- If this PR resolves an issue, please include 'Closes #<issue number>'. For example: Closes #123 -->
 
-Closes: #ISSUE_NUMBER
+Closes: #
 
 ## Checklist before submitting
 
 - [ ] I've checked the [contributing guidelines](../CONTRIBUTING.md).
 - [ ] I've added sufficient tests to cover my changes.
 - [ ] I've documented my code according to [Go Doc comments](https://go.dev/doc/comment).
-- [ ] I've updated the documentation on <https://polyclient.pages.dev/docs> ([Source](../docs)) **if necessary**.
+- [ ] I've updated the documentation on <https://polyclient.pages.dev> ([Source](../docs)) **if necessary**.
 
 ## Additional notes (optional)
 

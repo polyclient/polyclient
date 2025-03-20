@@ -1,6 +1,6 @@
 # Contributor's guide
 
-This page provides information on reporting issues and guidelines for open-source contributors. Before contributing, review the PolyClient [documentation](https://polyclient.pages.dev/docs) for project context.
+This page provides information on reporting issues and guidelines for open-source contributors. Before contributing, review the PolyClient [documentation](https://polyclient.pages.dev) for project context.
 
 ## License
 
@@ -11,9 +11,9 @@ By contributing, you agree to license your contributions under the project's app
 We welcome community contributions. Here's how you can help:
 
 - **Feature requests:** Share ideas via [feedback discussions](https://github.com/polyclient/polyclient/discussions). Accepted ideas become issues.
-- **Documentation:** Fix typos or links with pull requests. For major changes, use issues on <https://github.com/polyclient/website>.
+- **Documentation:** Fix typos or links with pull requests. For major changes, submit an issue first.
 - **Bug discovery:** Report new bugs ([check existing issues](https://github.com/polyclient/polyclient/issues)). Fix them or leave them for others.
-- **Plugin authoring:** Extend functionality by creating plugins. [Plugin docs](https://polyclient.pages.dev/docs/plugins).
+- **Plugin authoring:** Extend functionality by creating plugins. [Plugin docs](https://polyclient.pages.dev/plugins).
 
 ## Contribution Workflow
 

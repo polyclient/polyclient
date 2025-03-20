@@ -7,15 +7,27 @@ tasks:
   install:
     desc: Install the project dependencies and devtools
     cmds:
+      - task: init:workspace
+    deps:
+      - install:go
+      - install:docs
+
+  install:go:
+    desc: Install the project dependencies
+    cmds:
       - go mod tidy
       - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
       - go install github.com/evilmartians/lefthook@latest
-      - task: init:workspace
+
+  install:docs:
+    desc: Install the documentation dependencies
+    cmds:
+      - bun --cwd=docs install
 
   init:workspace:
     desc: Initialize Go workspace
     cmds:
-      - ./scripts/init_workspace.sh
+      - ./scripts/init-workspace.sh
 
   dev:
     desc: Run the CLI in development mode for testing and debugging
@@ -25,7 +37,7 @@ tasks:
 
   dev:docs:
     desc: Run the documentation server for local development
-    cmd: mdbook serve docs
+    cmd: bun --cwd=docs run dev
 
   build:
     desc: Build the CLI binary
@@ -37,7 +49,7 @@ tasks:
 
   build:docs:
     desc: Build the documentation static site
-    cmd: mdbook build docs
+    cmd: bun --cwd=docs run build
 
   build:plugins:
     desc: Build the plugins for Wasm target
