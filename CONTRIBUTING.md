@@ -40,9 +40,9 @@ We follow [Effective Go](https://go.dev/doc/effective_go) principles, ensuring c
 
 We use trunk-based development (<https://trunkbaseddevelopment.com>).
 
-1. Developers work on short-lived branches off master, integrating changes frequently.
-2. Create a pull request to merge into master. At least one maintainer must approve.
-3. Approved pull requests are merged into master, triggering automated workflows.
+1. Developers work on short-lived branches off main, integrating changes frequently.
+2. Create a pull request to merge into main. At least one maintainer must approve.
+3. Approved pull requests are merged into main, triggering automated workflows.
 
 ```mermaid
 gitGraph

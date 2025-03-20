@@ -5,7 +5,7 @@
 
 <!-- TODO: replace with cool GIF -->
 <a href="https://github.com/polyclient/polyclient">
-  <img src="https://github.com/polyclient/polyclient/blob/master/.github/assets/banner.png" alt="PolyClient Banner" width="100%" height="200"/>
+  <img src="https://github.com/polyclient/polyclient/blob/main/.github/assets/banner.png" alt="PolyClient Banner" width="100%" height="200"/>
 </a>
 
 [*Temp banner*]
@@ -40,7 +40,7 @@ PolyClient is a fast, extensible, and cross-platform database management platfor
 
 - 📤📥 Versatile data import and export capabilities:
   - Export to CSV, TSV, JSON, XML, HTML, YAML, TOML, Markdown.
-  - Import from CSV, TSV, JSON, XML, SQL dumps.  
+  - Import from CSV, TSV, JSON, XML, SQL dumps.
 - 💾 Backup and restore functionality:
   - Scheduled automated backups.
   - Point-in-time recovery options.
@@ -76,32 +76,29 @@ PolyClient is a fast, extensible, and cross-platform database management platfor
 
 **Legend:**
 
-- **Support Status:**
+- **Status:**
   - ✅ Supported: Fully functional and reliable.
   - ⚠️ Limited: Partial functionality, potential issues.
   - 🚧 Developing: Actively being developed, may have changes.
   - 🗓️ Upcoming: Scheduled for future release.
 - **Version:** Version `x.y.z` where support was introduced.
 
-| Database        | Type        | Support Status | Version | Reference                                                                                           |
-| :-------------- | :---------- | :------------- | :------ | :-------------------------------------------------------------------------------------------------- |
-| PostgreSQL      | Relational  | 🗓️ Upcoming    | TBD     | [Source](plugins/postgresql) · [Documentation](https://polyclient.pages.dev/databases/postgresql)   |
-| MySQL           | Relational  | 🗓️ Upcoming    | TBD     | [Source](plugins/mysql) · [Documentation](https://polyclient.pages.dev/databases/mysql)             |
-| SQLite          | Relational  | 🚧 Developing  | TBD     | [Source](plugins/sqlite) · [Documentation](https://polyclient.pages.dev/databases/sqlite)           |
-| SQL Server      | Relational  | 🗓️ Upcoming    | TBD     | [Source](plugins/mssql) · [Documentation](https://polyclient.pages.dev/databases/mssql)             |
-| Oracle Database | Relational  | 🗓️ Upcoming    | TBD     | [Source](plugins/oracle) · [Documentation](https://polyclient.pages.dev/databases/oracle)           |
-| MariaDB         | Relational  | 🗓️ Upcoming    | TBD     | [Source](plugins/mariadb) · [Documentation](https://polyclient.pages.dev/databases/mariadb)         |
-| Firebird        | Relational  | 🗓️ Upcoming    | TBD     | [Source](plugins/firebird) · [Documentation](https://polyclient.pages.dev/databases/firebird)       |
-| LibSQL          | Relational  | 🗓️ Upcoming    | TBD     | [Source](plugins/libsql) · [Documentation](https://polyclient.pages.dev/databases/libsql)           |
-|                 |             |                |         |                                                                                                     |
-| MongoDB         | NoSQL       | 🗓️ Upcoming    | TBD     | [Source](plugins/mongodb) · [Documentation](https://polyclient.pages.dev/databases/mongodb)         |
-| Redis           | NoSQL       | 🗓️ Upcoming    | TBD     | [Source](plugins/redis) · [Documentation](https://polyclient.pages.dev/databases/redis)             |
-| Cassandra       | NoSQL       | 🗓️ Upcoming    | TBD     | [Source](plugins/cassandra) · [Documentation](https://polyclient.pages.dev/databases/cassandra)     |
-|                 |             |                |         |                                                                                                     |
-| CockroachDB     | Distributed | 🗓️ Upcoming    | TBD     | [Source](plugins/cockroachdb) · [Documentation](https://polyclient.pages.dev/databases/cockroachdb) |
-|                 |             |                |         |                                                                                                     |
-| DuckDB          | Analytical  | 🗓️ Upcoming    | TBD     | [Source](plugins/duckdb) · [Documentation](https://polyclient.pages.dev/databases/duckdb)           |
-| ClickHouse      | Analytical  | 🗓️ Upcoming    | TBD     | [Source](plugins/clickhouse) · [Documentation](https://polyclient.pages.dev/databases/clickhouse)   |
+| Database                                                                      | Type        | Support Status | Version | Reference                                                                                                                        |
+| :---------------------------------------------------------------------------- | :---------- | :------------- | :------ | :------------------------------------------------------------------------------------------------------------------------------- |
+| [PostgreSQL](https://www.postgresql.org)                                      | Relational  | 🗓️ Upcoming    | TBD     | [Source](https://github.com/your-repo/plugins/postgresql) · [Documentation](https://polyclient.pages.dev/databases/postgresql)   |
+| [MySQL](https://www.mysql.com/)                                               | Relational  | 🗓️ Upcoming    | TBD     | [Source](https://github.com/your-repo/plugins/mysql) · [Documentation](https://polyclient.pages.dev/databases/mysql)             |
+| [SQLite](https://www.sqlite.org/index.html)                                   | Relational  | 🚧 Developing  | TBD     | [Source](https://github.com/your-repo/plugins/sqlite) · [Documentation](https://polyclient.pages.dev/databases/sqlite)           |
+| [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) | Relational  | 🗓️ Upcoming    | TBD     | [Source](https://github.com/your-repo/plugins/mssql) · [Documentation](https://polyclient.pages.dev/databases/mssql)             |
+| [Oracle Database](https://www.oracle.com/database/)                           | Relational  | 🗓️ Upcoming    | TBD     | [Source](https://github.com/your-repo/plugins/oracle) · [Documentation](https://polyclient.pages.dev/databases/oracle)           |
+| [MariaDB](https://mariadb.org/)                                               | Relational  | 🗓️ Upcoming    | TBD     | [Source](https://github.com/your-repo/plugins/mariadb) · [Documentation](https://polyclient.pages.dev/databases/mariadb)         |
+| [Firebird](https://firebirdsql.org/)                                          | Relational  | 🗓️ Upcoming    | TBD     | [Source](https://github.com/your-repo/plugins/firebird) · [Documentation](https://polyclient.pages.dev/databases/firebird)       |
+| [LibSQL](https://libsql.org/)                                                 | Relational  | 🗓️ Upcoming    | TBD     | [Source](https://github.com/your-repo/plugins/libsql) · [Documentation](https://polyclient.pages.dev/databases/libsql)           |
+| [MongoDB](https://www.mongodb.com/)                                           | NoSQL       | 🗓️ Upcoming    | TBD     | [Source](https://github.com/your-repo/plugins/mongodb) · [Documentation](https://polyclient.pages.dev/databases/mongodb)         |
+| [Redis](https://redis.io/)                                                    | NoSQL       | 🗓️ Upcoming    | TBD     | [Source](https://github.com/your-repo/plugins/redis) · [Documentation](https://polyclient.pages.dev/databases/redis)             |
+| [Cassandra](https://cassandra.apache.org/)                                    | NoSQL       | 🗓️ Upcoming    | TBD     | [Source](https://github.com/your-repo/plugins/cassandra) · [Documentation](https://polyclient.pages.dev/databases/cassandra)     |
+| [CockroachDB](https://www.cockroachlabs.com/)                                 | Distributed | 🗓️ Upcoming    | TBD     | [Source](https://github.com/your-repo/plugins/cockroachdb) · [Documentation](https://polyclient.pages.dev/databases/cockroachdb) |
+| [DuckDB](https://duckdb.org/)                                                 | Analytical  | 🗓️ Upcoming    | TBD     | [Source](https://github.com/your-repo/plugins/duckdb) · [Documentation](https://polyclient.pages.dev/databases/duckdb)           |
+| [ClickHouse](https://clickhouse.com/)                                         | Analytical  | 🗓️ Upcoming    | TBD     | [Source](https://github.com/your-repo/plugins/clickhouse) · [Documentation](https://polyclient.pages.dev/databases/clickhouse)   |
 
 ## Installation
 
@@ -120,7 +117,7 @@ TBD
 - Install:
   - [Go >= 1.24](https://go.dev)
   - [Task](https://taskfile.dev)
-  - [Bun](https://bun.sh) to run the GUI and documentation.  
+  - [Bun](https://bun.sh) to run the GUI and documentation.
 - Run `task install` to install the project dependencies.
 - Run `task --list` to list all the available tasks.
 
