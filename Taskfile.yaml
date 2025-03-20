@@ -10,7 +10,6 @@ tasks:
       - task: init:workspace
     deps:
       - install:go
-      - install:docs
 
   install:go:
     desc: Install the project dependencies
@@ -18,11 +17,6 @@ tasks:
       - go mod tidy
       - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
       - go install github.com/evilmartians/lefthook@latest
-
-  install:docs:
-    desc: Install the documentation dependencies
-    cmds:
-      - bun --cwd=docs install
 
   init:workspace:
     desc: Initialize Go workspace
@@ -35,10 +29,6 @@ tasks:
     deps:
       - build:plugins
 
-  dev:docs:
-    desc: Run the documentation server for local development
-    cmd: bun --cwd=docs run dev
-
   build:
     desc: Build the CLI binary
     cmd: goreleaser build --snapshot --clean
@@ -46,10 +36,6 @@ tasks:
   build:single-target:
     desc: Build the CLI binary
     cmd: goreleaser build --snapshot --clean --single-target
-
-  build:docs:
-    desc: Build the documentation static site
-    cmd: bun --cwd=docs run build
 
   build:plugins:
     desc: Build the plugins for Wasm target

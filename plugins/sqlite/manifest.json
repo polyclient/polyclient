@@ -13,7 +13,7 @@
     }
   ],
   "license": "SEE LICENSE IN LICENSE.txt",
-  "repository": "https://github.com/polyclient/polyclient/tree/master/plugins/sqlite",
+  "repository": "https://github.com/polyclient/polyclient/tree/main/plugins/sqlite",
   "homepage": "https://polyclient.pages.dev/plugins/sqlite",
   "keywords": ["sql", "sqlite", "database"],
   "entrypoint": "sqlite-plugin.wasm"

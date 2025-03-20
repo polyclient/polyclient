@@ -10,7 +10,7 @@ import "fmt"
 // build holds the build metadata and is populated at build time.
 var (
 	version     = "dev"     // Git tag (e.g., "v1.2.3")
-	branch      = "unknown" // Git branch (e.g., "master")
+	branch      = "unknown" // Git branch (e.g., "main")
 	shortCommit = "none"    // Git short commit SHA (e.g., "0fd6153")
 	fullCommit  = "none"    // Git full commit SHA (e.g., "0fd6153429327455ec5bca2cda839116cfcb6a19")
 	date        = "unknown" // Build date in RFC3339 format (e.g., "2025-03-02T18:46:18Z")

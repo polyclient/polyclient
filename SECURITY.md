@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-This project does not provide long-term support for older versions. Only the current release and the `master` branch are supported.
+This project does not provide long-term support for older versions. Only the current release and the `main` branch are supported.
 
 ## Reporting a Vulnerability
 
