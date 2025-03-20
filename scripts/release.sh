@@ -33,13 +33,16 @@ ensure_clean_git
 
 TAG="v$VERSION"
 
-echo "Updating version.txt"
-printf "%s" "$VERSION" | tee version.txt >/dev/null
-
 echo "Creating tag: $TAG"
 git tag -a "$TAG" -m "publish $TAG"
 echo "✅ Tag $TAG created successfully"
 
+echo "Updating version.txt"
+printf "%s" "$VERSION" | tee version.txt >/dev/null
+
 echo "Pushing tag: $TAG"
+git add version.txt
+git commit -m "release: version $VERSION"
+git push origin HEAD
 git push origin "$TAG"
 echo "✅ Tag $TAG pushed successfully"
