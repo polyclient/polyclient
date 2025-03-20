@@ -37,6 +37,7 @@ func main() {
 		HideHelpCommand:       true,
 		Commands: []*cli.Command{
 			pCli.NewVersionCommand(),
+			pCli.NewDocsCommand(),
 			pCli.NewDatabaseCommand(pr),
 			pCli.NewPluginCommand(pr),
 			pCli.NewGUICommand(),

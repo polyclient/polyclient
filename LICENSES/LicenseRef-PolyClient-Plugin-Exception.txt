@@ -29,7 +29,7 @@ code beyond what is strictly necessary to interact with the Interface.
 
 "Interface" refers to the documented set of functions, types, and
 protocols that enable communication between the Program and linked
-Modules. The Interface is documented at https://polyclient.pages.dev/docs/plugins.
+Modules. The Interface is documented at https://polyclient.pages.dev/plugins.
 
 1. Grant of Additional Permission
 
