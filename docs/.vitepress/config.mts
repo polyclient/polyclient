@@ -170,7 +170,7 @@ export default defineConfig({
 			"/plugins/": sidebarPlugins,
 		},
 		editLink: {
-			pattern: "https://github.com/polyclient/polyclient/edit/main/:path",
+			pattern: "https://github.com/polyclient/polyclient/blob/master/docs/:path",
 			text: "Suggest changes to this page",
 		},
 		socialLinks: [{ icon: "github", link: "https://github.com/polyclient/polyclient" }],
