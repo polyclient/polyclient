@@ -7,7 +7,6 @@ require (
 	github.com/go-playground/validator/v10 v10.25.0
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v3 v3.0.0-beta1
-	go.bytecodealliance.org/cm v0.2.2
 )
 
 require (
