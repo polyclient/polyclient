@@ -2,41 +2,54 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
-package database
+package databasex
 
 import (
 	"context"
 )
 
-// SQLDriver extends Driver with SQL-specific functionality.
-type SQLDriver interface {
-	Driver
-
+// SQLSchemaInspector handles schema inspection operations.
+type SQLSchemaInspector interface {
 	// GetSchema returns database schema information.
 	GetSchema(ctx context.Context, conn Connection) (Schema, error)
+}
 
+// SQLQueryExplainer handles query execution plan operations.
+type SQLQueryExplainer interface {
 	// ExplainQuery returns the query execution plan.
 	ExplainQuery(ctx context.Context, conn Connection, query string) (string, error)
+}
 
+// SQLStatementPreparer handles prepared statements operations.
+type SQLStatementPreparer interface {
 	// PrepareStatement creates a prepared statement.
 	PrepareStatement(ctx context.Context, conn Connection, query string) (SQLPreparedStatement, error)
+}
 
+// SQLDialectProvider handles SQL dialect operations.
+type SQLDialectProvider interface {
 	// GetDialect returns information about the SQL dialect.
 	GetDialect() SQLDialect
 
 	// QuoteIdentifier quotes an identifier according to the SQL dialect.
 	QuoteIdentifier(identifier string) string
 
-	// GetDataTypes returns the data types supported by this
+	// GetDataTypes returns the data types supported by the SQL dialect.
 	GetDataTypes() []SQLDataType
+}
+
+// SQLDriver extends Driver with SQL-specific functionality.
+type SQLDriver interface {
+	Driver
+	SQLSchemaInspector
+	SQLQueryExplainer
+	SQLStatementPreparer
+	SQLDialectProvider
 }
 
 // SQLConnection extends Connection with SQL-specific functionality.
 type SQLConnection interface {
 	Connection
-
-	// PrepareStatement creates a prepared statement.
-	PrepareStatement(ctx context.Context, query string) (SQLPreparedStatement, error)
 
 	// GetTables returns a list of tables belonging to the specified schema.
 	GetTables(ctx context.Context, schema string) ([]Table, error)
@@ -90,6 +103,24 @@ type SQLDialect struct {
 	SupportsUpsert bool
 }
 
+// SQLExecutionPlan represents a query execution plan.
+type SQLExecutionPlan struct {
+	PlanMode     string
+	Operation    string
+	Relation     string
+	Alias        string
+	StartupCost  float64
+	TotalCost    float64
+	Rows         int
+	Width        int
+	FilteredRows float64
+	ActualTime   float64
+	ActualRows   int
+	Loops        int
+	SubPlans     []SQLExecutionPlan
+	Details      map[string]any
+}
+
 // SQLDataType represents an SQL data type.
 type SQLDataType struct {
 	// Name is the name of the data type.
@@ -118,22 +149,4 @@ type SQLDataType struct {
 
 	// DefaultScale is the default scale for the data type.
 	DefaultScale int
-}
-
-// SQLExecutionPlan represents a query execution plan.
-type SQLExecutionPlan struct {
-	PlanMode     string
-	Operation    string
-	Relation     string
-	Alias        string
-	StartupCost  float64
-	TotalCost    float64
-	Rows         int
-	Width        int
-	FilteredRows float64
-	ActualTime   float64
-	ActualRows   int
-	Loops        int
-	SubPlans     []SQLExecutionPlan
-	Details      map[string]any
 }

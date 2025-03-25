@@ -26,8 +26,6 @@ tasks:
   dev:
     desc: Run the CLI in development mode
     cmd: go run ./cmd/polyclient/main.go {{ .CLI_ARGS }}
-    deps:
-      - build:plugins
 
   build:
     desc: Build the CLI binary
@@ -43,8 +41,6 @@ tasks:
       - GOOS=wasip1 GOARCH=wasm go build -buildmode=c-shared -o ./plugins/sqlite/sqlite-plugin.wasm ./plugins/sqlite/main.go
       - mkdir -p .polyclientdev/plugins/sqlite
       - cp ./plugins/sqlite/manifest.json ./plugins/sqlite/sqlite-plugin.wasm .polyclientdev/plugins/sqlite/
-    deps:
-      - generate:bindings
 
   generate:bindings:
     desc: Generate bindings for Wasm plugins

@@ -2,36 +2,30 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
-package database
+package databasex
 
 import (
 	"fmt"
-	"strings"
 	"sync"
 )
 
 // Registry manages database drivers.
-type Registry[T AnyDriver] struct {
+type Registry[T any] struct {
 	mu      sync.RWMutex
 	drivers map[string]T
 }
 
 // newRegistry creates a new database registry.
-func NewRegistry[T AnyDriver]() *Registry[T] {
+func newRegistry[T any]() *Registry[T] {
 	return &Registry[T]{
 		drivers: map[string]T{},
 	}
 }
 
 // Register registers a database driver.
-func (r *Registry[T]) Register(driver T) error {
+func (r *Registry[T]) Register(name string, driver T) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-
-	name := strings.TrimSpace(driver.Name())
-	if name == "" {
-		return fmt.Errorf("driver name cannot be empty")
-	}
 
 	if _, exists := r.drivers[name]; exists {
 		return fmt.Errorf("driver %s already registered", name)
@@ -79,4 +73,19 @@ func (r *Registry[T]) Clear() {
 	defer r.mu.Unlock()
 
 	r.drivers = map[string]T{}
+}
+
+// global registry instance.
+var (
+	globalRegistry *Registry[Driver]
+	once           sync.Once
+)
+
+// GetGlobalRegistry returns the global database registry.
+func GetGlobalRegistry() *Registry[Driver] {
+	once.Do(func() {
+		globalRegistry = newRegistry[Driver]()
+	})
+
+	return globalRegistry
 }

@@ -12,10 +12,14 @@ import (
 	"os"
 
 	pCli "github.com/polyclient/polyclient/cli"
+	"github.com/polyclient/polyclient/internal/database"
 	"github.com/polyclient/polyclient/internal/env"
 	"github.com/polyclient/polyclient/internal/plugin"
 	"github.com/polyclient/polyclient/internal/version"
 	"github.com/urfave/cli/v3"
+
+	"github.com/polyclient/polyclient/drivers/sqlite"
+	_ "github.com/polyclient/polyclient/drivers/sqlite"
 )
 
 // main initializes and runs the PolyClient CLI application.
@@ -24,10 +28,15 @@ func main() {
 		log.Fatal("Error setting up environment:", err)
 	}
 
-	pr, err := loadPlugins()
+	driversRegistry, err := loadDrivers()
 	if err != nil {
-		log.Fatal("Error loading plugins:", err)
+		log.Fatal("Error loading database drivers:", err)
 	}
+
+	// pluginsRegistry, err := loadPlugins()
+	// if err != nil {
+	// 	log.Fatal("Error loading plugins:", err)
+	// }
 
 	cmd := &cli.Command{
 		Name:                  "PolyClient CLI",
@@ -38,8 +47,8 @@ func main() {
 		Commands: []*cli.Command{
 			pCli.NewVersionCommand(),
 			pCli.NewDocsCommand(),
-			pCli.NewDatabaseCommand(pr),
-			pCli.NewPluginCommand(pr),
+			pCli.NewDatabaseCommand(driversRegistry),
+			// pCli.NewPluginCommand(pluginsRegistry),
 			pCli.NewGUICommand(),
 		},
 	}
@@ -49,7 +58,17 @@ func main() {
 	}
 }
 
-// loadBuiltinPlugins loads the built-in PolyClient plugins into the plugin registry.
+func loadDrivers() (*database.Registry[database.AnyDriver], error) {
+	dr := database.NewRegistry[database.AnyDriver]()
+
+	if err := dr.Register(sqlite.NewDriver()); err != nil {
+		return nil, fmt.Errorf("failed to register SQLite driver: %w", err)
+	}
+
+	return dr, nil
+}
+
+// loadPlugins loads the built-in PolyClient plugins into the plugin registry.
 // The built-in plugins are loaded from the POLYCLIENT_PLUGINS_DIR environment variable.
 func loadPlugins() (*plugin.Registry, error) {
 	pluginsDir, err := env.GetManager().Get(env.EnvPolyClientPluginsDir)
