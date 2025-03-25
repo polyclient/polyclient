@@ -1,62 +1,43 @@
-// SPDX-FileCopyrightText: 2025 The PolyClient Authors
-//
-// SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
-
 package sqlite
 
 import (
-	"context"
-	"errors"
+	"database/sql"
+	"fmt"
 
 	"github.com/polyclient/polyclient/internal/database"
+	_ "modernc.org/sqlite"
 )
 
-// Driver implements the database.Driver interface for SQLite.
 type Driver struct{}
 
-// Name implements database.Driver.Name().
+func NewDriver() database.Driver[database.Connection] {
+	return &Driver{}
+}
+
 func (d *Driver) Name() string {
 	return "sqlite"
 }
 
-// Description implements database.Driver.Description().
-func (d *Driver) Description() string {
-	return "SQLite database driver for PolyClient"
+func (d *Driver) Type() database.DriverType {
+	return database.DriverTypeSQL
 }
 
-// Version implements database.Driver.Version().
-func (d *Driver) Version() string {
-	return "1.0.0"
-}
+func (d *Driver) CreateConnection(config database.ConnectionConfig) (database.Connection, error) {
+	fmt.Println("Creating SQLite connection...")
 
-// Capabilities implements database.Driver.Capabilities().
-func (d *Driver) Capabilities() database.DriverCapabilities {
-	return database.DriverCapabilities{
-		SupportsTransactions:        true,
-		SupportsSchemaIntrospection: true,
-		SupportsPreparedStatements:  true,
-		SupportsStoredProcedures:    false,
-		SupportsReplication:         false,
-		SupportsTLS:                 false,
-		SupportsSSH:                 false,
-		IsDistributed:               false,
-		IsEmbedded:                  true,
-		MaxConnections:              1,
+	cfg, ok := config.(*ConnectionConfig)
+	if !ok {
+		return nil, fmt.Errorf("invalid connection config")
 	}
-}
 
-// Connect implements database.Driver.Connect().
-func (d *Driver) Connect(ctx context.Context, connectionString string) (database.Connection, error) {
-	return nil, errors.New("not implemented")
-}
+	if err := cfg.Validate(); err != nil {
+		return nil, fmt.Errorf("failed to create connection: %w", err)
+	}
 
-// ValidateConnectionString implements database.Driver.ValidateConnectionString().
-func (d *Driver) ValidateConnectionString(connectionString string) error {
-	return errors.New("not implemented")
-}
+	sqlDB, err := sql.Open(d.Name(), cfg.Path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create connection: %w", err)
+	}
 
-// Register registers the SQLite driver in the global database registry.
-func Register() {
-	registry := database.GetGlobalRegistry()
-	_ = registry.RegisterDriver(&Driver{})
+	return &Connection{db: sqlDB}, nil
 }

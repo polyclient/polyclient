@@ -1,0 +1,295 @@
+run:
+  allow-parallel-runners: true
+  timeout: 5m
+
+linters:
+  disable-all: true
+  enable:
+    # General
+    - goheader # https://golangci-lint.run/usage/linters/#goheader // TODO: still not possible to have multiple headers (https://github.com/denis-tingaikin/go-header/issues/34)
+    - revive # https://golangci-lint.run/usage/linters/#revive
+    - misspell # https://golangci-lint.run/usage/linters/#misspell
+
+    # Code quality, correctness and security
+    - errorlint # https://golangci-lint.run/usage/linters/#errorlint
+    - gocognit # https://golangci-lint.run/usage/linters/#gocognit
+    - gocritic # https://golangci-lint.run/usage/linters/#gocritic
+    - gosec # https://golangci-lint.run/usage/linters/#gosec
+    - govet # https://golangci-lint.run/usage/linters/#govet
+    - musttag # https://golangci-lint.run/usage/linters/#musttag
+    - nilerr # https://golangci-lint.run/usage/linters/#nilerr
+    - nilnil # https://golangci-lint.run/usage/linters/#nilnil
+    - noctx # https://golangci-lint.run/usage/linters/#noctx
+    - staticcheck # https://golangci-lint.run/usage/linters/#staticcheck
+    - unconvert # https://golangci-lint.run/usage/linters/#unconvert
+
+    # Performance and efficiency
+    - bodyclose # https://golangci-lint.run/usage/linters/#bodyclose
+    - perfsprint # https://golangci-lint.run/usage/linters/#perfsprint
+    - prealloc # https://golangci-lint.run/usage/linters/#prealloc
+
+    # Code cleanliness
+    - godot # https://golangci-lint.run/usage/linters/#godot
+    - godox # https://golangci-lint.run/usage/linters/#godox
+    - gofmt # https://golangci-lint.run/usage/linters/#gofmt
+    - gosimple # https://golangci-lint.run/usage/linters/#gosimple
+    - grouper # https://golangci-lint.run/usage/linters/#grouper
+    - dupword # https://golangci-lint.run/usage/linters/#dupword
+    - mnd # https://golangci-lint.run/usage/linters/#mnd
+    - whitespace # https://golangci-lint.run/usage/linters/#whitespace
+    - wsl # https://golangci-lint.run/usage/linters/#wsl
+
+    # Modern Go practices
+    - gomodguard # https://golangci-lint.run/usage/linters/#gomodguard
+    - wastedassign # https://golangci-lint.run/usage/linters/#wastedassign
+
+    # Context and concurrency
+    - copyloopvar # https://golangci-lint.run/usage/linters/#copyloopvar
+    - fatcontext # https://golangci-lint.run/usage/linters/#fatcontext
+
+    # Testing
+    - predeclared # https://golangci-lint.run/usage/linters/#predeclared
+    - testifylint # https://golangci-lint.run/usage/linters/#testifylint
+    - testpackage # https://golangci-lint.run/usage/linters/#testpackage
+    - thelper # https://golangci-lint.run/usage/linters/#thelper
+    - tparallel # https://golangci-lint.run/usage/linters/#tparallel
+
+linters-settings:
+  goheader:
+    values:
+      regexp:
+        copyright-holder: "{{mod-year}} The PolyClient Authors"
+    template: |-
+      SPDX-FileCopyrightText: {{copyright-holder}}
+
+      SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
+
+  revive:
+    severity: error
+    confidence: 0.8
+    rules:
+      - name: line-length-limit
+        arguments: [200]
+      - name: var-naming
+        arguments:
+          [
+            [],
+            [
+              "AES",
+              "API",
+              "ASCII",
+              "AST",
+              "AWS",
+              "BOM",
+              "CLI",
+              "CPU",
+              "CSS",
+              "CSV",
+              "DNS",
+              "DOM",
+              "DOML",
+              "EOF",
+              "FTP",
+              "GUI",
+              "HTML",
+              "HTTP",
+              "HTTPS",
+              "ID",
+              "IDE",
+              "IP",
+              "IPv4",
+              "IPv6",
+              "IRC",
+              "ISO",
+              "JPEG",
+              "JSON",
+              "JWT",
+              "KPI",
+              "LDAP",
+              "LSP",
+              "MAC",
+              "MD5",
+              "MIME",
+              "MVC",
+              "NTP",
+              "OAuth",
+              "OS",
+              "PCI",
+              "PDF",
+              "PNG",
+              "REST",
+              "RSA",
+              "S3",
+              "SAML",
+              "SHA",
+              "SMTP",
+              "SOAP",
+              "SQL",
+              "SSH",
+              "SSL",
+              "TCP",
+              "TLS",
+              "TOML",
+              "TSV",
+              "UDP",
+              "UI",
+              "UID",
+              "UIX",
+              "URI",
+              "URL",
+              "UTF8",
+              "UUID",
+              "VPN",
+              "Wasm",
+              "WebGL",
+              "WebRTC",
+              "WebSocket",
+              "WebWorker",
+              "WSL",
+              "XML",
+              "XSS",
+              "YAML",
+              "ZIP",
+            ],
+          ]
+      - name: dot-imports
+      - name: duplicated-imports
+      - name: blank-imports
+      - name: exported
+      - name: receiver-naming
+      - name: increment-decrement
+      - name: indent-error-flow
+      - name: empty-lines
+      - name: early-return
+      - name: filename-format
+        arguments:
+          - "^[_a-z][_a-z0-9]*\\.go$"
+      - name: confusing-naming
+      - name: confusing-results
+      - name: empty-block
+        arguments:
+          - "if"
+          - "else"
+          - "for"
+          - "switch"
+      - name: superfluous-else
+      - name: unused-parameter
+      - name: unreachable-code
+      - name: error-naming
+      - name: error-return
+      - name: error-strings
+      - name: errorf
+      - name: use-errors-new
+      - name: unhandled-error
+        arguments:
+          - "fmt.Printf"
+          - "fmt.Println"
+          - "fmt.Print"
+          - "fmt.Fprintf"
+          - "log.Print"
+          - "log.Printf"
+          - "log.Println"
+          - "file.Close"
+          - "strings.Builder.WriteString"
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: enforce-map-style
+        arguments: ["literal"]
+      - name: enforce-slice-style
+        arguments: ["literal"]
+      - name: enforce-repeated-arg-type-style
+        arguments: ["short"]
+      - name: var-declaration
+      - name: time-naming
+      - name: use-any
+      - name: identical-branches
+      - name: if-return
+      - name: increment-decrement
+      - name: indent-error-flow
+      - name: unexported-return
+      - name: unexported-naming
+      - name: atomic
+      - name: waitgroup-by-value
+      - name: bool-literal-in-expr
+      - name: constant-logical-expr
+      - name: datarace
+      - name: deep-exit
+      - name: defer
+      - name: flag-parameter
+      - name: import-shadowing
+      - name: modifies-parameter
+      - name: modifies-value-receiver
+      - name: range
+      - name: range-val-in-closure
+      - name: range-val-address
+      - name: string-format
+      - name: struct-tag
+      - name: unconditional-recursion
+      - name: unnecessary-stmt
+      - name: useless-break
+      - name: comment-spacings
+      - name: cyclomatic
+        arguments: [15]
+
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+
+  govet:
+    enable:
+      - nilness
+      - reflectvaluecompare
+      - sortslice
+      - unusedwrite
+
+  mnd:
+    checks:
+      - argument
+      - case
+      - condition
+      - operation
+      - return
+      - assign
+    ignored-functions:
+      - '^math\.'
+      - '^http\.StatusText$'
+      - '^os\.Mkdir$'
+      - '^os\.MkdirAll$'
+      - '^os\.Chmod$'
+      - '^os\.OpenFile$'
+      - '^os\.WriteFile$'
+      - '^os\.Lstat$'
+      - '^os\.Stat$'
+      - '^os\.Fchmod$'
+      - '^os\.Fchmodat$'
+      - '^syscall\.Mkfifo$'
+      - '^syscall\.Mknod$'
+      - '^syscall\.Open$'
+      - '^syscall\.Fchmod$'
+
+  whitespace:
+    multi-if: true
+    multi-func: true
+
+  wsl:
+    allow-cuddle-declarations: true
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude-use-default: false
+  include:
+    - EXC0013 # exported type without comment
+    - EXC0014 # exported function without comment
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - gocritic
+        - gocyclo
+        - gosec
+        - govet
+        - noctx
