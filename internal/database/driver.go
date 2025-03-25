@@ -16,21 +16,23 @@ const (
 )
 
 // Driver represents a generic database driver.
-type Driver[T Connection] interface {
+type Driver interface {
 	Name() string
 	Type() DriverType
-	CreateConnection(config ConnectionConfig) (T, error)
+}
+
+type DriverConnector[T Connection] interface {
+	Connect(dsn string) (T, error)
 }
 
 // DriverSQL represents an SQL database driver.
 type DriverSQL interface {
-	Driver[ConnectionSQL]
+	Driver
+	DriverConnector[ConnectionSQL]
 }
 
 // DriverNoSQL represents a NoSQL database driver.
 type DriverNoSQL interface {
-	Driver[ConnectionNoSQL]
+	Driver
+	DriverConnector[ConnectionNoSQL]
 }
-
-// AnyDriver is an alias for Driver with Connection type.
-type AnyDriver = Driver[Connection]

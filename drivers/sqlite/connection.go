@@ -3,21 +3,7 @@ package sqlite
 import (
 	"context"
 	"database/sql"
-	"fmt"
 )
-
-// ConnectionConfig defines the configuration for SQLite.
-type ConnectionConfig struct {
-	Path string
-}
-
-func (c *ConnectionConfig) Validate() error {
-	if c.Path == "" {
-		return fmt.Errorf("missing path")
-	}
-
-	return nil
-}
 
 // Connection implements db.Connection.
 type Connection struct {
@@ -25,16 +11,21 @@ type Connection struct {
 }
 
 func (c *Connection) Close() error {
-	fmt.Println("Closing SQLite connection")
 	return c.db.Close()
 }
 
 func (c *Connection) Ping() error {
-	fmt.Println("Pinging SQLite connection")
 	return c.db.Ping()
 }
 
 func (c *Connection) PingContext(ctx context.Context) error {
-	fmt.Println("Pinging SQLite connection")
 	return c.db.PingContext(ctx)
+}
+
+func (c *Connection) Query(query string, args ...any) (*sql.Rows, error) {
+	return c.db.Query(query, args...)
+}
+
+func (c *Connection) QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
+	return c.db.QueryContext(ctx, query, args...)
 }

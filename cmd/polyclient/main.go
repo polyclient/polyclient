@@ -18,6 +18,7 @@ import (
 	"github.com/polyclient/polyclient/internal/version"
 	"github.com/urfave/cli/v3"
 
+	"github.com/polyclient/polyclient/drivers/postgres"
 	"github.com/polyclient/polyclient/drivers/sqlite"
 	_ "github.com/polyclient/polyclient/drivers/sqlite"
 )
@@ -58,11 +59,15 @@ func main() {
 	}
 }
 
-func loadDrivers() (*database.Registry[database.AnyDriver], error) {
-	dr := database.NewRegistry[database.AnyDriver]()
+func loadDrivers() (*database.Registry[database.Driver], error) {
+	dr := database.NewRegistry[database.Driver]()
 
 	if err := dr.Register(sqlite.NewDriver()); err != nil {
 		return nil, fmt.Errorf("failed to register SQLite driver: %w", err)
+	}
+
+	if err := dr.Register(postgres.NewDriver()); err != nil {
+		return nil, fmt.Errorf("failed to register PostgreSQL driver: %w", err)
 	}
 
 	return dr, nil

@@ -11,13 +11,13 @@ import (
 )
 
 // Registry manages database drivers.
-type Registry[T AnyDriver] struct {
+type Registry[T Driver] struct {
 	mu      sync.RWMutex
 	drivers map[string]T
 }
 
 // newRegistry creates a new database registry.
-func NewRegistry[T AnyDriver]() *Registry[T] {
+func NewRegistry[T Driver]() *Registry[T] {
 	return &Registry[T]{
 		drivers: map[string]T{},
 	}

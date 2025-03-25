@@ -67,3 +67,22 @@ tasks:
   test:
     desc: Run the project tests
     cmd: go test ./...
+
+  compose:db:all:
+    desc: Run all database containers
+    deps:
+      - compose:db:postgres
+      - compose:db:mysql
+      - compose:db:mongo
+
+  compose:db:postgres:
+    desc: Run the Postgres database container
+    cmd: docker-compose -f docker/docker-compose.postgres.yaml up -d
+
+  compose:db:mysql:
+    desc: Run the MySQL database container
+    cmd: docker-compose -f docker/docker-compose.mysql.yaml up -d
+
+  compose:db:mongo:
+    desc: Run the MongoDB database container
+    cmd: docker-compose -f docker/docker-compose.mongo.yaml up -d
