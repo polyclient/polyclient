@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: polyclient_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${PG_USER:-testuser}
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-testpassword}
+      POSTGRES_DB: ${PG_DB:-testdb}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${PG_USER:-testuser}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5  
+
+volumes:
+  postgres_data:

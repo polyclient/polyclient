@@ -4,25 +4,18 @@
 
 package database
 
-import "context"
-
 // Connection represents a generic database connection.
 type Connection interface {
 	Close() error
-	Ping() error
-	PingContext(ctx context.Context) error
 }
 
-type ConnectionConfig interface {
-	Validate() error
-}
-
-// ConnectionSQL represents an SQL database connection.
 type ConnectionSQL interface {
 	Connection
+	Pinger
+	SQLQuerier
 }
 
-// ConnectionNoSQL represents a NoSQL database connection.
 type ConnectionNoSQL interface {
 	Connection
+	Pinger
 }
