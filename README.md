@@ -12,7 +12,7 @@
 
 ---
 
-[**Documentation**](https://polyclient.pages.dev) · [**Plugins**](https://polyclient.pages.dev/plugins)
+[**Website**](https://polyclient.pages.dev) · [**Documentation**](https://polyclient.pages.dev/docs) · [**API**](https://polyclient.pages.dev/docs/api) · [**CLI**](https://polyclient.pages.dev/docs/cli) · [**GUI**](https://polyclient.pages.dev/docs/gui) · [**Plugins**](https://polyclient.pages.dev/plugins)
 
 ---
 
