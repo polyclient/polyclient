@@ -1,4 +1,4 @@
-package healthcheck
+package health
 
 import (
 	"encoding/json"
@@ -7,12 +7,11 @@ import (
 
 func NewHandler() http.Handler {
 	mux := http.NewServeMux()
-	mux.Handle("GET /healthcheck", http.HandlerFunc(check))
-
-	return http.StripPrefix("/healthcheck", mux)
+	mux.HandleFunc("GET /", getHealth)
+	return mux
 }
 
-func check(w http.ResponseWriter, r *http.Request) {
+func getHealth(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"status": "OK"})
 }

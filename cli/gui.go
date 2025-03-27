@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"runtime"
+	"strconv"
 	"syscall"
 	"time"
 
@@ -27,7 +28,7 @@ func NewGUICommand() *cli.Command {
 		Usage: "Launch the PolyClient GUI",
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			server := api.NewServer()
-			url := "http://localhost" + server.HttpServer.Addr
+			url := "http://localhost:" + strconv.Itoa(server.Port)
 			log.Printf("Starting server at: %s", url)
 
 			sigCtx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
