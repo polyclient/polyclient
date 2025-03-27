@@ -10,6 +10,7 @@ tasks:
       - task: init:workspace
     deps:
       - install:go
+      - install:gui
 
   install:go:
     desc: Install the project dependencies
@@ -17,6 +18,11 @@ tasks:
       - go mod tidy
       - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
       - go install github.com/evilmartians/lefthook@latest
+
+  install:gui:
+    desc: Install the GUI dependencies
+    cmds:
+      - bun install --cwd gui
 
   init:workspace:
     desc: Initialize Go workspace
@@ -34,6 +40,10 @@ tasks:
   build:single-target:
     desc: Build the CLI binary
     cmd: goreleaser build --snapshot --clean --single-target
+
+  build:gui:
+    desc: Build the GUI binary
+    cmd: bun run --cwd gui build
 
   build:plugins:
     desc: Build the plugins for Wasm target

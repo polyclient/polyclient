@@ -1,18 +1,22 @@
 {
-  "name": "gui",
-  "module": "index.ts",
-  "type": "module",
+  "name": "guix",
   "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "bun index.html",
-    "build": "bun run build.ts"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "bun-plugin-svelte": "^0.0.5",
-    "svelte": "^5.23.0"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
+    "@sveltejs/vite-plugin-svelte": "^5.0.3",
+    "@tailwindcss/vite": "^4.0.17",
+    "@tsconfig/svelte": "^5.0.4",
+    "svelte": "^5.20.2",
+    "svelte-check": "^4.1.4",
+    "tailwindcss": "^4.0.17",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0"
   }
 }
