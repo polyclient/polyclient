@@ -12,7 +12,10 @@ import (
 )
 
 type Server struct {
-	HttpServer *http.Server
+	Addr string
+	Port int
+
+	httpServer *http.Server
 }
 
 func NewServer() *Server {
@@ -27,25 +30,27 @@ func NewServer() *Server {
 	)
 
 	httpServer := &http.Server{
-		Addr:              fmt.Sprintf(":%d", port),
+		Addr:              fmt.Sprintf("localhost:%d", port),
 		Handler:           stack(router),
+		ReadTimeout:       5 * time.Second,
+		WriteTimeout:      5 * time.Second,
 		ReadHeaderTimeout: 3 * time.Second,
 		IdleTimeout:       30 * time.Second,
 	}
 
-	return &Server{HttpServer: httpServer}
+	return &Server{
+		Addr:       httpServer.Addr,
+		Port:       port,
+		httpServer: httpServer,
+	}
 }
 
 func (s *Server) ListenAndServe() error {
-	if err := s.HttpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		return err
-	}
-
-	return nil
+	return s.httpServer.ListenAndServe()
 }
 
 func (s *Server) Shutdown(ctx context.Context) error {
-	return s.HttpServer.Shutdown(ctx)
+	return s.httpServer.Shutdown(ctx)
 }
 
 func findAvailablePort() (int, error) {

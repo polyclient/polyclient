@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"github.com/polyclient/polyclient/api/features/healthcheck"
+	"github.com/polyclient/polyclient/api/features/health"
 	"github.com/polyclient/polyclient/gui"
 )
 
@@ -23,10 +23,7 @@ func NewRouter() *Router {
 		http.FileServer(http.FS(gui.DistDirFS)).ServeHTTP(w, r)
 	}))
 
-	// API v1 routes
-	v1Router := http.NewServeMux()
-	v1Router.Handle("/healthcheck/", healthcheck.NewHandler())
-	mux.Handle("/api/v1/", http.StripPrefix("/api/v1", v1Router))
+	mux.Handle("/api/health", health.NewHandler())
 
 	return &Router{mux: mux}
 }

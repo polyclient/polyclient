@@ -1,3 +1,9 @@
+<script lang="ts">
+	console.log("test");
+
+	fetch("/api/health").then((res) => console.log(res));
+</script>
+
 <div class="container mx-auto mt-12 text-center">
 	<h1 class="text-7xl text-blue-600 font-semibold">PolyClient</h1>
 
