@@ -20,7 +20,6 @@ import (
 
 	"github.com/polyclient/polyclient/drivers/postgres"
 	"github.com/polyclient/polyclient/drivers/sqlite"
-	_ "github.com/polyclient/polyclient/drivers/sqlite"
 )
 
 // main initializes and runs the PolyClient CLI application.
@@ -57,6 +56,7 @@ func main() {
 	if err := cmd.Run(context.Background(), os.Args); err != nil {
 		log.Fatal(err)
 	}
+
 }
 
 func loadDrivers() (*database.Registry[database.Driver], error) {
