@@ -1,24 +1,18 @@
 package healthcheck
 
 import (
+	"encoding/json"
 	"net/http"
-
-	"github.com/labstack/echo/v4"
 )
 
-type Handler struct {
-	healthcheckService Service
+func NewHandler() http.Handler {
+	mux := http.NewServeMux()
+	mux.Handle("GET /healthcheck", http.HandlerFunc(check))
+
+	return http.StripPrefix("/healthcheck", mux)
 }
 
-func NewHandler() *Handler {
-	return &Handler{healthcheckService: NewService()}
-}
-
-func (h *Handler) Check(c echo.Context) error {
-	err := h.healthcheckService.Check()
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, "OK")
+func check(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"status": "OK"})
 }

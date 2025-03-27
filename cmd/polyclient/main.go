@@ -39,17 +39,17 @@ func main() {
 	// }
 
 	cmd := &cli.Command{
-		Name:                  "PolyClient CLI",
-		Usage:                 "Manage and query your databases with ease",
+		Name:                  "polyclient",
+		Usage:                 "A command-line interface for PolyClient",
 		Version:               version.Version(),
 		EnableShellCompletion: true,
-		HideHelpCommand:       true,
 		Commands: []*cli.Command{
 			pCli.NewVersionCommand(),
 			pCli.NewDocsCommand(),
 			pCli.NewDatabaseCommand(driversRegistry),
 			// pCli.NewPluginCommand(pluginsRegistry),
 			pCli.NewGUICommand(),
+			pCli.NewLogCommand(),
 		},
 	}
 

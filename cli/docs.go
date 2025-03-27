@@ -13,11 +13,11 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-// NewDocsCommand creates a CLI command for launching PolyClient's documentation website.
+// NewDocsCommand creates a CLI command for opening the documentation website.
 func NewDocsCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "docs",
-		Usage: "Launch PolyClient's documentation website",
+		Usage: "Open documentation website",
 		Action: func(context.Context, *cli.Command) error {
 			url := "https://polyclient.pages.dev"
 

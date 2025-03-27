@@ -16,7 +16,7 @@ import (
 func NewVersionCommand() *cli.Command {
 	return &cli.Command{
 		Name:  "version",
-		Usage: "Show more detailed version information",
+		Usage: "Show detailed version information",
 		Action: func(context.Context, *cli.Command) error {
 			//nolint:forbidigo  // Printing version info to stdout is intentional here.
 			fmt.Println(version.String())
