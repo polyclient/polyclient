@@ -1,31 +1,36 @@
 package api
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"net/http"
+
 	"github.com/polyclient/polyclient/api/features/healthcheck"
 	"github.com/polyclient/polyclient/gui"
 )
 
 type Router struct {
-	echo *echo.Echo
+	mux *http.ServeMux
 }
 
 func NewRouter() *Router {
-	e := echo.New()
-	e.HideBanner = true
-	e.HidePort = true
+	mux := http.NewServeMux()
 
-	e.Pre(middleware.RemoveTrailingSlash())
+	mux.HandleFunc("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+			return
+		}
 
-	e.Use(middleware.Recover())
-	e.Use(middleware.Secure())
-	e.Use(middleware.RequestID())
+		http.FileServer(http.FS(gui.DistDirFS)).ServeHTTP(w, r)
+	}))
 
-	e.StaticFS("/", gui.DistDirFS)
+	// API v1 routes
+	v1Router := http.NewServeMux()
+	v1Router.Handle("/healthcheck/", healthcheck.NewHandler())
+	mux.Handle("/api/v1/", http.StripPrefix("/api/v1", v1Router))
 
-	api := e.Group("/api/v1")
-	healthcheck.NewGroup(api)
+	return &Router{mux: mux}
+}
 
-	return &Router{echo: e}
+func (r *Router) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	r.mux.ServeHTTP(w, req)
 }

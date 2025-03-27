@@ -18,11 +18,11 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-// NewDatabaseCommand returns a new database command for managing databases from the CLI.
+// NewDatabaseCommand returns a new database command for managing databases and their connections.
 func NewDatabaseCommand(driverRegistry *database.Registry[database.Driver]) *cli.Command {
 	return &cli.Command{
 		Name:  "database",
-		Usage: "Manage databases from the CLI",
+		Usage: "Manage databases and their connections",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:     "driver",

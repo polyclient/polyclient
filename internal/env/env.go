@@ -167,8 +167,7 @@ func getEnvPath(envVar string) (string, error) {
 
 // ensureEnvVarSet sets an environment variable if it is not already set.
 func ensureEnvVarSet(envVar, defaultValue string) error {
-	if val, exists := os.LookupEnv(envVar); exists {
-		fmt.Println("Skipping setting", envVar, "because it is already set to:", val)
+	if _, exists := os.LookupEnv(envVar); exists {
 		return nil
 	}
 

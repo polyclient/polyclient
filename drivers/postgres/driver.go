@@ -26,8 +26,6 @@ func (d *Driver) Type() database.DriverType {
 
 // CreateConnection implements database.Driver.
 func (d *Driver) Connect(dsn string) (database.ConnectionSQL, error) {
-	fmt.Println("Creating PostgreSQL connection...")
-
 	sqlDB, err := sql.Open("pgx", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create connection: %w", err)

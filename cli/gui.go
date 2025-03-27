@@ -6,52 +6,85 @@ package cli
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"net/http"
+	"os"
 	"os/exec"
+	"os/signal"
 	"runtime"
-	"sync"
+	"syscall"
 	"time"
 
 	"github.com/polyclient/polyclient/api"
 	"github.com/urfave/cli/v3"
 )
 
-// NewGUICommand creates a CLI command for launching PolyClient in GUI mode.
+// NewGUICommand creates a CLI command for launching the PolyClient GUI.
 func NewGUICommand() *cli.Command {
 	return &cli.Command{
 		Name:  "gui",
-		Usage: "Launch PolyClient in GUI mode",
-		Action: func(context.Context, *cli.Command) error {
+		Usage: "Launch the PolyClient GUI",
+		Action: func(ctx context.Context, cmd *cli.Command) error {
 			server := api.NewServer()
-			var wg sync.WaitGroup
-			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
+			url := "http://localhost" + server.HttpServer.Addr
+			log.Printf("Starting server at: %s", url)
 
-			wg.Add(1)
+			sigCtx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
+			defer stop()
+
+			serverErr := make(chan error, 1)
 			go func() {
-				defer wg.Done()
-				if err := server.Run(ctx); err != nil {
-					log.Printf("Server error: %v", err)
+				if err := server.ListenAndServe(); err != nil {
+					serverErr <- err
 				}
 			}()
 
-			go func() {
-				time.Sleep(500 * time.Millisecond)
-				if err := openBrowser("http://localhost:8081"); err != nil {
-					log.Printf("Failed to open browser: %v", err)
-				}
-			}()
+			if err := waitForServer(url); err != nil {
+				return fmt.Errorf("failed to wait for server: %w", err)
+			}
 
-			<-ctx.Done()
-			wg.Wait()
+			fmt.Println("Opening browser at:", url)
+			if err := openBrowser(url); err != nil {
+				log.Printf("Failed to open browser: %v", err)
+			}
+
+			fmt.Println("GUI launched successfully. Server is running. Press Ctrl+C to stop.")
+
+			select {
+			case <-sigCtx.Done():
+				log.Println("Shutting down server...")
+				if err := server.Shutdown(sigCtx); err != nil {
+					log.Printf("Failed to shutdown server: %v", err)
+				}
+
+			case err := <-serverErr:
+				return fmt.Errorf("server failed: %w", err)
+			}
 
 			return nil
 		},
 	}
 }
 
-func openBrowser(url string) error {
+func waitForServer(ur string) error {
+	const maxAttempts = 10
+	const delay = 100 * time.Millisecond
 
+	for i := 0; i < maxAttempts; i++ {
+		resp, err := http.Get(ur)
+		if err == nil && resp.StatusCode == http.StatusOK {
+			resp.Body.Close()
+			return nil
+		}
+
+		time.Sleep(delay)
+	}
+
+	return fmt.Errorf("server not available after %d attempts", maxAttempts)
+}
+
+func openBrowser(url string) error {
 	if runtime.GOOS == "windows" {
 		return exec.Command("cmd", "/c", "start", url).Start()
 	}

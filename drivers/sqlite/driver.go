@@ -23,8 +23,6 @@ func (d *Driver) Type() database.DriverType {
 }
 
 func (d *Driver) Connect(dsn string) (database.ConnectionSQL, error) {
-	fmt.Println("Creating SQLite connection...")
-
 	sqlDB, err := sql.Open("sqlite", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create connection: %w", err)
