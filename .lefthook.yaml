@@ -6,11 +6,19 @@ pre-commit:
   parallel: true
 
   jobs:
-    - name: lint & test
-      glob: "*.go"
+    - name: lint
       group:
         jobs:
-          - run: go-task lint
+          - run: task lint
             stage_fixed: true
 
-          - run: go-task test
+    - name: format
+      group:
+        jobs:
+          - run: task format
+            stage_fixed: true
+
+    - name: test
+      group:
+        jobs:
+          - run: task test
