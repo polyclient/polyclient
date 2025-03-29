@@ -58,5 +58,8 @@ tmp
 # Task
 .task
 
+# Utilities
+todo.md
+
 # PolyClient
 .polyclientdev
