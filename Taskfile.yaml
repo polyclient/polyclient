@@ -65,16 +65,16 @@ tasks:
       - ./scripts/release.sh {{ .CLI_ARGS }}
 
   lint:
-    desc: Check code quality and identify potential issues
-    cmd: golangci-lint run ./...
-
-  lint:fix:
     desc: Check code quality and identify potential issues + fix them where possible
-    cmd: golangci-lint run ./... --fix
+    cmds:
+      - golangci-lint run ./... --fix
+      - bun run lint
 
   format:
     desc: Apply standard Go code formatting to all project files
-    cmd: go fmt ./...
+    cmds:
+      - go fmt ./...
+      - bun run format
 
   test:
     desc: Run the project tests
