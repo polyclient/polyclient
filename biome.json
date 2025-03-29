@@ -45,7 +45,9 @@
       "linter": {
         "rules": {
           "style": {
-            "noNamespaceImport": "off"
+            "noNamespaceImport": "off",
+            "useConst": "off",
+            "useImportType": "off"
           },
           "correctness": {
             "noUndeclaredVariables": "off",
