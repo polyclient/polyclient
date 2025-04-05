@@ -36,7 +36,7 @@
 	];
 </script>
 
-<Sidebar.Provider style="--sidebar-width: 100%; --sidebar-width-mobile: 100%;">
+<Sidebar.Provider>
 	<Sidebar.Root class="h-full">
 		<Sidebar.Content>
 			<Sidebar.Group>
