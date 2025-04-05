@@ -67,6 +67,7 @@ func (exp *JSONExporter) Export(w io.Writer, data any) error {
 	// Handle empty slices explicitly to ensure consistent output
 	if v.Kind() == reflect.Slice && v.Len() == 0 {
 		_, err := w.Write([]byte("[]\n"))
+
 		return err
 	}
 

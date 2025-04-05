@@ -6,12 +6,11 @@ package gui
 
 import (
 	"embed"
-	_ "embed"
 	"io/fs"
 )
 
 //go:embed all:dist
 var distDir embed.FS
 
-// DistDirFS is the embedded dist directory as a file system for use with http.FS
+// DistDirFS is the embedded dist directory as a file system for use with http.FS.
 var DistDirFS, _ = fs.Sub(distDir, "dist")

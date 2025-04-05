@@ -12,14 +12,13 @@ import (
 	"os"
 
 	pCli "github.com/polyclient/polyclient/cli"
+	"github.com/polyclient/polyclient/drivers/postgres"
+	"github.com/polyclient/polyclient/drivers/sqlite"
 	"github.com/polyclient/polyclient/internal/database"
 	"github.com/polyclient/polyclient/internal/env"
 	"github.com/polyclient/polyclient/internal/plugin"
 	"github.com/polyclient/polyclient/internal/version"
 	"github.com/urfave/cli/v3"
-
-	"github.com/polyclient/polyclient/drivers/postgres"
-	"github.com/polyclient/polyclient/drivers/sqlite"
 )
 
 // main initializes and runs the PolyClient CLI application.
@@ -56,7 +55,6 @@ func main() {
 	if err := cmd.Run(context.Background(), os.Args); err != nil {
 		log.Fatal(err)
 	}
-
 }
 
 func loadDrivers() (*database.Registry[database.Driver], error) {

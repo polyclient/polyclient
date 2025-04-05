@@ -1,0 +1,65 @@
+{
+  "$schema": "./jsonschema/polyclient-settings.json",
+  "theme": "system",
+  "language": "en",
+  "editor": {
+    "vimMode": false,
+    "minimap": false,
+    "lineNumbers": "relative",
+    "cursorStyle": "line",
+    "cursorBlinking": "blink"
+  },
+  "history": {
+    "queries": {
+      "enabled": true,
+      "maxItems": 50
+    }
+  },
+  "layout": {
+    "explorer": {
+      "defaultSize": 20,
+      "dockPosition": "left"
+    },
+    "assistant": {
+      "defaultSize": 30,
+      "dockPosition": "right"
+    },
+    "output": {
+      "defaultSize": 30,
+      "dockPosition": "bottom"
+    },
+    "rememberSizes": true,
+    "zenMode": false
+  },
+  "erd": {
+    "defaultLayout": "elk",
+    "showPrimaryKeys": true,
+    "showForeignKeys": true,
+    "showColumnTypes": true,
+    "zoomLevel": 1.0
+  },
+  "backup": {
+    "storage": {
+      "directoryPath": "/path/to/backup"
+    },
+    "scheduling": {
+      "enabled": true,
+      "cronExpression": "0 0 1 * * *",
+      "keepLastN": 10
+    }
+  },
+  "a11y": {
+    "screenReaderEnabled": false
+  },
+  "system": {
+    "performance": {
+      "hardwareAccelerationEnabled": false,
+      "throttleInactiveTabQueries": true
+    },
+    "updates": {
+      "checkAutomatically": true,
+      "downloadAutomatically": false,
+      "channel": "stable"
+    }
+  }
+}

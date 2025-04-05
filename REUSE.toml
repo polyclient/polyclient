@@ -25,7 +25,7 @@ path = [
     "plugins/**/go.sum",
     "plugins/**/LICENSE.txt",
     "plugins/**/README.md",
-    "schema/plugin-manifest.json",
+    "jsonschema/plugin-manifest.json",
     "docs/**/*",
 ]
 SPDX-FileCopyrightText = "2025 The PolyClient Authors"

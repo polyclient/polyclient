@@ -66,6 +66,7 @@ func (m *Manager) Setup() error {
 		defaultPath, err := getDefaultPath(name)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("failed to get default path for %s: %w", name, err))
+
 			continue
 		}
 
@@ -75,7 +76,10 @@ func (m *Manager) Setup() error {
 
 		if envVar.IsDir {
 			if err := ensureDirExists(defaultPath); err != nil {
-				errs = append(errs, fmt.Errorf("failed to create directory %s: %w", defaultPath, err))
+				errs = append(
+					errs,
+					fmt.Errorf("failed to create directory %s: %w", defaultPath, err),
+				)
 			}
 		}
 	}

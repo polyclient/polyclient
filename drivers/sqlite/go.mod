@@ -1,6 +1,6 @@
 module github.com/polyclient/polyclient/drivers/sqlite
 
-go 1.24.1
+go 1.24.2
 
 require modernc.org/sqlite v1.36.2
 

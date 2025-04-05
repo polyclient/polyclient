@@ -53,7 +53,12 @@ func TestManagerGet(t *testing.T) {
 	t.Run("Unknown environment variable", func(t *testing.T) {
 		_, err := manager.Get("UNKNOWN_VAR")
 		require.Error(t, err, "Getting unknown var should return error")
-		assert.Contains(t, err.Error(), "unknown environment variable", "Error message should be descriptive")
+		assert.Contains(
+			t,
+			err.Error(),
+			"unknown environment variable",
+			"Error message should be descriptive",
+		)
 	})
 }
 

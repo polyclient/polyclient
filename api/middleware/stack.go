@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025 The PolyClient Authors
+//
+// SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
+
 package middleware
 
 import "net/http"
@@ -9,6 +13,7 @@ func CreateStack(middlewares ...Middleware) Middleware {
 		for i := len(middlewares) - 1; i >= 0; i-- {
 			next = middlewares[i](next)
 		}
+
 		return next
 	}
 }

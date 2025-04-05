@@ -73,7 +73,7 @@ tasks:
   format:
     desc: Apply standard Go code formatting to all project files
     cmds:
-      - go fmt ./...
+      - golangci-lint fmt ./...
       - bun run format
 
   test:

@@ -24,7 +24,14 @@ var (
 func String() string {
 	return fmt.Sprintf(
 		"Version: %s\nBranch: %s\nShort commit: %s\nFull commit: %s\nBuild date: %s\nOS: %s\nArch: %s",
-		version, branch, shortCommit, fullCommit, date, os, arch)
+		version,
+		branch,
+		shortCommit,
+		fullCommit,
+		date,
+		os,
+		arch,
+	)
 }
 
 // Version returns the build version of the application.

@@ -112,6 +112,7 @@ func FindManifestPath(lookupPath string) (string, error) {
 
 		if isPluginManifest(info) {
 			foundPath = path
+
 			return filepath.SkipAll
 		}
 
