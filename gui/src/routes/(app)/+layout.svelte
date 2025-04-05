@@ -29,20 +29,20 @@
 		>
 			<Resizable.PaneGroup direction="vertical">
 				<Resizable.Pane
-					defaultSize={80}
+					defaultSize={70}
 					minSize={0}
 					maxSize={100}
 				>
-					<div class="flex h-full items-center justify-center p-6">
-						<span class="font-semibold">Main</span>
-					</div>
+					<main class="h-full">
+						{@render children()}
+					</main>
 				</Resizable.Pane>
 
 				<Resizable.Handle withHandle />
 
 				<Resizable.Pane
 					collapsible
-					defaultSize={20}
+					defaultSize={30}
 					minSize={0}
 					maxSize={100}
 				>
@@ -57,7 +57,7 @@
 
 		<Resizable.Pane
 			collapsible
-			defaultSize={30}
+			defaultSize={true ? 0 : 30}
 			minSize={0}
 			maxSize={100}
 		>
