@@ -1,0 +1,323 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PolyClient Settings Schema",
+  "type": "object",
+  "description": "Configuration schema for PolyClient application settings",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Path to the JSON schema definition file"
+    },
+    "theme": {
+      "type": "string",
+      "description": "UI theme preference",
+      "enum": ["light", "dark", "system"],
+      "default": "system"
+    },
+    "language": {
+      "type": "string",
+      "description": "Application interface language",
+      "pattern": "^[a-z]{2}(-[A-Z]{2})?$",
+      "default": "en"
+    },
+    "editor": {
+      "type": "object",
+      "description": "Code editor configuration",
+      "additionalProperties": false,
+      "properties": {
+        "vimMode": {
+          "type": "boolean",
+          "description": "Enable Vim keybindings in the editor",
+          "default": false
+        },
+        "minimap": {
+          "type": "boolean",
+          "description": "Show the editor minimap",
+          "default": true
+        },
+        "lineNumbers": {
+          "type": "string",
+          "description": "Line number display mode",
+          "enum": ["off", "on", "relative"],
+          "default": "on"
+        },
+        "cursorStyle": {
+          "type": "string",
+          "description": "Style of the editor cursor",
+          "enum": ["line", "block", "underline", "line-thin", "block-outline", "underline-thin"],
+          "default": "line"
+        },
+        "cursorBlinking": {
+          "type": "string",
+          "description": "Cursor blinking animation",
+          "enum": ["blink", "smooth", "phase", "expand", "solid"],
+          "default": "blink"
+        },
+        "fontFamily": {
+          "type": "string",
+          "description": "Font family for editor text",
+          "default": "sans-serif"
+        },
+        "fontSize": {
+          "type": "integer",
+          "description": "Font size in pixels for editor text",
+          "minimum": 8,
+          "maximum": 32,
+          "default": 16
+        },
+        "fontWeight": {
+          "type": "string",
+          "description": "Font weight for editor text",
+          "enum": ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+          "default": "400"
+        },
+        "fontLigatures": {
+          "type": "boolean",
+          "description": "Enable font ligatures in the editor",
+          "default": true
+        }
+      }
+    },
+    "history": {
+      "type": "object",
+      "description": "History and recent items configuration",
+      "additionalProperties": false,
+      "properties": {
+        "queries": {
+          "type": "object",
+          "description": "Query history settings",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enable query history tracking",
+              "default": true
+            },
+            "maxItems": {
+              "type": "integer",
+              "description": "Maximum number of queries to store",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 50
+            }
+          }
+        }
+      }
+    },
+    "layout": {
+      "type": "object",
+      "description": "UI layout configuration",
+      "additionalProperties": false,
+      "properties": {
+        "explorer": {
+          "type": "object",
+          "description": "Explorer panel settings",
+          "additionalProperties": false,
+          "properties": {
+            "defaultSize": {
+              "type": "integer",
+              "description": "Default size of the explorer panel in percentage",
+              "minimum": 5,
+              "maximum": 80,
+              "default": 20
+            },
+            "dockPosition": {
+              "type": "string",
+              "description": "Dock position of the explorer panel",
+              "enum": ["left", "right"],
+              "default": "left"
+            }
+          }
+        },
+        "assistant": {
+          "type": "object",
+          "description": "Assistant panel settings",
+          "additionalProperties": false,
+          "properties": {
+            "defaultSize": {
+              "type": "integer",
+              "description": "Default size of the assistant panel in percentage",
+              "minimum": 5,
+              "maximum": 80,
+              "default": 30
+            },
+            "dockPosition": {
+              "type": "string",
+              "description": "Dock position of the assistant panel",
+              "enum": ["left", "right"],
+              "default": "right"
+            }
+          }
+        },
+        "output": {
+          "type": "object",
+          "description": "Output panel settings",
+          "additionalProperties": false,
+          "properties": {
+            "defaultSize": {
+              "type": "integer",
+              "description": "Default size of the output panel in percentage",
+              "minimum": 5,
+              "maximum": 80,
+              "default": 30
+            },
+            "dockPosition": {
+              "type": "string",
+              "description": "Dock position of the output panel",
+              "enum": ["right", "bottom"],
+              "default": "bottom"
+            }
+          }
+        },
+        "rememberSizes": {
+          "type": "boolean",
+          "description": "Remember panel sizes between sessions",
+          "default": true
+        },
+        "zenMode": {
+          "type": "boolean",
+          "description": "Enable zen mode (hide all panels)",
+          "default": false
+        }
+      }
+    },
+    "erd": {
+      "type": "object",
+      "description": "Entity Relationship Diagram settings",
+      "additionalProperties": false,
+      "properties": {
+        "defaultLayout": {
+          "type": "string",
+          "description": "Default layout algorithm for ERD",
+          "enum": ["elk", "dagre", "force", "cola", "klay"],
+          "default": "elk"
+        },
+        "showPrimaryKeys": {
+          "type": "boolean",
+          "description": "Show primary key indicators in ERD",
+          "default": true
+        },
+        "showForeignKeys": {
+          "type": "boolean",
+          "description": "Show foreign key indicators in ERD",
+          "default": true
+        },
+        "showColumnTypes": {
+          "type": "boolean",
+          "description": "Show column data types in ERD",
+          "default": true
+        },
+        "zoomLevel": {
+          "type": "number",
+          "description": "Default zoom level for ERD view",
+          "minimum": 0.1,
+          "maximum": 5.0,
+          "default": 1.0
+        }
+      }
+    },
+    "backup": {
+      "type": "object",
+      "description": "Backup configuration settings",
+      "additionalProperties": false,
+      "properties": {
+        "storage": {
+          "type": "object",
+          "description": "Backup storage configuration",
+          "additionalProperties": false,
+          "required": ["directoryPath"],
+          "properties": {
+            "directoryPath": {
+              "type": "string",
+              "description": "Directory path for storing backups",
+              "default": "/path/to/backup"
+            }
+          }
+        },
+        "scheduling": {
+          "type": "object",
+          "description": "Backup scheduling configuration",
+          "additionalProperties": false,
+          "required": ["enabled", "cronExpression"],
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Enable scheduled backups"
+            },
+            "cronExpression": {
+              "type": "string",
+              "description": "Cron expression for backup schedule",
+              "pattern": "^\\S+ \\S+ \\S+ \\S+ \\S+ \\S+$"
+            },
+            "keepLastN": {
+              "type": "integer",
+              "description": "Number of most recent backups to keep",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 10
+            }
+          }
+        }
+      }
+    },
+    "a11y": {
+      "type": "object",
+      "description": "Accessibility settings",
+      "additionalProperties": false,
+      "properties": {
+        "screenReaderEnabled": {
+          "type": "boolean",
+          "description": "Enable optimizations for screen readers",
+          "default": false
+        }
+      }
+    },
+    "system": {
+      "type": "object",
+      "description": "System-level application settings",
+      "additionalProperties": false,
+      "properties": {
+        "performance": {
+          "type": "object",
+          "description": "Performance-related settings",
+          "additionalProperties": false,
+          "properties": {
+            "hardwareAccelerationEnabled": {
+              "type": "boolean",
+              "description": "Enable hardware acceleration",
+              "default": false
+            },
+            "throttleInactiveTabQueries": {
+              "type": "boolean",
+              "description": "Throttle query execution when tab is inactive",
+              "default": false
+            }
+          }
+        },
+        "updates": {
+          "type": "object",
+          "description": "Application update settings",
+          "additionalProperties": false,
+          "properties": {
+            "checkAutomatically": {
+              "type": "boolean",
+              "description": "Automatically check for updates",
+              "default": true
+            },
+            "downloadAutomatically": {
+              "type": "boolean",
+              "description": "Automatically download updates",
+              "default": false
+            },
+            "channel": {
+              "type": "string",
+              "description": "Update channel to use",
+              "enum": ["stable", "beta", "nightly"],
+              "default": "stable"
+            }
+          }
+        }
+      }
+    }
+  }
+}

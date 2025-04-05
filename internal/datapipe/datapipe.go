@@ -117,6 +117,7 @@ func GetAvailableExportFormats() []Format {
 // format along with its associated exporter function.
 func GetRegistryEntry(format Format) (Entry, bool) {
 	entry, ok := registry[format]
+
 	return entry, ok
 }
 
@@ -127,12 +128,14 @@ func ParseDataFromBytes[T any](data []byte, format Format) (T, error) {
 	_, ok := registry[format]
 	if !ok {
 		var zero T
+
 		return zero, fmt.Errorf("format %s is not supported", format)
 	}
 
 	var parsedData T
 	if err := json.Unmarshal(data, &parsedData); err != nil {
 		var zero T
+
 		return zero, fmt.Errorf("failed to parse data: %w", err)
 	}
 

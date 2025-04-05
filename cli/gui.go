@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -27,9 +28,13 @@ func NewGUICommand() *cli.Command {
 		Name:  "gui",
 		Usage: "Launch the PolyClient GUI",
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			server := api.NewServer()
-			url := "http://localhost:" + strconv.Itoa(server.Port)
-			log.Printf("Starting server at: %s", url)
+			server, err := api.NewServer()
+			if err != nil {
+				return fmt.Errorf("failed to create server: %w", err)
+			}
+
+			guiURL := "http://localhost:" + strconv.Itoa(server.Port)
+			log.Printf("Starting server at: %s", guiURL)
 
 			sigCtx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 			defer stop()
@@ -41,12 +46,12 @@ func NewGUICommand() *cli.Command {
 				}
 			}()
 
-			if err := waitForServer(url); err != nil {
+			if err := waitForServer(guiURL); err != nil {
 				return fmt.Errorf("failed to wait for server: %w", err)
 			}
 
-			fmt.Println("Opening browser at:", url)
-			if err := openBrowser(url); err != nil {
+			fmt.Println("Opening browser at:", guiURL)
+			if err := openBrowser(guiURL); err != nil {
 				log.Printf("Failed to open browser: %v", err)
 			}
 
@@ -68,14 +73,32 @@ func NewGUICommand() *cli.Command {
 	}
 }
 
-func waitForServer(ur string) error {
+func waitForServer(guiURL string) error {
 	const maxAttempts = 10
+
 	const delay = 100 * time.Millisecond
 
-	for i := 0; i < maxAttempts; i++ {
-		resp, err := http.Get(ur)
-		if err == nil && resp.StatusCode == http.StatusOK {
-			resp.Body.Close()
+	for range maxAttempts {
+		parsedURL, err := url.ParseRequestURI(guiURL)
+		if err != nil {
+			return fmt.Errorf("invalid URL: %w", err)
+		}
+
+		req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, parsedURL.String(), http.NoBody)
+		if err != nil {
+			return fmt.Errorf("failed to create request: %w", err)
+		}
+
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return fmt.Errorf("failed to send request: %w", err)
+		}
+
+		if resp.StatusCode == http.StatusOK {
+			if err := resp.Body.Close(); err != nil {
+				log.Printf("Failed to close response body: %v", err)
+			}
+
 			return nil
 		}
 
@@ -85,18 +108,18 @@ func waitForServer(ur string) error {
 	return fmt.Errorf("server not available after %d attempts", maxAttempts)
 }
 
-func openBrowser(url string) error {
+func openBrowser(guiURL string) error {
 	if runtime.GOOS == "windows" {
-		return exec.Command("cmd", "/c", "start", url).Start()
+		return exec.Command("cmd", "/c", "start", guiURL).Start()
 	}
 
 	if runtime.GOOS == "darwin" {
-		return exec.Command("open", url).Start()
+		return exec.Command("open", guiURL).Start()
 	}
 
 	if isWSL() {
-		return exec.Command("cmd", "/c", "start", url).Start()
+		return exec.Command("cmd", "/c", "start", guiURL).Start()
 	}
 
-	return exec.Command("xdg-open", url).Start()
+	return exec.Command("xdg-open", guiURL).Start()
 }

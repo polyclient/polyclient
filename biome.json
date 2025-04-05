@@ -5,6 +5,9 @@
     "useIgnoreFile": true,
     "clientKind": "git"
   },
+  "files": {
+    "ignore": ["gui/.svelte-kit", "gui/src/lib/paraglide", "gui/src/lib/components/ui"]
+  },
   "organizeImports": {
     "enabled": true
   },
@@ -52,7 +55,8 @@
           "correctness": {
             "noUndeclaredVariables": "off",
             "noUnusedVariables": "off",
-            "noUnusedImports": "off"
+            "noUnusedImports": "off",
+            "useHookAtTopLevel": "off"
           }
         }
       },

@@ -148,7 +148,10 @@ func (pr *Registry) LoadPlugin(manifestPath string) (*LoadedPlugin, error) {
 		return nil, fmt.Errorf("failed to load plugin: %w", err)
 	}
 
-	wasmPath := filepath.Join(filepath.Dir(manifestPath), strings.TrimPrefix(manifest.Entrypoint, "./"))
+	wasmPath := filepath.Join(
+		filepath.Dir(manifestPath),
+		strings.TrimPrefix(manifest.Entrypoint, "./"),
+	)
 
 	wasiConfig := wasmtime.NewWasiConfig()
 	wasiConfig.InheritStdout()

@@ -5,6 +5,7 @@
 package database
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -30,7 +31,7 @@ func (r *Registry[T]) Register(driver T) error {
 
 	name := strings.TrimSpace(driver.Name())
 	if name == "" {
-		return fmt.Errorf("driver name cannot be empty")
+		return errors.New("driver name cannot be empty")
 	}
 
 	if _, exists := r.drivers[name]; exists {

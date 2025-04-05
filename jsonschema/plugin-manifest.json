@@ -1,23 +1,23 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Plugin Manifest Schema",
-  "description": "JSON Schema for validating a plugin manifest file.",
+  "description": "JSON Schema for validating a PolyClient plugin manifest file",
   "type": "object",
   "required": ["id", "name", "scope", "version", "entrypoint"],
   "additionalProperties": false,
   "properties": {
     "$schema": {
       "type": "string",
-      "description": "Pointer to the schema against which this document should be validated."
+      "description": "Path to the schema file that validates this configuration"
     },
     "id": {
       "type": "string",
       "pattern": "^[a-z0-9_-]+$",
-      "description": "A globally unique identifier for the plugin. Should be lowercase and URL-safe."
+      "description": "A globally unique identifier for the plugin. Should be lowercase and URL-safe"
     },
     "name": {
       "type": "string",
-      "description": "The human-readable name of the plugin.",
+      "description": "The human-readable name of the plugin",
       "minLength": 1,
       "maxLength": 30
     },
@@ -28,21 +28,21 @@
           "enum": ["sql", "nosql", "ai", "theme"]
         }
       ],
-      "description": "Specifies the category of the plugin, which is used to identify its capabilities and dictate its loading process."
+      "description": "Specifies the category of the plugin, which is used to identify its capabilities and dictate its loading process"
     },
     "version": {
       "type": "string",
-      "description": "The version of the plugin, following the semantic versioning spec.",
+      "description": "The version of the plugin, following the semantic versioning spec",
       "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
     },
     "description": {
       "type": "string",
-      "description": "A short description of the plugin, which will be used to describe it in the plugin list.",
+      "description": "A short description of the plugin, which will be used to describe it in the plugin list",
       "maxLength": 300
     },
     "authors": {
       "type": "array",
-      "description": "A list of authors associated with the plugin.",
+      "description": "A list of authors associated with the plugin",
       "minItems": 1,
       "uniqueItems": true,
       "items": {
@@ -84,17 +84,17 @@
     },
     "repository": {
       "type": "string",
-      "description": "URL of the repository where the source code of the plugin is maintained.",
+      "description": "URL of the repository where the source code of the plugin is maintained",
       "format": "uri"
     },
     "homepage": {
       "type": "string",
-      "description": "URL of the plugin's homepage or documentation (optional).",
+      "description": "URL of the plugin's homepage or documentation (optional)",
       "format": "uri"
     },
     "keywords": {
       "type": "array",
-      "description": "A list of keywords related to the plugin, useful for search and discovery.",
+      "description": "A list of keywords related to the plugin, useful for search and discovery",
       "items": {
         "type": "string"
       },
@@ -103,35 +103,35 @@
     },
     "entrypoint": {
       "type": "string",
-      "description": "The main WebAssembly (.wasm) file that serves as the entry point for the plugin.",
+      "description": "The main WebAssembly (.wasm) file that serves as the entry point for the plugin",
       "pattern": "^[a-zA-Z0-9._/-]+\\.wasm$"
     }
   },
   "definitions": {
     "author": {
       "type": "object",
-      "description": "Information about the plugin author.",
+      "description": "Information about the plugin author",
       "required": ["name"],
       "additionalProperties": false,
       "properties": {
         "name": {
           "type": "string",
-          "description": "The name of the person or organization that created the plugin."
+          "description": "The name of the person or organization that created the plugin"
         },
         "email": {
           "type": "string",
-          "description": "The author's contact email (optional).",
+          "description": "The author's contact email (optional)",
           "format": "email"
         },
         "websites": {
           "type": "array",
-          "description": "A list of URLs associated with the plugin author or organization (optional).",
+          "description": "A list of URLs associated with the plugin author or organization (optional)",
           "minItems": 1,
           "maxItems": 5,
           "uniqueItems": true,
           "items": {
             "format": "uri",
-            "description": "A website or homepage for the plugin author or organization."
+            "description": "A website or homepage for the plugin author or organization"
           }
         }
       }

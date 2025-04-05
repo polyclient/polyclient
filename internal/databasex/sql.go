@@ -23,7 +23,11 @@ type SQLQueryExplainer interface {
 // SQLStatementPreparer handles prepared statements operations.
 type SQLStatementPreparer interface {
 	// PrepareStatement creates a prepared statement.
-	PrepareStatement(ctx context.Context, conn Connection, query string) (SQLPreparedStatement, error)
+	PrepareStatement(
+		ctx context.Context,
+		conn Connection,
+		query string,
+	) (SQLPreparedStatement, error)
 }
 
 // SQLDialectProvider handles SQL dialect operations.

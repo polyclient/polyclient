@@ -1,9 +1,12 @@
+// SPDX-FileCopyrightText: 2025 The PolyClient Authors
+//
+// SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
+
 package api
 
 import (
 	"context"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"time"
@@ -18,15 +21,17 @@ type Server struct {
 	httpServer *http.Server
 }
 
-func NewServer() *Server {
+func NewServer() (*Server, error) {
 	router := NewRouter()
+
 	port, err := findAvailablePort()
 	if err != nil {
-		log.Fatalf("Failed to find an available port: %v", err)
+		return nil, fmt.Errorf("Failed to find an available port: %w", err)
 	}
 
 	stack := middleware.CreateStack(
 		middleware.Logger,
+		middleware.Recover,
 	)
 
 	httpServer := &http.Server{
@@ -42,7 +47,7 @@ func NewServer() *Server {
 		Addr:       httpServer.Addr,
 		Port:       port,
 		httpServer: httpServer,
-	}
+	}, nil
 }
 
 func (s *Server) ListenAndServe() error {
@@ -59,5 +64,6 @@ func findAvailablePort() (int, error) {
 		return 0, err
 	}
 	defer listener.Close()
+
 	return listener.Addr().(*net.TCPAddr).Port, nil
 }

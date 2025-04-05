@@ -29,6 +29,10 @@ func (c Connection) Query(query string, args ...any) (*sql.Rows, error) {
 }
 
 // Query implements database.ConnectionSQL.
-func (c Connection) QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error) {
+func (c Connection) QueryContext(
+	ctx context.Context,
+	query string,
+	args ...any,
+) (*sql.Rows, error) {
 	return c.db.QueryContext(ctx, query, args...)
 }

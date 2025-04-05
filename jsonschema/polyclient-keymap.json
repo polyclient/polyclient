@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PolyClient Keymap Schema",
+  "description": "JSON Schema for validating a PolyClient keymap file.",
+  "type": "object",
+  "required": [],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Path to the schema file that validates this configuration"
+    }
+  }
+}

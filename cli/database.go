@@ -104,7 +104,11 @@ func newQueryCommand(dr *database.Registry[database.Driver]) *cli.Command {
 				Validator: func(output string) error {
 					_, ok := datapipe.GetRegistryEntry(datapipe.Format(output))
 					if !ok {
-						return fmt.Errorf("invalid output format: %s\nSupported formats: %s", output, exportFormats)
+						return fmt.Errorf(
+							"invalid output format: %s\nSupported formats: %s",
+							output,
+							exportFormats,
+						)
 					}
 
 					return nil
@@ -183,7 +187,7 @@ func newQueryCommand(dr *database.Registry[database.Driver]) *cli.Command {
 						return fmt.Errorf("failed to scan row: %w", err)
 					}
 
-					result := make(map[string]any)
+					result := map[string]any{}
 
 					for i, col := range columns {
 						result[col] = values[i]
@@ -205,7 +209,10 @@ func newQueryCommand(dr *database.Registry[database.Driver]) *cli.Command {
 				return errors.New("driver does not support query")
 			}
 
-			result, err := datapipe.ParseDataFromBytes[any](resultBytes, datapipe.Format(flagOutput))
+			result, err := datapipe.ParseDataFromBytes[any](
+				resultBytes,
+				datapipe.Format(flagOutput),
+			)
 			if err != nil {
 				return fmt.Errorf("failed to parse data: %w", err)
 			}
@@ -215,7 +222,7 @@ func newQueryCommand(dr *database.Registry[database.Driver]) *cli.Command {
 				return fmt.Errorf("output format %s is not supported", flagOutput)
 			}
 
-			if err := entry.Exporter.Export(w, result); err != nil {
+			if err := entry.Export(w, result); err != nil {
 				return fmt.Errorf("failed to export data: %w", err)
 			}
 
