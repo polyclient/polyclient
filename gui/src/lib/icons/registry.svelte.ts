@@ -1,7 +1,7 @@
-import { defaultIcons } from './defaults.ts';
+import { polyclientDefault } from './icon-sets/polyclient-default.ts';
 import type { IconName, IconSet, IconSource } from './types.ts';
 
-export const registry = $state<Partial<IconSet>>({ ...defaultIcons });
+export const registry = $state<Partial<IconSet>>({ ...polyclientDefault });
 
 /**
  * registerIconSet registers a new partial icon set, merging it with the existing registry.

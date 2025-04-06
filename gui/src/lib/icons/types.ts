@@ -1,13 +1,13 @@
 import type { Component } from 'svelte';
 
 export const iconsNames = {
-	railDatabase: 'rail:database',
-	railExplorer: 'rail:explorer',
 	railHistory: 'rail:history',
-	railPlugins: 'rail:plugins',
 	railAssistant: 'rail:assistant',
+	railPlugins: 'rail:plugins',
+	railNotifications: 'rail:notifications',
 	railSettings: 'rail:settings',
 
+	dbDatabase: 'db:database',
 	dbSchema: 'db:schema',
 	dbTable: 'db:table',
 	dbColumn: 'db:column',
@@ -20,16 +20,16 @@ export const iconsNames = {
 	dbConnection: 'db:connection',
 	dbFolder: 'db:folder',
 
-	uiChevronRight: 'ui:chevron-right',
 	uiChevronLeft: 'ui:chevron-left',
+	uiChevronRight: 'ui:chevron-right',
 	uiChevronUp: 'ui:chevron-up',
 	uiChevronDown: 'ui:chevron-down',
-	uiArrowRight: 'ui:arrow-right',
 	uiArrowLeft: 'ui:arrow-left',
+	uiArrowRight: 'ui:arrow-right',
 	uiArrowUp: 'ui:arrow-up',
 	uiArrowDown: 'ui:arrow-down',
-	uiNext: 'ui:next',
 	uiPrevious: 'ui:previous',
+	uiNext: 'ui:next',
 	uiPlus: 'ui:plus',
 	uiMinus: 'ui:minus',
 	uiInfo: 'ui:info',
