@@ -40,6 +40,33 @@ export const iconsNames = {
 
 export type IconName = (typeof iconsNames)[keyof typeof iconsNames];
 
-export type IconComponent = Component;
+export type IconSourceComponent = Component;
 
-export type IconSet = Record<IconName, IconComponent | undefined>;
+export type IconSourceSvg = `<svg${string}></svg>`;
+
+export type IconSourceIconify = string;
+
+export type IconSource = IconSourceComponent | IconSourceSvg | IconSourceIconify;
+
+export type IconSet = Record<IconName, IconSource | undefined>;
+
+/**
+ * Type guard to check if an icon source is a Svelte component.
+ */
+export function isIconSourceComponent(source: IconSource): source is IconSourceComponent {
+	return typeof source === 'function';
+}
+
+/**
+ * Type guard to check if an icon source is a raw SVG string.
+ */
+export function isIconSourceSvg(source: IconSource): source is IconSourceSvg {
+	return typeof source === 'string' && source.trimStart().startsWith('<svg');
+}
+
+/**
+ * Type guard to check if an icon source is an Iconify icon.
+ */
+export function isIconSourceIconify(source: IconSource): source is IconSourceIconify {
+	return typeof source === 'string' && source.trimStart().startsWith('iconify:');
+}
