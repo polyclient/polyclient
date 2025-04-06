@@ -1,0 +1,40 @@
+import House from '@lucide/svelte/icons/house';
+import { type IconSet, iconsNames } from './types.ts';
+
+export const defaultIcons: IconSet = {
+	[iconsNames.railDatabase]: House,
+	[iconsNames.railExplorer]: House,
+	[iconsNames.railHistory]: House,
+	[iconsNames.railPlugins]: House,
+	[iconsNames.railAssistant]: House,
+	[iconsNames.railSettings]: House,
+
+	[iconsNames.dbSchema]: House,
+	[iconsNames.dbTable]: House,
+	[iconsNames.dbColumn]: House,
+	[iconsNames.dbColumnPk]: House,
+	[iconsNames.dbColumnFk]: House,
+	[iconsNames.dbView]: House,
+	[iconsNames.dbFunction]: House,
+	[iconsNames.dbProcedure]: House,
+	[iconsNames.dbTrigger]: House,
+	[iconsNames.dbConnection]: House,
+	[iconsNames.dbFolder]: House,
+
+	[iconsNames.uiChevronRight]: House,
+	[iconsNames.uiChevronDown]: House,
+	[iconsNames.uiChevronLeft]: House,
+	[iconsNames.uiChevronUp]: House,
+	[iconsNames.uiArrowRight]: House,
+	[iconsNames.uiArrowLeft]: House,
+	[iconsNames.uiArrowUp]: House,
+	[iconsNames.uiArrowDown]: House,
+	[iconsNames.uiNext]: House,
+	[iconsNames.uiPrevious]: House,
+	[iconsNames.uiPlus]: House,
+	[iconsNames.uiMinus]: House,
+	[iconsNames.uiInfo]: House,
+	[iconsNames.uiError]: House,
+	[iconsNames.uiWarning]: House,
+	[iconsNames.uiSuccess]: House,
+};

@@ -5,6 +5,7 @@
 	import { Compartment, EditorState } from '@codemirror/state';
 	import { keymap } from '@codemirror/view';
 	import { EditorView, basicSetup } from 'codemirror';
+	import { onMount } from 'svelte';
 
 	let parent: HTMLDivElement;
 
@@ -22,9 +23,11 @@ ORDER BY Name;`;
 
 	const state = EditorState.create({
 		extensions: [
+			// vim(),
 			extensionMoveToLine,
 			basicSetup,
 			keymap.of([indentWithTab]),
+			tabSize.of(EditorState.tabSize.of(4)),
 			language.of(
 				sql({
 					dialect: SQLite,
@@ -32,13 +35,12 @@ ORDER BY Name;`;
 					tables: [],
 				}),
 			),
-			tabSize.of(EditorState.tabSize.of(4)),
 		],
 		doc,
 	});
 
-	$effect(() => {
-		const editor = new EditorView({ state, parent });
+	onMount(() => {
+		new EditorView({ state, parent });
 	});
 </script>
 
@@ -46,3 +48,5 @@ ORDER BY Name;`;
 	bind:this={parent}
 	class="h-full overflow-auto"
 ></div>
+
+s-
