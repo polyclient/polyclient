@@ -1,43 +1,43 @@
 <script lang="ts">
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import Calendar from '@lucide/svelte/icons/calendar';
-	import House from '@lucide/svelte/icons/house';
-	import Inbox from '@lucide/svelte/icons/inbox';
-	import Search from '@lucide/svelte/icons/search';
-	import Settings from '@lucide/svelte/icons/settings';
+	import Icon from '$lib/icons/icon.svelte';
+	import { iconsNames } from '$lib/icons/types';
 
 	// Menu items.
 	const items = [
 		{
 			title: 'Home',
 			url: '#',
-			icon: House,
+			icon: iconsNames.railDatabase,
 		},
 		{
 			title: 'Inbox',
 			url: '#',
-			icon: Inbox,
+			icon: iconsNames.railDatabase,
 		},
 		{
 			title: 'Calendar',
 			url: '#',
-			icon: Calendar,
+			icon: iconsNames.railDatabase,
 		},
 		{
 			title: 'Search',
 			url: '#',
-			icon: Search,
+			icon: iconsNames.railDatabase,
 		},
 		{
 			title: 'Settings',
 			url: '#',
-			icon: Settings,
+			icon: iconsNames.railDatabase,
 		},
 	];
 </script>
 
 <Sidebar.Provider>
-	<Sidebar.Root class="h-full">
+	<Sidebar.Root
+		collapsible="none"
+		class="w-full"
+	>
 		<Sidebar.Content>
 			<Sidebar.Group>
 				<Sidebar.GroupLabel>Application</Sidebar.GroupLabel>
@@ -51,7 +51,7 @@
 											href={item.url}
 											{...props}
 										>
-											<item.icon />
+											<Icon name={item.icon} />
 											<span>{item.title}</span>
 										</a>
 									{/snippet}
