@@ -8,27 +8,27 @@
 		{
 			title: 'Home',
 			url: '#',
-			icon: iconsNames.railDatabase,
+			icon: iconsNames.dbDatabase,
 		},
 		{
 			title: 'Inbox',
 			url: '#',
-			icon: iconsNames.railDatabase,
+			icon: iconsNames.dbDatabase,
 		},
 		{
 			title: 'Calendar',
 			url: '#',
-			icon: iconsNames.railDatabase,
+			icon: iconsNames.dbDatabase,
 		},
 		{
 			title: 'Search',
 			url: '#',
-			icon: iconsNames.railDatabase,
+			icon: iconsNames.dbDatabase,
 		},
 		{
 			title: 'Settings',
 			url: '#',
-			icon: iconsNames.railDatabase,
+			icon: iconsNames.dbDatabase,
 		},
 	];
 </script>
