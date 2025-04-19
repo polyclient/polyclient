@@ -6,20 +6,20 @@ package cli
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path"
 
-	"github.com/polyclient/polyclient/internal/database"
 	"github.com/polyclient/polyclient/internal/datapipe"
+	"github.com/polyclient/polyclient/internal/db"
+	"github.com/polyclient/polyclient/internal/sdk"
 	"github.com/urfave/cli/v3"
 )
 
 // NewDatabaseCommand returns a new database command for managing databases and their connections.
-func NewDatabaseCommand(driverRegistry *database.Registry[database.Driver]) *cli.Command {
+func NewDatabaseCommand(dbSDK *sdk.DatabaseSDK) *cli.Command {
 	return &cli.Command{
 		Name:  "database",
 		Usage: "Manage databases and their connections",
@@ -37,14 +37,15 @@ func NewDatabaseCommand(driverRegistry *database.Registry[database.Driver]) *cli
 			},
 		},
 		Commands: []*cli.Command{
-			newPingCommand(driverRegistry),
-			newQueryCommand(driverRegistry),
+			newPingCommand(dbSDK),
+			newListTablesCommand(dbSDK),
+			newQueryCommand(dbSDK),
 		},
 	}
 }
 
 // newPingCommand returns a new ping command that can be used to ping a database from the CLI.
-func newPingCommand(driverRegistry *database.Registry[database.Driver]) *cli.Command {
+func newPingCommand(dbSDK *sdk.DatabaseSDK) *cli.Command {
 	return &cli.Command{
 		Name:  "ping",
 		Usage: "Ping a database to check connectivity",
@@ -52,37 +53,49 @@ func newPingCommand(driverRegistry *database.Registry[database.Driver]) *cli.Com
 			flagDriver := cmd.String("driver")
 			flagDSN := cmd.String("dsn")
 
-			driver, ok := driverRegistry.Get(flagDriver)
-			if !ok {
-				return fmt.Errorf("driver %s not found", flagDriver)
+			conn, err := dbSDK.OpenConnection(ctx, flagDriver, db.Config{"dsn": flagDSN})
+			if err != nil {
+				return fmt.Errorf("failed to open connection: %w", err)
 			}
 
-			switch d := driver.(type) {
-			case database.DriverSQL:
-				conn, err := d.Connect(flagDSN)
-				if err != nil {
-					return fmt.Errorf("failed to connect to database: %w", err)
-				}
-
-				return conn.PingContext(ctx)
-
-			case database.DriverNoSQL:
-				conn, err := d.Connect(flagDSN)
-				if err != nil {
-					return fmt.Errorf("failed to connect to database: %w", err)
-				}
-
-				return conn.PingContext(ctx)
-
-			default:
-				return errors.New("driver does not support ping")
+			if err := conn.Ping(ctx); err != nil {
+				return fmt.Errorf("failed to ping database: %w", err)
 			}
+
+			return nil
+		},
+	}
+}
+
+func newListTablesCommand(dbSDK *sdk.DatabaseSDK) *cli.Command {
+	return &cli.Command{
+		Name:  "list-tables",
+		Usage: "List all tables in a database",
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			flagDriver := cmd.String("driver")
+			flagDSN := cmd.String("dsn")
+
+			conn, err := dbSDK.OpenConnection(ctx, flagDriver, db.Config{"dsn": flagDSN})
+			if err != nil {
+				return fmt.Errorf("failed to open connection: %w", err)
+			}
+
+			tables, err := conn.Schema().ListTables(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to list tables: %w", err)
+			}
+
+			for _, table := range tables {
+				fmt.Println(table.Name)
+			}
+
+			return nil
 		},
 	}
 }
 
 // newQueryCommand returns a new query command that can be used to query a database from the CLI.
-func newQueryCommand(dr *database.Registry[database.Driver]) *cli.Command {
+func newQueryCommand(dbSDK *sdk.DatabaseSDK) *cli.Command {
 	exportFormats := datapipe.GetAvailableExportFormats()
 
 	return &cli.Command{
@@ -148,74 +161,17 @@ func newQueryCommand(dr *database.Registry[database.Driver]) *cli.Command {
 				w = file
 			}
 
-			var resultBytes []byte
-
-			driver, ok := dr.Get(flagDriver)
-			if !ok {
-				return fmt.Errorf("driver %s not found", flagDriver)
-			}
-
-			switch d := driver.(type) {
-			case database.DriverSQL:
-				conn, err := d.Connect(flagDSN)
-				if err != nil {
-					return fmt.Errorf("failed to connect to database: %w", err)
-				}
-
-				rows, err := conn.QueryContext(ctx, flagQuery)
-				if err != nil {
-					return fmt.Errorf("failed to execute query: %w", err)
-				}
-				defer rows.Close()
-
-				columns, err := rows.Columns()
-				if err != nil {
-					return fmt.Errorf("failed to get columns: %w", err)
-				}
-
-				results := []map[string]any{}
-
-				for rows.Next() {
-					values := make([]any, len(columns))
-					valuesPtrs := make([]any, len(columns))
-
-					for i := range values {
-						valuesPtrs[i] = &values[i]
-					}
-
-					if err := rows.Scan(valuesPtrs...); err != nil {
-						return fmt.Errorf("failed to scan row: %w", err)
-					}
-
-					result := map[string]any{}
-
-					for i, col := range columns {
-						result[col] = values[i]
-					}
-
-					results = append(results, result)
-				}
-
-				if err := rows.Err(); err != nil {
-					return fmt.Errorf("failed to iterate rows: %w", err)
-				}
-
-				resultBytes, err = json.Marshal(results)
-				if err != nil {
-					return fmt.Errorf("failed to marshal results: %w", err)
-				}
-
-			default:
-				return errors.New("driver does not support query")
-			}
-
-			result, err := datapipe.ParseDataFromBytes[any](
-				resultBytes,
-				datapipe.Format(flagOutput),
-			)
+			conn, err := dbSDK.OpenConnection(ctx, flagDriver, db.Config{"dsn": flagDSN})
 			if err != nil {
-				return fmt.Errorf("failed to parse data: %w", err)
+				return fmt.Errorf("failed to open connection: %w", err)
 			}
+
+			result, err := conn.Query().Execute(ctx, flagQuery)
+			if err != nil {
+				return fmt.Errorf("failed to execute query: %w", err)
+			}
+
+			fmt.Println(result) // TODO: connect this to datapipe
 
 			entry, ok := datapipe.GetRegistryEntry(datapipe.Format(flagOutput))
 			if !ok {
