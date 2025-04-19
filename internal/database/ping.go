@@ -6,6 +6,7 @@ package database
 
 import "context"
 
+// Pinger represents a database connection that can be pinged.
 type Pinger interface {
 	Ping() error
 	PingContext(ctx context.Context) error

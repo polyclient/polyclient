@@ -17,7 +17,7 @@ type Registry[T Driver] struct {
 	drivers map[string]T
 }
 
-// newRegistry creates a new database registry.
+// NewRegistry creates a new database registry.
 func NewRegistry[T Driver]() *Registry[T] {
 	return &Registry[T]{
 		drivers: map[string]T{},

@@ -21,6 +21,7 @@ type Driver interface {
 	Type() DriverType
 }
 
+// DriverConnector represents a generic database connector.
 type DriverConnector[T Connection] interface {
 	Connect(dsn string) (T, error)
 }
