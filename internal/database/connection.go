@@ -9,12 +9,14 @@ type Connection interface {
 	Close() error
 }
 
+// ConnectionSQL represents a generic SQL database connection.
 type ConnectionSQL interface {
 	Connection
 	Pinger
 	SQLQuerier
 }
 
+// ConnectionNoSQL represents a generic NoSQL database connection.
 type ConnectionNoSQL interface {
 	Connection
 	Pinger

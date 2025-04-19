@@ -26,7 +26,7 @@ func NewServer() (*Server, error) {
 
 	port, err := findAvailablePort()
 	if err != nil {
-		return nil, fmt.Errorf("Failed to find an available port: %w", err)
+		return nil, fmt.Errorf("failed to find an available port: %w", err)
 	}
 
 	stack := middleware.CreateStack(

@@ -81,6 +81,7 @@ type Paginator interface {
 	TotalRows() (int, bool)
 }
 
+// PaginationOptions specifies options for pagination.
 type PaginationOptions struct {
 	// PageSize is the number of rows per page.
 	PageSize int
