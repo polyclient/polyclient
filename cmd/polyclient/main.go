@@ -14,9 +14,10 @@ import (
 	pCli "github.com/polyclient/polyclient/cli"
 	"github.com/polyclient/polyclient/drivers/postgres"
 	"github.com/polyclient/polyclient/drivers/sqlite"
-	"github.com/polyclient/polyclient/internal/database"
+	"github.com/polyclient/polyclient/internal/db"
 	"github.com/polyclient/polyclient/internal/env"
 	"github.com/polyclient/polyclient/internal/plugin"
+	"github.com/polyclient/polyclient/internal/sdk"
 	"github.com/polyclient/polyclient/internal/version"
 	"github.com/urfave/cli/v3"
 )
@@ -32,6 +33,8 @@ func main() {
 		log.Fatal("Error loading database drivers:", err)
 	}
 
+	dbSDK := sdk.NewDatabaseSDK(driversRegistry)
+
 	// pluginsRegistry, err := loadPlugins()
 	// if err != nil {
 	// 	log.Fatal("Error loading plugins:", err)
@@ -45,7 +48,7 @@ func main() {
 		Commands: []*cli.Command{
 			pCli.NewVersionCommand(),
 			pCli.NewDocsCommand(),
-			pCli.NewDatabaseCommand(driversRegistry),
+			pCli.NewDatabaseCommand(dbSDK),
 			// pCli.NewPluginCommand(pluginsRegistry),
 			pCli.NewGUICommand(),
 			pCli.NewLogCommand(),
@@ -57,8 +60,8 @@ func main() {
 	}
 }
 
-func loadDrivers() (*database.Registry[database.Driver], error) {
-	dr := database.NewRegistry[database.Driver]()
+func loadDrivers() (*db.Registry[db.Driver], error) {
+	dr := db.NewRegistry[db.Driver]()
 
 	if err := dr.Register(sqlite.NewDriver()); err != nil {
 		return nil, fmt.Errorf("failed to register SQLite driver: %w", err)
