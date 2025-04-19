@@ -24,8 +24,7 @@ PolyClient is a fast, extensible, and cross-platform database management platfor
 
 ### Core
 
-- 💸 No SaaS model—everything is forever free and unrestricted.
-- 🚫 No telemetry, no tracking, no spying, no hidden data harvesting.
+- 🚷 **NO** subscriptions, paywalls, “Pro Tier”, crippled features, telemetry, tracking, spyware, data harvesting.
 - 💻 Cross-platform (Linux, macOS, Windows) + Docker & Podman support.
 - 👨🏻‍💻 Powerful CLI to manage your databases without leaving your terminal.
 - 🖼️ Fast, intuitive, and extensible GUI with clean, clutter-free design.

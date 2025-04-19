@@ -10,10 +10,11 @@ services:
     ports:
       - "5432:5432"
     volumes:
+      - ../test/fixtures/postgres:/docker-entrypoint-initdb.d
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${PG_USER:-testuser}"]
-      interval: 10s
+      test: ["CMD", "pg_isready", "-U", "${PG_USER:-testuser}", "-d", "${PG_DB:-testdb}"]
+      interval: 5s
       timeout: 5s
       retries: 5  
 
