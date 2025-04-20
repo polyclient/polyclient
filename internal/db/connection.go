@@ -15,6 +15,16 @@ type Connection interface {
 	// Ping verifies that the connection is alive.
 	Ping(ctx context.Context) error
 
+	// Info returns information about the connection.
+	Info() ConnectionInfo
+
 	// Close terminates the connection.
 	io.Closer
+}
+
+// ConnectionInfo contains information about a database connection.
+type ConnectionInfo interface {
+
+	// ServerVersion returns the version of the database server used by the connection.
+	ServerVersion() string
 }

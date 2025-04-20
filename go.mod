@@ -2,22 +2,41 @@ module github.com/polyclient/polyclient
 
 go 1.24.2
 
-replace github.com/polyclient/polyclient/drivers/postgres => ./drivers/postgres
+replace github.com/polyclient/polyclient/drivers/cassandra => ./drivers/cassandra
 
-replace github.com/polyclient/polyclient/drivers/sqlite => ./drivers/sqlite
+replace github.com/polyclient/polyclient/drivers/clickhouse => ./drivers/clickhouse
+
+replace github.com/polyclient/polyclient/drivers/cockroachdb => ./drivers/cockroachdb
+
+replace github.com/polyclient/polyclient/drivers/duckdb => ./drivers/duckdb
+
+replace github.com/polyclient/polyclient/drivers/firebird => ./drivers/firebird
+
+replace github.com/polyclient/polyclient/drivers/libsql => ./drivers/libsql
+
+replace github.com/polyclient/polyclient/drivers/mariadb => ./drivers/mariadb
+
+replace github.com/polyclient/polyclient/drivers/mongodb => ./drivers/mongodb
 
 replace github.com/polyclient/polyclient/drivers/mysql => ./drivers/mysql
 
-replace github.com/polyclient/polyclient/drivers/mongodb => ./drivers/mongodb
+replace github.com/polyclient/polyclient/drivers/oracle => ./drivers/oracle
+
+replace github.com/polyclient/polyclient/drivers/postgresql => ./drivers/postgresql
+
+replace github.com/polyclient/polyclient/drivers/redis => ./drivers/redis
+
+replace github.com/polyclient/polyclient/drivers/sqlite => ./drivers/sqlite
+
+replace github.com/polyclient/polyclient/drivers/sqlserver => ./drivers/sqlserver
 
 require (
 	github.com/bytecodealliance/wasmtime-go/v30 v30.0.0
 	github.com/go-playground/validator/v10 v10.25.0
-	github.com/polyclient/polyclient/drivers/postgres v0.0.0-00010101000000-000000000000
+	github.com/polyclient/polyclient/drivers/postgresql v0.0.0-00010101000000-000000000000
 	github.com/polyclient/polyclient/drivers/sqlite v0.0.0-00010101000000-000000000000
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v3 v3.0.0-beta1
-	go.bytecodealliance.org/cm v0.2.2
 )
 
 require (

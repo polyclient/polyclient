@@ -54,14 +54,19 @@ func (s *DatabaseSDK) OpenConnection(ctx context.Context, driverName string, con
 	}, nil
 }
 
-// CloseConnection closes the database connection.
-func (s *Session) CloseConnection() error {
-	return s.conn.Close()
+// Info returns information about the current database connection.
+func (s *Session) Info() db.ConnectionInfo {
+	return s.conn.Info()
 }
 
 // Ping verifies that the connection is alive.
 func (s *Session) Ping(ctx context.Context) error {
 	return s.conn.Ping(ctx)
+}
+
+// CloseConnection closes the database connection.
+func (s *Session) CloseConnection() error {
+	return s.conn.Close()
 }
 
 // Schema provides access to schema-related operations.

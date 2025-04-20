@@ -1,4 +1,4 @@
-module github.com/polyclient/polyclient/drivers/postgres
+module github.com/polyclient/polyclient/drivers/postgresql
 
 go 1.24.2
 

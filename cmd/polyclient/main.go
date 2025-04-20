@@ -12,7 +12,7 @@ import (
 	"os"
 
 	pCli "github.com/polyclient/polyclient/cli"
-	"github.com/polyclient/polyclient/drivers/postgres"
+	"github.com/polyclient/polyclient/drivers/postgresql"
 	"github.com/polyclient/polyclient/drivers/sqlite"
 	"github.com/polyclient/polyclient/internal/db"
 	"github.com/polyclient/polyclient/internal/env"
