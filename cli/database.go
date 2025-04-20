@@ -62,6 +62,9 @@ func newPingCommand(dbSDK *sdk.DatabaseSDK) *cli.Command {
 				return fmt.Errorf("failed to ping database: %w", err)
 			}
 
+			info := conn.Info()
+			fmt.Printf("Connected to %s", info.ServerVersion())
+
 			return nil
 		},
 	}

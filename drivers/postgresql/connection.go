@@ -1,4 +1,4 @@
-package sqlite
+package postgres
 
 import (
 	"context"
@@ -36,7 +36,7 @@ type ConnectionInfo struct {
 func (c *ConnectionInfo) ServerVersion() string {
 	var version string
 
-	err := c.db.QueryRow("SELECT sqlite_version()").Scan(&version)
+	err := c.db.QueryRow("SELECT version()").Scan(&version)
 	if err != nil {
 		return "unknown"
 	}

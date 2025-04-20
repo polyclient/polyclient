@@ -15,7 +15,7 @@ type Driver struct{}
 
 // Name implements db.Driver.
 func (d *Driver) Name() string {
-	return "postgres"
+	return "sqlite"
 }
 
 // Open implements db.Driver.
