@@ -74,26 +74,6 @@ func (s *Session) Schema() *SchemaOperations {
 	return &SchemaOperations{session: s}
 }
 
-// ListDatabases returns a list of all databases in the connection.
-func (o *SchemaOperations) ListDatabases(ctx context.Context) ([]db.DatabaseSummary, error) {
-	inspector, ok := o.session.conn.(db.DatabaseLister)
-	if !ok {
-		return nil, ErrDriverDoesNotSupportDatabaseListing
-	}
-
-	return inspector.ListDatabases(ctx)
-}
-
-// GetDatabase returns the database with the given name.
-func (o *SchemaOperations) GetDatabase(ctx context.Context, name string) (db.DatabaseDetail, error) {
-	inspector, ok := o.session.conn.(db.DatabaseGetter)
-	if !ok {
-		return db.DatabaseDetail{}, ErrDriverDoesNotSupportDatabaseListing
-	}
-
-	return inspector.GetDatabase(ctx, name)
-}
-
 // ListSchemas returns a list of all schemas in the connection.
 func (o *SchemaOperations) ListSchemas(ctx context.Context) ([]db.SchemaSummary, error) {
 	inspector, ok := o.session.conn.(db.SchemaLister)
@@ -115,13 +95,13 @@ func (o *SchemaOperations) GetSchema(ctx context.Context, name string) (db.Schem
 }
 
 // ListTables returns a list of all tables in the connection.
-func (o *SchemaOperations) ListTables(ctx context.Context) ([]db.TableSummary, error) {
+func (o *SchemaOperations) ListTables(ctx context.Context, options ...db.ListTablesOption) ([]db.TableSummary, error) {
 	inspector, ok := o.session.conn.(db.TableLister)
 	if !ok {
 		return nil, ErrDriverDoesNotSupportTableListing
 	}
 
-	return inspector.ListTables(ctx)
+	return inspector.ListTables(ctx, options...)
 }
 
 // GetTable returns the table with the given name.

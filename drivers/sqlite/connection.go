@@ -43,3 +43,15 @@ func (c *ConnectionInfo) ServerVersion() string {
 
 	return version
 }
+
+// CurrentDatabase implements db.ConnectionInfo.CurrentDatabase.
+func (c *ConnectionInfo) CurrentDatabase() string {
+	var database string
+
+	err := c.db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' LIMIT 1").Scan(&database)
+	if err != nil {
+		return "unknown"
+	}
+
+	return database
+}

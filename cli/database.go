@@ -63,7 +63,7 @@ func newPingCommand(dbSDK *sdk.DatabaseSDK) *cli.Command {
 			}
 
 			info := conn.Info()
-			fmt.Printf("Connected to %s", info.ServerVersion())
+			fmt.Printf("Connection established [Database: %s, Version: %s]", info.CurrentDatabase(), info.ServerVersion())
 
 			return nil
 		},
@@ -74,18 +74,57 @@ func newListTablesCommand(dbSDK *sdk.DatabaseSDK) *cli.Command {
 	return &cli.Command{
 		Name:  "list-tables",
 		Usage: "List all tables in a database",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "schema",
+				Aliases: []string{"s"},
+				Usage:   "Filter tables by schema",
+			},
+			&cli.IntFlag{
+				Name:    "limit",
+				Aliases: []string{"n"},
+				Usage:   "Maximum number of tables to return",
+				Value:   100,
+			},
+			&cli.IntFlag{
+				Name:    "offset",
+				Aliases: []string{"skip", "o"},
+				Usage:   "Offset for pagination",
+				Value:   0,
+			},
+			&cli.StringFlag{
+				Name:    "filter",
+				Aliases: []string{"f"},
+				Usage:   "Filter tables by name",
+				Value:   "",
+			},
+		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
 			flagDriver := cmd.String("driver")
 			flagDSN := cmd.String("dsn")
+			flagSchema := cmd.String("schema")
+			flagFilter := cmd.String("filter")
+			flagLimit := cmd.Int("limit")
+			flagOffset := cmd.Int("offset")
 
 			conn, err := dbSDK.OpenConnection(ctx, flagDriver, db.Config{"dsn": flagDSN})
 			if err != nil {
 				return fmt.Errorf("failed to open connection: %w", err)
 			}
 
-			tables, err := conn.Schema().ListTables(ctx)
+			tables, err := conn.Schema().ListTables(ctx,
+				db.WithTablesSchema(flagSchema),
+				db.WithTablesFilter(flagFilter),
+				db.WithTablesLimit(int(flagLimit)),
+				db.WithTablesOffset(int(flagOffset)),
+			)
 			if err != nil {
 				return fmt.Errorf("failed to list tables: %w", err)
+			}
+
+			if len(tables) == 0 {
+				fmt.Println("No tables found in database")
+				return nil
 			}
 
 			for _, table := range tables {

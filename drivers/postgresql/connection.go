@@ -43,3 +43,15 @@ func (c *ConnectionInfo) ServerVersion() string {
 
 	return version
 }
+
+// CurrentDatabase implements db.ConnectionInfo.CurrentDatabase.
+func (c *ConnectionInfo) CurrentDatabase() string {
+	var database string
+
+	err := c.db.QueryRow("SELECT current_database()").Scan(&database)
+	if err != nil {
+		return "unknown"
+	}
+
+	return database
+}
