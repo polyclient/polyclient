@@ -39,7 +39,7 @@ type TableLister interface {
 // TableGetter defines the capability to retrieve a specific table by name.
 type TableGetter interface {
 	// GetTable returns the table with the given name.
-	GetTable(ctx context.Context, name string) (TableDetail, error)
+	GetTable(ctx context.Context, name string, options ...GetTableOption) (TableDetail, error)
 }
 
 // ViewLister defines the capability to list views in the database.

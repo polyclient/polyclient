@@ -33,10 +33,10 @@ type ConnectionInfo struct {
 }
 
 // ServerVersion implements db.ConnectionInfo.ServerVersion.
-func (c *ConnectionInfo) ServerVersion() string {
+func (c *ConnectionInfo) ServerVersion(ctx context.Context) string {
 	var version string
 
-	err := c.db.QueryRow("SELECT version()").Scan(&version)
+	err := c.db.QueryRowContext(ctx, "SELECT version()").Scan(&version)
 	if err != nil {
 		return "unknown"
 	}
@@ -45,10 +45,10 @@ func (c *ConnectionInfo) ServerVersion() string {
 }
 
 // CurrentDatabase implements db.ConnectionInfo.CurrentDatabase.
-func (c *ConnectionInfo) CurrentDatabase() string {
+func (c *ConnectionInfo) CurrentDatabase(ctx context.Context) string {
 	var database string
 
-	err := c.db.QueryRow("SELECT current_database()").Scan(&database)
+	err := c.db.QueryRowContext(ctx, "SELECT current_database()").Scan(&database)
 	if err != nil {
 		return "unknown"
 	}

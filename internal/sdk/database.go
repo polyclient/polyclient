@@ -105,13 +105,13 @@ func (o *SchemaOperations) ListTables(ctx context.Context, options ...db.ListTab
 }
 
 // GetTable returns the table with the given name.
-func (o *SchemaOperations) GetTable(ctx context.Context, name string) (db.TableDetail, error) {
+func (o *SchemaOperations) GetTable(ctx context.Context, name string, options ...db.GetTableOption) (db.TableDetail, error) {
 	inspector, ok := o.session.conn.(db.TableGetter)
 	if !ok {
 		return db.TableDetail{}, ErrDriverDoesNotSupportTableListing
 	}
 
-	return inspector.GetTable(ctx, name)
+	return inspector.GetTable(ctx, name, options...)
 }
 
 // ListViews returns a list of all views in the connection.
