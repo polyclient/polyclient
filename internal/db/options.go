@@ -1,10 +1,8 @@
-// Order is the order to sort the list of tables.
-
 package db
 
-// ListTablesOptions defines options for the SchemaLister.ListTables method.
+// ListTablesOptions defines options for SchemaLister.ListTables.
 type ListTablesOptions struct {
-	// Schema is the name of the schema to list tables from.
+	// Schema is the name of the schema to get the list of tables from.
 	Schema string
 	// Filter is a filter to apply to the list of tables.
 	Filter string
@@ -56,6 +54,35 @@ func WithTablesOffset(offset int) ListTablesOption {
 // NewListTablesOptions creates a ListTablesOptions with the given options applied.
 func NewListTablesOptions(opts ...ListTablesOption) *ListTablesOptions {
 	options := &ListTablesOptions{}
+
+	for _, opt := range opts {
+		opt(options)
+	}
+
+	return options
+}
+
+// GetTableOptions defines options for the SchemaLister.GetTable.
+type GetTableOptions struct {
+	// Schema is the name of the schema to get the table from.
+	Schema string
+}
+
+// GetTableOption is a functional option for configuring GetTableOptions.
+type GetTableOption func(*GetTableOptions)
+
+// WithTableSchema sets the schema for getting a table.
+func WithTableSchema(schema string) GetTableOption {
+	return func(opts *GetTableOptions) {
+		if schema != "" {
+			opts.Schema = schema
+		}
+	}
+}
+
+// NewGetTableOptions creates a GetTableOptions with the given options applied.
+func NewGetTableOptions(opts ...GetTableOption) *GetTableOptions {
+	options := &GetTableOptions{}
 
 	for _, opt := range opts {
 		opt(options)

@@ -6,6 +6,7 @@ package cli
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -39,6 +40,7 @@ func NewDatabaseCommand(dbSDK *sdk.DatabaseSDK) *cli.Command {
 		Commands: []*cli.Command{
 			newPingCommand(dbSDK),
 			newListTablesCommand(dbSDK),
+			newGetTableCommand(dbSDK),
 			newQueryCommand(dbSDK),
 		},
 	}
@@ -63,7 +65,7 @@ func newPingCommand(dbSDK *sdk.DatabaseSDK) *cli.Command {
 			}
 
 			info := conn.Info()
-			fmt.Printf("Connection established [Database: %s, Version: %s]", info.CurrentDatabase(), info.ServerVersion())
+			fmt.Printf("Connection established [Database: %s, Version: %s]", info.CurrentDatabase(ctx), info.ServerVersion(ctx))
 
 			return nil
 		},
@@ -130,6 +132,53 @@ func newListTablesCommand(dbSDK *sdk.DatabaseSDK) *cli.Command {
 			for _, table := range tables {
 				fmt.Println(table.Name)
 			}
+
+			return nil
+		},
+	}
+}
+
+func newGetTableCommand(dbSDK *sdk.DatabaseSDK) *cli.Command {
+	return &cli.Command{
+		Name:  "get-table",
+		Usage: "Get details of a table in a database",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "schema",
+				Aliases: []string{"s"},
+				Usage:   "Table schema",
+			},
+			&cli.StringFlag{
+				Name:     "name",
+				Aliases:  []string{"n"},
+				Usage:    "Table name",
+				Required: true,
+			},
+		},
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			flagDriver := cmd.String("driver")
+			flagDSN := cmd.String("dsn")
+			flagSchema := cmd.String("schema")
+			flagName := cmd.String("name")
+
+			conn, err := dbSDK.OpenConnection(ctx, flagDriver, db.Config{"dsn": flagDSN})
+			if err != nil {
+				return fmt.Errorf("failed to open connection: %w", err)
+			}
+
+			table, err := conn.Schema().GetTable(ctx, flagName,
+				db.WithTableSchema(flagSchema),
+			)
+			if err != nil {
+				return fmt.Errorf("failed to get table: %w", err)
+			}
+
+			tableJSON, err := json.MarshalIndent(table, "", "  ")
+			if err != nil {
+				return fmt.Errorf("failed to marshal table: %w", err)
+			}
+
+			fmt.Println(string(tableJSON))
 
 			return nil
 		},
