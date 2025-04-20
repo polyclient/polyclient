@@ -33,7 +33,7 @@ type SchemaGetter interface {
 // TableLister defines the capability to list tables in the database.
 type TableLister interface {
 	// ListTables returns a list of all tables in the database.
-	ListTables(ctx context.Context) ([]TableSummary, error)
+	ListTables(ctx context.Context, options ...ListTablesOption) ([]TableSummary, error)
 }
 
 // TableGetter defines the capability to retrieve a specific table by name.

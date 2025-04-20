@@ -8,16 +8,29 @@ import (
 	"github.com/polyclient/polyclient/internal/db"
 )
 
+var defaultListTablesOptions = func() []db.ListTablesOption {
+	return []db.ListTablesOption{
+		db.WithTablesSchema("public"),
+		db.WithTablesFilter(""),
+		db.WithTablesLimit(100),
+		db.WithTablesOffset(0),
+	}
+}
+
 // ListTables implements db.TableLister.
-func (c *Connection) ListTables(ctx context.Context) ([]db.TableSummary, error) {
-	query := `	
+func (c *Connection) ListTables(ctx context.Context, options ...db.ListTablesOption) ([]db.TableSummary, error) {
+	opts := db.NewListTablesOptions(append(defaultListTablesOptions(), options...)...)
+
+	query := `
 		SELECT table_name
 		FROM information_schema.tables
-		WHERE table_type = 'public'
-		ORDER BY table_name
+		WHERE table_schema = $1 AND table_type = 'BASE TABLE' AND table_name LIKE '%%' || $2 || '%%'
+		ORDER BY table_name ASC
+		LIMIT $3
+		OFFSET $4
 	`
 
-	rows, err := c.db.QueryContext(ctx, query)
+	rows, err := c.db.QueryContext(ctx, query, opts.Schema, opts.Filter, opts.Limit, opts.Offset)
 	if err != nil {
 		return nil, fmt.Errorf("postgres: failed to list tables: %w", err)
 	}
@@ -35,7 +48,7 @@ func (c *Connection) ListTables(ctx context.Context) ([]db.TableSummary, error) 
 		summary = append(summary, db.TableSummary{
 			GenericObjectIdentifier: db.GenericObjectIdentifier{
 				Name:   name,
-				Schema: "public",
+				Schema: opts.Schema,
 			},
 			GenericObjectOwner: db.GenericObjectOwner{
 				Owner: "postgres", // TODO: get owner

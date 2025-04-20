@@ -24,7 +24,9 @@ type Connection interface {
 
 // ConnectionInfo contains information about a database connection.
 type ConnectionInfo interface {
-
 	// ServerVersion returns the version of the database server used by the connection.
 	ServerVersion() string
+
+	// CurrentDatabase returns the name of the current database.
+	CurrentDatabase() string
 }
