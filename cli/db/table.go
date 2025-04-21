@@ -30,6 +30,11 @@ func newTableListCommand(app *application.Application) *cli.Command {
 				Aliases: []string{"s"},
 				Usage:   "Filter tables by schema",
 			},
+			&cli.StringFlag{
+				Name:    "filter",
+				Aliases: []string{"f"},
+				Usage:   "Filter tables by name",
+			},
 			&cli.IntFlag{
 				Name:    "limit",
 				Aliases: []string{"n"},
@@ -41,11 +46,6 @@ func newTableListCommand(app *application.Application) *cli.Command {
 				Aliases: []string{"skip"},
 				Usage:   "Offset for pagination",
 				Value:   0,
-			},
-			&cli.StringFlag{
-				Name:    "filter",
-				Aliases: []string{"f"},
-				Usage:   "Filter tables by name",
 			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {

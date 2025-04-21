@@ -128,8 +128,6 @@ type SchemaSummary struct {
 type TableSummary struct {
 	GenericObjectIdentifier
 	GenericObjectAttributes
-
-	IsTemporary bool `json:"isTemporary,omitempty"` // True if the table is a temporary table
 }
 
 // ViewSummary provides basic information about a view.

@@ -8,24 +8,23 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"time"
 
-	"github.com/go-playground/validator/v10"
+	"github.com/polyclient/polyclient/internal/validator"
 )
 
 // ConnectionProfile defines a saved database connection profile with metadata and config.
 type ConnectionProfile struct {
 	Driver               string           `json:"driver" validate:"required"`                  // e.g., "postgres", "mongodb", "mysql", etc.
 	Name                 string           `json:"name" validate:"required,max=30,namePattern"` // user-defined name for the connection
-	ColorTag             string           `json:"colorTag"`                                    // optional UI color tag to distinguish profiles
+	ColorTag             string           `json:"colorTag" validate:"omitempty,iscolor"`       // optional UI color tag to distinguish profiles
 	SaveCreds            bool             `json:"saveCreds"`                                   // whether to persist credentials (encrypted)
 	Pinned               bool             `json:"pinned"`                                      // whether the profile is pinned in UI
 	ConfirmBeforeConnect bool             `json:"confirmBeforeConnect"`                        // whether to confirm before connecting (prevents accidental connects to prod)
 	CreatedAt            time.Time        `json:"createdAt"`                                   // profile creation time
 	LastUsedAt           time.Time        `json:"lastUsedAt"`                                  // last time profile was used
-	Config               ConnectionConfig `json:"config"`                                      // actual driver-specific config
+	Config               ConnectionConfig `json:"config" validate:"required,dive"`             // actual driver-specific config
 }
 
 // ConnectionStore defines the interface for persisting connection configurations.
@@ -60,15 +59,12 @@ func NewFileConnectionStore(path string) *FileConnectionStore {
 
 // SaveProfile implements ConnectionStore.SaveProfile.
 func (s *FileConnectionStore) SaveProfile(ctx context.Context, profile *ConnectionProfile) error {
-	v := validator.New(validator.WithRequiredStructEnabled())
-
-	if err := v.RegisterValidation("namePattern", func(fl validator.FieldLevel) bool {
-		return regexp.MustCompile(`^[a-zA-Z0-9._-]+$`).MatchString(fl.Field().String())
-	}); err != nil {
-		return fmt.Errorf("invalid profile: %w", err)
+	v, err := validator.NewCustomValidator()
+	if err != nil {
+		return fmt.Errorf("failed to create validator: %w", err)
 	}
 
-	if err := v.Struct(profile); err != nil {
+	if err := v.Validate(profile); err != nil {
 		return fmt.Errorf("invalid profile: %w", err)
 	}
 

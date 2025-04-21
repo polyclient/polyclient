@@ -11,6 +11,7 @@ import (
 	"github.com/polyclient/polyclient/internal/db"
 	"github.com/polyclient/polyclient/internal/env"
 	"github.com/polyclient/polyclient/internal/plugin"
+	"github.com/polyclient/polyclient/internal/validator"
 )
 
 // App is the application container.
@@ -20,6 +21,7 @@ type Application struct {
 	PluginsRegistry *plugin.Registry
 	SDK             *db.SDK
 	Logger          *slog.Logger
+	Validator       *validator.CustomValidator
 }
 
 // NewApplication creates a new application container.
@@ -49,12 +51,18 @@ func NewApplication(ctx context.Context) (*Application, error) {
 
 	logger := slog.Default()
 
+	v, err := validator.NewCustomValidator()
+	if err != nil {
+		return nil, fmt.Errorf("Error creating validator: %w", err)
+	}
+
 	return &Application{
 		Config:          nil,
 		DriversRegistry: driversRegistry,
 		PluginsRegistry: nil,
 		SDK:             sdk,
 		Logger:          logger,
+		Validator:       v,
 	}, nil
 }
 
