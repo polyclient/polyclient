@@ -32,6 +32,7 @@ replace github.com/polyclient/polyclient/drivers/sqlserver => ./drivers/sqlserve
 
 require (
 	github.com/bytecodealliance/wasmtime-go/v30 v30.0.0
+	github.com/go-chi/chi/v5 v5.2.1
 	github.com/go-playground/validator/v10 v10.25.0
 	github.com/polyclient/polyclient/drivers/postgresql v0.0.0-00010101000000-000000000000
 	github.com/polyclient/polyclient/drivers/sqlite v0.0.0-00010101000000-000000000000

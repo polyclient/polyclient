@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
+
 	"slices"
 
-	"github.com/go-playground/validator/v10"
+	"github.com/polyclient/polyclient/internal/validator"
 )
 
 var supportedManifestFiles = [...]string{"manifest.json"}
@@ -42,23 +42,12 @@ type Author struct {
 // ValidateManifest verifies that a give manifest configuration
 // complies with all the defined validation rules.
 func ValidateManifest(m *Manifest) error {
-	v := validator.New(validator.WithRequiredStructEnabled())
-
-	// Register custom validation for id pattern
-	if err := v.RegisterValidation("idPattern", func(fl validator.FieldLevel) bool {
-		return regexp.MustCompile(`^[a-z0-9_-]+$`).MatchString(fl.Field().String())
-	}); err != nil {
-		return fmt.Errorf("invalid plugin manifest: %w", err)
+	v, err := validator.NewCustomValidator()
+	if err != nil {
+		return fmt.Errorf("failed to create validator: %w", err)
 	}
 
-	// Register custom validation for entrypoint pattern
-	if err := v.RegisterValidation("entrypointPattern", func(fl validator.FieldLevel) bool {
-		return regexp.MustCompile(`^[a-zA-Z0-9._/-]+\.wasm$`).MatchString(fl.Field().String())
-	}); err != nil {
-		return fmt.Errorf("invalid plugin manifest: %w", err)
-	}
-
-	if err := v.Struct(m); err != nil {
+	if err := v.Validate(m); err != nil {
 		return fmt.Errorf("invalid plugin manifest: %w", err)
 	}
 

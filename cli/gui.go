@@ -28,8 +28,20 @@ func NewGUICommand(app *application.Application) *cli.Command {
 	return &cli.Command{
 		Name:  "gui",
 		Usage: "Launch the PolyClient GUI",
+		Flags: []cli.Flag{
+			&cli.IntFlag{
+				Name:    "port",
+				Aliases: []string{"p"},
+				Usage:   "Port to listen on",
+				Value:   8080,
+			},
+		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			server, err := api.NewServer()
+			flagPort := cmd.Int("port")
+
+			server, err := api.NewServer(app,
+				api.WithPort(int(flagPort)),
+			)
 			if err != nil {
 				return fmt.Errorf("failed to create server: %w", err)
 			}
