@@ -7,24 +7,25 @@ package cli
 import (
 	"context"
 
+	"github.com/polyclient/polyclient/internal/application"
 	"github.com/polyclient/polyclient/internal/plugin"
 	"github.com/urfave/cli/v3"
 )
 
 // NewPluginCommand creates a CLI command for managing PolyClient plugins.
-func NewPluginCommand(pr *plugin.Registry) *cli.Command {
+func NewPluginCommand(app *application.Application) *cli.Command {
 	return &cli.Command{
 		Name:  "plugin",
 		Usage: "Manage PolyClient plugins from the CLI",
 		Commands: []*cli.Command{
-			newLoadCommand(pr),
-			newUnloadCommand(pr),
+			newLoadCommand(app),
+			newUnloadCommand(app),
 		},
 	}
 }
 
 // newLoadCommand creates a CLI command for loading PolyClient plugins.
-func newLoadCommand(pr *plugin.Registry) *cli.Command {
+func newLoadCommand(app *application.Application) *cli.Command {
 	return &cli.Command{
 		Name:  "load",
 		Usage: "Load a plugin",
@@ -44,7 +45,7 @@ func newLoadCommand(pr *plugin.Registry) *cli.Command {
 				return err
 			}
 
-			if _, err := pr.LoadPlugin(manifestPath); err != nil {
+			if _, err := app.PluginsRegistry.LoadPlugin(manifestPath); err != nil {
 				return err
 			}
 
@@ -54,7 +55,7 @@ func newLoadCommand(pr *plugin.Registry) *cli.Command {
 }
 
 // newUnloadCommand creates a CLI command for unloading PolyClient plugins.
-func newUnloadCommand(pr *plugin.Registry) *cli.Command {
+func newUnloadCommand(app *application.Application) *cli.Command {
 	return &cli.Command{
 		Name:  "unload",
 		Usage: "Unload a plugin",
@@ -68,7 +69,7 @@ func newUnloadCommand(pr *plugin.Registry) *cli.Command {
 		Action: func(_ context.Context, cmd *cli.Command) error {
 			id := cmd.String("id")
 
-			return pr.UnloadPlugin(id)
+			return app.PluginsRegistry.UnloadPlugin(id)
 		},
 	}
 }

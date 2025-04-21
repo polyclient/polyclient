@@ -1,4 +1,4 @@
-package postgres
+package postgresql
 
 import (
 	"context"
@@ -80,7 +80,7 @@ func (c *Connection) ListTables(ctx context.Context, options ...db.ListTablesOpt
 }
 
 // GetTable implements db.TableGetter.
-func (c *Connection) GetTable(ctx context.Context, name string, options ...db.GetTableOption) (db.TableDetail, error) {
+func (c *Connection) GetTable(ctx context.Context, name string, options ...db.GetTableOption) (*db.TableDetail, error) {
 	opts := db.NewGetTableOptions(append(defaultGetTableOptions(), options...)...)
 
 	var exists bool
@@ -92,11 +92,11 @@ func (c *Connection) GetTable(ctx context.Context, name string, options ...db.Ge
 		)`, opts.Schema, name).Scan(&exists)
 
 	if err != nil {
-		return db.TableDetail{}, fmt.Errorf("failed to get table: %w", err)
+		return nil, fmt.Errorf("failed to get table: %w", err)
 	}
 
 	if !exists {
-		return db.TableDetail{}, fmt.Errorf("table %s.%s does not exist", opts.Schema, name)
+		return nil, fmt.Errorf("table %s.%s does not exist", opts.Schema, name)
 	}
 
 	var tableOID int
@@ -110,7 +110,7 @@ func (c *Connection) GetTable(ctx context.Context, name string, options ...db.Ge
 		name, opts.Schema).Scan(&tableOID)
 
 	if err != nil {
-		return db.TableDetail{}, fmt.Errorf("failed to get table OID: %w", err)
+		return nil, fmt.Errorf("failed to get table OID: %w", err)
 	}
 
 	detail := db.TableDetail{
@@ -125,25 +125,25 @@ func (c *Connection) GetTable(ctx context.Context, name string, options ...db.Ge
 
 	detail.Columns, err = c.fetchTableColumns(ctx, opts.Schema, name, tableOID)
 	if err != nil {
-		return db.TableDetail{}, fmt.Errorf("failed to get table columns: %w", err)
+		return nil, fmt.Errorf("failed to get table columns: %w", err)
 	}
 
 	detail.Indexes, err = c.fetchTableIndexes(ctx, opts.Schema, tableOID)
 	if err != nil {
-		return db.TableDetail{}, fmt.Errorf("failed to get table indexes: %w", err)
+		return nil, fmt.Errorf("failed to get table indexes: %w", err)
 	}
 
 	detail.Constraints, err = c.fetchTableConstraints(ctx, opts.Schema, tableOID)
 	if err != nil {
-		return db.TableDetail{}, fmt.Errorf("failed to get table constraints: %w", err)
+		return nil, fmt.Errorf("failed to get table constraints: %w", err)
 	}
 
 	detail.Triggers, err = c.fetchTableTriggers(ctx, opts.Schema, tableOID)
 	if err != nil {
-		return db.TableDetail{}, fmt.Errorf("failed to get table triggers: %w", err)
+		return nil, fmt.Errorf("failed to get table triggers: %w", err)
 	}
 
-	return detail, nil
+	return &detail, nil
 }
 
 // fetchTableColumns retrieves column details for a table.

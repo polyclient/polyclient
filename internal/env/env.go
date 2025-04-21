@@ -16,6 +16,9 @@ import (
 )
 
 const (
+	// EnvPolyClientConnectionsDir controls the PolyClient connections directory.
+	EnvPolyClientConnectionsDir = "POLYCLIENT_CONNECTIONS_DIR"
+
 	// EnvPolyClientPluginsDir controls the PolyClient plugins directory.
 	EnvPolyClientPluginsDir = "POLYCLIENT_PLUGINS_DIR"
 
@@ -47,9 +50,10 @@ func GetManager() *Manager {
 	once.Do(func() {
 		globalManager = &Manager{
 			vars: map[string]Variable{
-				EnvPolyClientPluginsDir:   {EnvPolyClientPluginsDir, true},
-				EnvPolyClientSettingsFile: {EnvPolyClientSettingsFile, false},
-				EnvPolyClientKeymapFile:   {EnvPolyClientKeymapFile, false},
+				EnvPolyClientConnectionsDir: {EnvPolyClientConnectionsDir, true},
+				EnvPolyClientPluginsDir:     {EnvPolyClientPluginsDir, true},
+				EnvPolyClientSettingsFile:   {EnvPolyClientSettingsFile, false},
+				EnvPolyClientKeymapFile:     {EnvPolyClientKeymapFile, false},
 			},
 		}
 		_ = globalManager.Setup()
@@ -108,6 +112,8 @@ func (m *Manager) Get(name string) (string, error) {
 // getDefaultPath determines the default path based on the environment.
 func getDefaultPath(name string) (string, error) {
 	switch name {
+	case EnvPolyClientConnectionsDir:
+		return getUserConfigPath("connections")
 	case EnvPolyClientPluginsDir:
 		return getUserConfigPath("plugins")
 	case EnvPolyClientSettingsFile:

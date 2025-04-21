@@ -8,12 +8,13 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/polyclient/polyclient/internal/application"
 	"github.com/polyclient/polyclient/internal/version"
 	"github.com/urfave/cli/v3"
 )
 
 // NewVersionCommand creates a CLI command for displaying detailed version information.
-func NewVersionCommand() *cli.Command {
+func NewVersionCommand(app *application.Application) *cli.Command {
 	return &cli.Command{
 		Name:  "version",
 		Usage: "Show detailed version information",

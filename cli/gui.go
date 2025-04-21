@@ -19,11 +19,12 @@ import (
 	"time"
 
 	"github.com/polyclient/polyclient/api"
+	"github.com/polyclient/polyclient/internal/application"
 	"github.com/urfave/cli/v3"
 )
 
 // NewGUICommand creates a CLI command for launching the PolyClient GUI.
-func NewGUICommand() *cli.Command {
+func NewGUICommand(app *application.Application) *cli.Command {
 	return &cli.Command{
 		Name:  "gui",
 		Usage: "Launch the PolyClient GUI",

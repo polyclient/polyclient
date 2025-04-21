@@ -36,7 +36,6 @@ linters:
     - gosimple # https://golangci-lint.run/usage/linters/#gosimple
     - grouper # https://golangci-lint.run/usage/linters/#grouper
     - dupword # https://golangci-lint.run/usage/linters/#dupword
-    - mnd # https://golangci-lint.run/usage/linters/#mnd
     - whitespace # https://golangci-lint.run/usage/linters/#whitespace
     - wsl # https://golangci-lint.run/usage/linters/#wsl
 

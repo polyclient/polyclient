@@ -9,20 +9,19 @@ import (
 	"io"
 )
 
-// Connection represents an active database connection.
-// The basic handle; specific capabilities are discovered via type assertions.
+// ConnectionConfig represents a driver-specific map of configuration options.
+type ConnectionConfig map[string]any
+
+// Connection represents a database connection.
 type Connection interface {
-	// Ping verifies that the connection is alive.
-	Ping(ctx context.Context) error
-
-	// Info returns information about the connection.
-	Info() ConnectionInfo
-
 	// Close terminates the connection.
 	io.Closer
+
+	// Ping verifies that the connection to the database is still alive.
+	Ping(ctx context.Context) error
 }
 
-// ConnectionInfo contains information about a database connection.
+// ConnectionInfo contains metadata information about a database connection.
 type ConnectionInfo interface {
 	// ServerVersion returns the version of the database server used by the connection.
 	ServerVersion(ctx context.Context) string

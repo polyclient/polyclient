@@ -10,11 +10,12 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/polyclient/polyclient/internal/application"
 	"github.com/urfave/cli/v3"
 )
 
 // NewDocsCommand creates a CLI command for opening the documentation website.
-func NewDocsCommand() *cli.Command {
+func NewDocsCommand(app *application.Application) *cli.Command {
 	return &cli.Command{
 		Name:  "docs",
 		Usage: "Open documentation website",

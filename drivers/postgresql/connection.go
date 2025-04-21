@@ -1,4 +1,4 @@
-package postgres
+package postgresql
 
 import (
 	"context"
@@ -10,11 +10,6 @@ import (
 // Connection implements db.Connection.
 type Connection struct {
 	db *sql.DB
-}
-
-// Info implements db.Connection.Info.
-func (c *Connection) Info() db.ConnectionInfo {
-	return &ConnectionInfo{db: c.db}
 }
 
 // Ping implements db.Connection.Ping.
@@ -55,3 +50,6 @@ func (c *ConnectionInfo) CurrentDatabase(ctx context.Context) string {
 
 	return database
 }
+
+var _ db.Connection = (*Connection)(nil)
+var _ db.ConnectionInfo = (*ConnectionInfo)(nil)

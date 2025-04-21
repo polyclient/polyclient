@@ -35,7 +35,7 @@ func NewServer() (*Server, error) {
 	)
 
 	httpServer := &http.Server{
-		Addr:              fmt.Sprintf("localhost:%d", port),
+		Addr:              fmt.Sprintf("127.0.0.1:%d", port),
 		Handler:           stack(router),
 		ReadTimeout:       5 * time.Second,
 		WriteTimeout:      5 * time.Second,
