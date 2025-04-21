@@ -15,7 +15,7 @@ type DatabaseLister interface {
 // DatabaseGetter defines the capability to retrieve a specific database by name.
 type DatabaseGetter interface {
 	// GetDatabase returns the database with the given name.
-	GetDatabase(ctx context.Context, name string) (DatabaseDetail, error)
+	GetDatabase(ctx context.Context, name string) (*DatabaseDetail, error)
 }
 
 // SchemaLister defines the capability to list schemas in the database.
@@ -27,7 +27,7 @@ type SchemaLister interface {
 // SchemaGetter defines the capability to retrieve a specific schema by name.
 type SchemaGetter interface {
 	// GetSchema returns the schema with the given name.
-	GetSchema(ctx context.Context, name string) (SchemaDetail, error)
+	GetSchema(ctx context.Context, name string) (*SchemaDetail, error)
 }
 
 // TableLister defines the capability to list tables in the database.
@@ -39,7 +39,7 @@ type TableLister interface {
 // TableGetter defines the capability to retrieve a specific table by name.
 type TableGetter interface {
 	// GetTable returns the table with the given name.
-	GetTable(ctx context.Context, name string, options ...GetTableOption) (TableDetail, error)
+	GetTable(ctx context.Context, name string, options ...GetTableOption) (*TableDetail, error)
 }
 
 // ViewLister defines the capability to list views in the database.
@@ -51,7 +51,7 @@ type ViewLister interface {
 // ViewGetter defines the capability to retrieve a specific view by name.
 type ViewGetter interface {
 	// GetView returns the view with the given name.
-	GetView(ctx context.Context, name string) (ViewDetail, error)
+	GetView(ctx context.Context, name string) (*ViewDetail, error)
 }
 
 // MaterializedViewLister defines the capability to list materialized views in the database.
@@ -63,7 +63,7 @@ type MaterializedViewLister interface {
 // MaterializedViewGetter defines the capability to retrieve a specific materialized view by name.
 type MaterializedViewGetter interface {
 	// GetMaterializedView returns the materialized view with the given name.
-	GetMaterializedView(ctx context.Context, name string) (MaterializedViewDetail, error)
+	GetMaterializedView(ctx context.Context, name string) (*MaterializedViewDetail, error)
 }
 
 // ColumnLister defines the capability to list columns in the database.
@@ -75,7 +75,7 @@ type ColumnLister interface {
 // ColumnGetter defines the capability to retrieve a specific column by name.
 type ColumnGetter interface {
 	// GetColumn returns the column with the given name.
-	GetColumn(ctx context.Context, name string) (ColumnDetail, error)
+	GetColumn(ctx context.Context, name string) (*ColumnDetail, error)
 }
 
 // IndexLister defines the capability to list indexes in the database.
@@ -87,7 +87,7 @@ type IndexLister interface {
 // IndexGetter defines the capability to retrieve a specific index by name.
 type IndexGetter interface {
 	// GetIndex returns the index with the given name.
-	GetIndex(ctx context.Context, name string) (IndexDetail, error)
+	GetIndex(ctx context.Context, name string) (*IndexDetail, error)
 }
 
 // ConstraintLister defines the capability to list constraints in the database.
@@ -99,7 +99,7 @@ type ConstraintLister interface {
 // ConstraintGetter defines the capability to retrieve a specific constraint by name.
 type ConstraintGetter interface {
 	// GetConstraint returns the constraint with the given name.
-	GetConstraint(ctx context.Context, name string) (ConstraintDetail, error)
+	GetConstraint(ctx context.Context, name string) (*ConstraintDetail, error)
 }
 
 // SequenceLister defines the capability to list sequences in the database.
@@ -111,7 +111,7 @@ type SequenceLister interface {
 // SequenceGetter defines the capability to retrieve a specific sequence by name.
 type SequenceGetter interface {
 	// GetSequence returns the sequence with the given name.
-	GetSequence(ctx context.Context, name string) (SequenceDetail, error)
+	GetSequence(ctx context.Context, name string) (*SequenceDetail, error)
 }
 
 // TypeLister defines the capability to list user-defined types in the database.
@@ -123,7 +123,7 @@ type TypeLister interface {
 // TypeGetter defines the capability to retrieve a specific user-defined type by name.
 type TypeGetter interface {
 	// GetType returns the type with the given name.
-	GetType(ctx context.Context, name string) (TypeDetail, error)
+	GetType(ctx context.Context, name string) (*TypeDetail, error)
 }
 
 // FunctionLister defines the capability to list functions in the database.
@@ -135,7 +135,7 @@ type FunctionLister interface {
 // FunctionGetter defines the capability to retrieve a specific function by name.
 type FunctionGetter interface {
 	// GetFunction returns the function with the given name.
-	GetFunction(ctx context.Context, name string) (FunctionDetail, error)
+	GetFunction(ctx context.Context, name string) (*FunctionDetail, error)
 }
 
 // ProcedureLister defines the capability to list procedures in the database.
@@ -147,7 +147,7 @@ type ProcedureLister interface {
 // ProcedureGetter defines the capability to retrieve a specific procedure by name.
 type ProcedureGetter interface {
 	// GetProcedure returns the procedure with the given name.
-	GetProcedure(ctx context.Context, name string) (ProcedureDetail, error)
+	GetProcedure(ctx context.Context, name string) (*ProcedureDetail, error)
 }
 
 // ArgumentLister defines the capability to list arguments (e.g., of functions/procedures) in the database.
@@ -159,7 +159,7 @@ type ArgumentLister interface {
 // ArgumentGetter defines the capability to retrieve a specific argument by name.
 type ArgumentGetter interface {
 	// GetArgument returns the argument with the given name.
-	GetArgument(ctx context.Context, name string) (ArgumentDetail, error)
+	GetArgument(ctx context.Context, name string) (*ArgumentDetail, error)
 }
 
 // TriggerLister defines the capability to list triggers in the database.
@@ -171,5 +171,5 @@ type TriggerLister interface {
 // TriggerGetter defines the capability to retrieve a specific trigger by name.
 type TriggerGetter interface {
 	// GetTrigger returns the trigger with the given name.
-	GetTrigger(ctx context.Context, name string) (TriggerDetail, error)
+	GetTrigger(ctx context.Context, name string) (*TriggerDetail, error)
 }

@@ -19,7 +19,7 @@ func (d *Driver) Name() string {
 }
 
 // Open implements db.Driver.
-func (d *Driver) Open(ctx context.Context, config db.Config) (db.Connection, error) {
+func (d *Driver) Open(ctx context.Context, config db.ConnectionConfig) (db.Connection, error) {
 	dsn, ok := config["dsn"].(string)
 	if !ok {
 		return nil, errors.New("sqlite: missing or invalid 'dsn' in config")

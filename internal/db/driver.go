@@ -11,7 +11,6 @@ type Driver interface {
 	// Name returns the unique name of the driver (e.g., "postgres", "mongodb").
 	Name() string
 
-	// Open connects to the database using the provided configuration.
-	// Config should be a driver-specific map of configuration options.
-	Open(ctx context.Context, config Config) (Connection, error)
+	// Open opens a new connection to the database.
+	Open(ctx context.Context, config ConnectionConfig) (Connection, error)
 }
