@@ -8,7 +8,6 @@ import (
 	"context"
 	"os/exec"
 	"runtime"
-	"strings"
 
 	"github.com/polyclient/polyclient/internal/application"
 	"github.com/urfave/cli/v3"
@@ -37,14 +36,4 @@ func NewDocsCommand(app *application.Application) *cli.Command {
 			return exec.Command("xdg-open", url).Start()
 		},
 	}
-}
-
-// isWSL checks if the Go program is running inside Windows Subsystem for Linux.
-func isWSL() bool {
-	releaseData, err := exec.Command("uname", "-r").Output()
-	if err != nil {
-		return false
-	}
-
-	return strings.Contains(strings.ToLower(string(releaseData)), "microsoft")
 }

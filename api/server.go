@@ -6,45 +6,54 @@ package api
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/polyclient/polyclient/internal/application"
 )
 
 // Server is the HTTP server for the API.
 type Server struct {
-	Addr string
-	Port int
-
-	handler http.Handler
+	Host       string
+	Port       int
+	HTTPServer *http.Server
 }
 
-// ServerOptions is the configuration options for the API server.
-type ServerOptions struct {
-	Port int
-}
+// ServerOption configures the API server.
+type ServerOption func(*Server)
 
-// ServerOption is a function that configures the API server.
-type ServerOption func(*ServerOptions)
+// WithHost sets the host for the API server.
+func WithHost(host string) ServerOption {
+	return func(opts *Server) {
+		opts.Host = host
+	}
+}
 
 // WithPort sets the port for the API server.
 func WithPort(port int) ServerOption {
-	return func(opts *ServerOptions) {
+	return func(opts *Server) {
 		opts.Port = port
 	}
 }
 
 // defaultOptions returns the default options for the API server.
-var defaultOptions = func() *ServerOptions {
-	return &ServerOptions{
+var defaultOptions = func() *Server {
+	return &Server{
+		Host: "127.0.0.1",
 		Port: 8080,
 	}
 }
 
 // NewServer creates a new HTTP server for the API.
 func NewServer(app *application.Application, options ...ServerOption) (*Server, error) {
+	if app == nil {
+		return nil, errors.New("application cannot be nil")
+	}
+
 	config := defaultOptions()
 	for _, opt := range options {
 		opt(config)
@@ -56,56 +65,93 @@ func NewServer(app *application.Application, options ...ServerOption) (*Server, 
 	}
 
 	var port int
-	if isPortTaken(config.Port) {
-		foundPort, err := findAvailablePort()
+	if !isPortAvailable(config.Port) {
+		foundPort, err := findAvailablePort(config.Host)
 		if err != nil {
 			return nil, fmt.Errorf("failed to find an available port: %w", err)
 		}
+
 		port = foundPort
 	} else {
 		port = config.Port
 	}
 
-	addr := fmt.Sprintf("127.0.0.1:%d", port)
+	httpServer := &http.Server{
+		Addr:              fmt.Sprintf("%s:%d", config.Host, port),
+		Handler:           router,
+		ReadTimeout:       5 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       15 * time.Second,
+		ReadHeaderTimeout: 5 * time.Second,
+		MaxHeaderBytes:    1 << 20,
+	}
 
 	return &Server{
-		Addr:    addr,
-		Port:    port,
-		handler: router,
+		Host:       config.Host,
+		Port:       port,
+		HTTPServer: httpServer,
 	}, nil
 }
 
 // ListenAndServe starts the HTTP server and listens for requests.
 func (s *Server) ListenAndServe() error {
-	return http.ListenAndServe(s.Addr, s.handler)
+	if s.HTTPServer == nil {
+		return errors.New("http server is not initialized")
+	}
+
+	slog.Info("Starting server", "addr", s.HTTPServer.Addr)
+
+	return s.HTTPServer.ListenAndServe()
 }
 
 // Shutdown gracefully shuts down the HTTP server.
 func (s *Server) Shutdown(ctx context.Context) error {
-	server := &http.Server{Addr: s.Addr, Handler: s.handler}
-	go func() {
-		<-ctx.Done()
-		server.Shutdown(context.Background())
-	}()
-	return server.ListenAndServe()
+	if s.HTTPServer == nil {
+		return errors.New("http server is not initialized")
+	}
+
+	if ctx == nil {
+		ctx = context.Background()
+	}
+
+	slog.Info("Shutting down server", "addr", s.HTTPServer.Addr)
+
+	return s.HTTPServer.Shutdown(ctx)
 }
 
-// isPortTaken checks if a port is already in use.
-func isPortTaken(port int) bool {
+// isPortAvailable checks if a TCP port is available for use.
+func isPortAvailable(port int) bool {
+	if port < 1 || port > 65535 {
+		return false
+	}
+
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
-		return true
+		return false
 	}
-	defer listener.Close()
-	return false
+
+	_ = listener.Close()
+
+	return true
 }
 
 // findAvailablePort finds an available port.
-func findAvailablePort() (int, error) {
-	listener, err := net.Listen("tcp", "127.0.0.1:0")
+func findAvailablePort(host string) (int, error) {
+	addr := ":0"
+	if host != "" {
+		addr = host + ":0"
+	}
+
+	listener, err := net.Listen("tcp", addr)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("failed to listen on %s: %w", addr, err)
 	}
 	defer listener.Close()
-	return listener.Addr().(*net.TCPAddr).Port, nil
+
+	tcpAddr, ok := listener.Addr().(*net.TCPAddr)
+	if !ok {
+		return 0, fmt.Errorf("unexpected address type: %T", listener.Addr())
+	}
+
+	return tcpAddr.Port, nil
 }
