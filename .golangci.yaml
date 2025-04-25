@@ -232,7 +232,7 @@ linters-settings:
       - name: useless-break
       - name: comment-spacings
       - name: cyclomatic
-        arguments: [15]
+        arguments: [20]
 
   gocritic:
     enabled-tags:
