@@ -37,11 +37,11 @@ echo "Creating tag: $TAG"
 git tag -a "$TAG" -m "publish $TAG"
 echo "[+] Tag $TAG created successfully"
 
-echo "[!] Updating version.txt"
-printf "%s" "$VERSION" | tee version.txt >/dev/null
+echo "[!] Updating .polyclient-version"
+printf "%s" "$VERSION" | tee .polyclient-version >/dev/null
 
 echo "[!] Pushing tag: $TAG"
-git add version.txt
+git add .polyclient-version
 git commit -m "release: version $VERSION"
 git push origin HEAD
 git push origin "$TAG"
