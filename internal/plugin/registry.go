@@ -11,7 +11,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/bytecodealliance/wasmtime-go/v30"
+	"github.com/bytecodealliance/wasmtime-go/v32"
 )
 
 // Registry manages discovery, loading, and execution of Wasm plugins.

@@ -44,6 +44,11 @@ func SetVersion(v string) {
 	version = v
 }
 
+// IsProd returns true if the application is running in production mode.
+func IsProd() bool {
+	return version != "" && version != "dev" && version != "test" && version != "local"
+}
+
 // Branch returns the Git branch name used during the build.
 func Branch() string {
 	return branch

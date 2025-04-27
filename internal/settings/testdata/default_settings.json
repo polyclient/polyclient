@@ -1,5 +1,4 @@
 {
-  "$schema": "./jsonschema/polyclient-settings.json",
   "drivers": {
     "sqlite": {
       "enabled": true
@@ -14,14 +13,14 @@
     "cors": {
       "enabled": true,
       "allowedOrigins": ["http://localhost:*", "http://127.0.0.1:*"],
-      "allowedMethods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      "allowedMethods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"],
       "allowedHeaders": ["Content-Type", "Authorization"],
       "maxAge": 86400
     },
     "rateLimit": {
       "enabled": false,
       "requestsPerMinute": 100,
-      "windowLengthDuration": "1m"
+      "windowLengthSeconds": 60
     },
     "compression": {
       "enabled": true,
@@ -38,6 +37,18 @@
     "enabled": true,
     "path": "/*",
     "theme": "system",
-    "locale": "en-US"
+    "locale": "en"
+  },
+  "logging": {
+    "format": "json",
+    "level": "info",
+    "rotation": {
+      "enabled": true,
+      "maxSizeMB": 100,
+      "maxAgeDays": 30,
+      "maxBackups": 5,
+      "localTime": true,
+      "compress": false
+    }
   }
 }

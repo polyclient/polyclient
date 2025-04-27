@@ -1,0 +1,55 @@
+{
+  "$schema": "../../jsonschema/settings.schema.json",
+  "drivers": {
+    "sqlite": {
+      "enabled": true
+    },
+    "postgresql": {
+      "enabled": true
+    }
+  },
+  "api": {
+    "host": "http://127.0.0.1",
+    "port": 8080,
+    "cors": {
+      "enabled": true,
+      "allowedOrigins": ["http://localhost:*", "http://127.0.0.1:*"],
+      "allowedMethods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"],
+      "allowedHeaders": ["Content-Type", "Authorization"],
+      "maxAge": 86400
+    },
+    "rateLimit": {
+      "enabled": false,
+      "requestsPerMinute": 100,
+      "windowLengthSeconds": 60
+    },
+    "compression": {
+      "enabled": true,
+      "level": 6
+    },
+    "timeouts": {
+      "enabled": true,
+      "readSeconds": 30,
+      "writeSeconds": 30,
+      "idleSeconds": 60
+    }
+  },
+  "gui": {
+    "enabled": true,
+    "path": "/*",
+    "theme": "system",
+    "locale": "en"
+  },
+  "logging": {
+    "format": "json",
+    "level": "info",
+    "rotation": {
+      "enabled": true,
+      "maxSizeMB": 100,
+      "maxAgeDays": 30,
+      "maxBackups": 5,
+      "localTime": true,
+      "compress": false
+    }
+  }
+}

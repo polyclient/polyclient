@@ -8,7 +8,8 @@
   "properties": {
     "$schema": {
       "type": "string",
-      "description": "Path to the schema file that validates this configuration"
+      "format": "uri-reference",
+      "description": "Optional reference to the schema this configuration adheres to (relative or absolute URI)."
     }
   }
 }
