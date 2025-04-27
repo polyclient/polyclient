@@ -7,6 +7,7 @@ package api
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -42,9 +43,9 @@ func NewRouter(ctx context.Context, e *engine.Engine) *Router {
 	}
 
 	if e.Settings.API.RateLimit.Enabled {
-		r.Use(httprate.Limit(
+		r.Use(httprate.LimitByIP(
 			e.Settings.API.RateLimit.RequestsPerMinute,
-			e.Settings.API.RateLimit.WindowLength,
+			time.Duration(e.Settings.API.RateLimit.WindowLengthSeconds),
 		))
 	}
 
@@ -70,7 +71,7 @@ func (r *Router) RegisterGUIRoutes() {
 	})
 }
 
-// RegisterAPIRoutesV1 configures the routing for the v1 API endpoints (/api/v1).
+// RegisterAPIV1Routes configures the routing for the v1 API endpoints (/api/v1).
 func (r *Router) RegisterAPIV1Routes() {
 	r.Mux.Route("/api/v1", func(apiRouter chi.Router) {
 		apiRouter.Use(middleware.SetHeader("Content-Type", "application/json"))

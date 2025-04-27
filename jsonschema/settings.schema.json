@@ -1,0 +1,276 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PolyClient Settings Schema",
+  "type": "object",
+  "description": "Configuration schema for PolyClient application settings",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri-reference",
+      "description": "Optional reference to the schema this configuration adheres to (relative or absolute URI)."
+    },
+    "drivers": {
+      "description": "Configuration for enabled database drivers.",
+      "type": "object",
+      "properties": {
+        "sqlite": {
+          "description": "Configuration for the SQLite driver.",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "description": "Specifies if the SQLite driver should be enabled.",
+              "type": "boolean",
+              "default": true
+            }
+          },
+          "additionalProperties": false
+        },
+        "postgresql": {
+          "description": "Configuration for the PostgreSQL driver.",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "description": "Specifies if the PostgreSQL driver should be enabled.",
+              "type": "boolean",
+              "default": true
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "api": {
+      "description": "Configuration settings for the backend API server.",
+      "type": "object",
+      "properties": {
+        "host": {
+          "description": "The host address the API server should bind to or connect to.",
+          "type": "string",
+          "format": "uri",
+          "examples": ["http://127.0.0.1", "http://0.0.0.0", "https://api.example.com"]
+        },
+        "port": {
+          "description": "The network port the API server should listen on.",
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 8080
+        },
+        "cors": {
+          "description": "Cross-Origin Resource Sharing (CORS) settings.",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "description": "Enable or disable CORS headers.",
+              "type": "boolean",
+              "default": true
+            },
+            "allowedOrigins": {
+              "description": "List of allowed origin patterns. Use '*' for any origin (use with caution).",
+              "type": "array",
+              "items": {
+                "type": "string",
+                "examples": ["http://localhost:*", "https://*.example.com", "*"]
+              },
+              "minItems": 1,
+              "uniqueItems": true,
+              "default": ["http://localhost:*", "http://127.0.0.1:*"]
+            },
+            "allowedMethods": {
+              "description": "List of allowed HTTP methods.",
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD"]
+              },
+              "minItems": 1,
+              "uniqueItems": true,
+              "default": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"]
+            },
+            "allowedHeaders": {
+              "description": "List of allowed HTTP request headers.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "uniqueItems": true,
+              "default": ["Accept", "Content-Type", "X-PolyClient-Connection-Name"]
+            },
+            "maxAge": {
+              "description": "Specifies the value for the 'Access-Control-Max-Age' header in seconds (how long preflight requests can be cached).",
+              "type": "integer",
+              "minimum": 0,
+              "default": 86400
+            }
+          },
+          "additionalProperties": false
+        },
+        "rateLimit": {
+          "description": "API request rate limiting settings.",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "description": "Enable or disable rate limiting.",
+              "type": "boolean",
+              "default": false
+            },
+            "requestsPerMinute": {
+              "description": "Maximum number of requests allowed per minute per client (e.g., IP address).",
+              "type": "integer",
+              "minimum": 1,
+              "default": 100
+            },
+            "windowLengthSeconds": {
+              "description": "Duration in seconds defining the time window for rate limiting (e.g., 60, 300).",
+              "type": "integer",
+              "minimum": 1,
+              "default": 60
+            }
+          },
+          "additionalProperties": false
+        },
+        "compression": {
+          "description": "HTTP response compression settings (e.g., Gzip, Deflate).",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "description": "Enable or disable response compression.",
+              "type": "boolean",
+              "default": true
+            },
+            "level": {
+              "description": "Compression level (typically 0-9, where higher means more compression but more CPU usage).",
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9,
+              "default": 6
+            }
+          },
+          "additionalProperties": false
+        },
+        "timeouts": {
+          "description": "Server connection timeout settings.",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "description": "Enable or disable specific connection timeouts.",
+              "type": "boolean",
+              "default": true
+            },
+            "readSeconds": {
+              "description": "Maximum duration in seconds for reading the entire request, including the body.",
+              "type": "integer",
+              "minimum": 0,
+              "default": 30
+            },
+            "writeSeconds": {
+              "description": "Maximum duration in seconds before timing out writes of the response.",
+              "type": "integer",
+              "minimum": 0,
+              "default": 30
+            },
+            "idleSeconds": {
+              "description": "Maximum amount of time in seconds to wait for the next request when keep-alives are enabled.",
+              "type": "integer",
+              "minimum": 0,
+              "default": 60
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "gui": {
+      "description": "Configuration settings for the web-based Graphical User Interface.",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Enable or disable serving the GUI.",
+          "type": "boolean",
+          "default": true
+        },
+        "path": {
+          "description": "The base URL path from which the GUI is served.",
+          "type": "string",
+          "pattern": "^/.*$",
+          "default": "/*"
+        },
+        "theme": {
+          "description": "Specifies the visual theme for the GUI.",
+          "type": "string",
+          "enum": ["system", "light", "dark"],
+          "default": "system"
+        },
+        "locale": {
+          "description": "Specifies the default language and regional format (e.g., 'es-CO', 'en-US', 'fr-FR'). Follows BCP 47.",
+          "type": "string",
+          "pattern": "^[a-z]{2}(-[A-Z]{2})?$",
+          "default": "en"
+        }
+      },
+      "additionalProperties": false
+    },
+    "logging": {
+      "description": "Configuration settings for logging.",
+      "type": "object",
+      "properties": {
+        "format": {
+          "description": "Specifies the log format.",
+          "type": "string",
+          "enum": ["json", "text"],
+          "default": "json"
+        },
+        "level": {
+          "description": "Specifies the log level.",
+          "type": "string",
+          "enum": ["debug", "info", "warn", "error"],
+          "default": "info"
+        },
+        "rotation": {
+          "description": "Configuration settings for log rotation.",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "description": "Enable or disable log rotation.",
+              "type": "boolean",
+              "default": true
+            },
+            "maxSizeMB": {
+              "description": "Maximum log size in megabytes before rotation.",
+              "type": "integer",
+              "minimum": 1,
+              "default": 100
+            },
+            "maxAgeDays": {
+              "description": "Maximum log age in days before rotation.",
+              "type": "integer",
+              "minimum": 0,
+              "default": 30
+            },
+            "maxBackups": {
+              "description": "Maximum number of log backups to keep.",
+              "type": "integer",
+              "minimum": 1,
+              "default": 5
+            },
+            "localTime": {
+              "description": "Use local time for log rotation instead of UTC.",
+              "type": "boolean",
+              "default": true
+            },
+            "compress": {
+              "description": "Compress rotated log files.",
+              "type": "boolean",
+              "default": true
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
