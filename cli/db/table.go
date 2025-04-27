@@ -4,23 +4,23 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/polyclient/polyclient/internal/application"
 	"github.com/polyclient/polyclient/internal/db"
+	"github.com/polyclient/polyclient/internal/engine"
 	"github.com/urfave/cli/v3"
 )
 
-func newTableCommand(app *application.Application) *cli.Command {
+func newTableCommand(e *engine.Engine) *cli.Command {
 	return &cli.Command{
 		Name:  "table",
 		Usage: "Manage database tables",
 		Commands: []*cli.Command{
-			newTableListCommand(app),
-			newTableGetCommand(app),
+			newTableListCommand(e),
+			newTableGetCommand(e),
 		},
 	}
 }
 
-func newTableListCommand(app *application.Application) *cli.Command {
+func newTableListCommand(e *engine.Engine) *cli.Command {
 	return &cli.Command{
 		Name:  "list",
 		Usage: "List all database tables",
@@ -59,7 +59,7 @@ func newTableListCommand(app *application.Application) *cli.Command {
 			flagLimit := cmd.Int("limit")
 			flagOffset := cmd.Int("offset")
 
-			tables, err := app.SDK.Inspector().ListTables(ctx, connName,
+			tables, err := e.SDK.Inspector().ListTables(ctx, connName,
 				db.WithTablesSchema(flagSchema),
 				db.WithTablesFilter(flagFilter),
 				db.WithTablesLimit(int(flagLimit)),
@@ -78,7 +78,7 @@ func newTableListCommand(app *application.Application) *cli.Command {
 	}
 }
 
-func newTableGetCommand(app *application.Application) *cli.Command {
+func newTableGetCommand(e *engine.Engine) *cli.Command {
 	return &cli.Command{
 		Name:  "get",
 		Usage: "Get details of a table in a database",
@@ -104,7 +104,7 @@ func newTableGetCommand(app *application.Application) *cli.Command {
 			flagSchema := cmd.String("schema")
 			flagName := cmd.String("name")
 
-			table, err := app.SDK.Inspector().GetTable(ctx, connName, flagName,
+			table, err := e.SDK.Inspector().GetTable(ctx, connName, flagName,
 				db.WithTableSchema(flagSchema),
 			)
 			if err != nil {

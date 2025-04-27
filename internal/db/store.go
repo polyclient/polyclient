@@ -75,9 +75,7 @@ func (s *FileConnectionStore) SaveProfile(ctx context.Context, profile *Connecti
 		return fmt.Errorf("failed to get absolute path: %w", err)
 	}
 
-	cleanPath := filepath.Clean(absPath)
-
-	if err := os.MkdirAll(filepath.Dir(cleanPath), 0o0700); err != nil {
+	if err := os.MkdirAll(filepath.Dir(absPath), 0o0700); err != nil {
 		return fmt.Errorf("failed to create directory: %w", err)
 	}
 
@@ -87,13 +85,13 @@ func (s *FileConnectionStore) SaveProfile(ctx context.Context, profile *Connecti
 	}
 
 	// Write to temp file first
-	tempFile := cleanPath + ".tmp"
+	tempFile := absPath + ".tmp"
 	if err = os.WriteFile(tempFile, profileBytes, 0o0600); err != nil {
 		return fmt.Errorf("failed to write profile: %w", err)
 	}
 
 	// Atomically rename to final destination
-	if err = os.Rename(tempFile, cleanPath); err != nil {
+	if err = os.Rename(tempFile, absPath); err != nil {
 		_ = os.Remove(tempFile)
 		return fmt.Errorf("failed to rename profile: %w", err)
 	}
@@ -108,9 +106,7 @@ func (s *FileConnectionStore) ListProfiles(ctx context.Context) ([]*ConnectionPr
 		return nil, fmt.Errorf("failed to get absolute path: %w", err)
 	}
 
-	cleanPath := filepath.Clean(absPath)
-
-	entries, err := os.ReadDir(cleanPath)
+	entries, err := os.ReadDir(absPath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return []*ConnectionProfile{}, nil
@@ -126,7 +122,7 @@ func (s *FileConnectionStore) ListProfiles(ctx context.Context) ([]*ConnectionPr
 			continue
 		}
 
-		profilePath := filepath.Join(cleanPath, entry.Name())
+		profilePath := filepath.Join(absPath, entry.Name())
 
 		profile, err := s.readProfileFile(profilePath)
 		if err != nil {
@@ -194,7 +190,7 @@ func (s *FileConnectionStore) DeleteProfile(ctx context.Context, name string) er
 		return fmt.Errorf("failed to get absolute path: %w", err)
 	}
 
-	if err := os.Remove(filepath.Clean(absPath)); err != nil {
+	if err := os.Remove(absPath); err != nil {
 		if os.IsNotExist(err) {
 			return nil // No error if file doesn't exist
 		}

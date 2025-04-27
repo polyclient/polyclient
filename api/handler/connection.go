@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
-package connection
+package handler
 
 import (
 	"encoding/json"
@@ -10,22 +10,22 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/polyclient/polyclient/internal/application"
 	"github.com/polyclient/polyclient/internal/db"
+	"github.com/polyclient/polyclient/internal/engine"
 )
 
-// Handler is the HTTP handler for the connection endpoint.
-type Handler struct {
-	app *application.Application
+// ConnectionHandler is the HTTP handler for the connection resource.
+type ConnectionHandler struct {
+	engine *engine.Engine
 }
 
-// NewHandler creates a new HTTP handler for the connection endpoint.
-func NewHandler(app *application.Application) *Handler {
-	return &Handler{app: app}
+// NewConnectionHandler creates a new instance of ConnectionHandler.
+func NewConnectionHandler(e *engine.Engine) *ConnectionHandler {
+	return &ConnectionHandler{engine: e}
 }
 
-// RegisterRoutes registers the routes for the connection endpoint.
-func (h *Handler) RegisterRoutes(r chi.Router) {
+// RegisterRoutes registers the routes for the ConnectionHandler.
+func (h *ConnectionHandler) RegisterRoutes(r chi.Router) {
 	r.Get("/", h.handleListConnections)
 	r.Get("/recent", h.handleListRecentConnections)
 	r.Get("/{name}", h.handleGetConnection)
@@ -33,14 +33,13 @@ func (h *Handler) RegisterRoutes(r chi.Router) {
 	r.Delete("/{name}", h.handleDeleteConnection)
 }
 
-func (h *Handler) handleListConnections(w http.ResponseWriter, r *http.Request) {
-	profiles, err := h.app.SDK.GetManager().GetStore().ListProfiles(r.Context())
+func (h *ConnectionHandler) handleListConnections(w http.ResponseWriter, r *http.Request) {
+	profiles, err := h.engine.SDK.GetManager().GetStore().ListProfiles(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(profiles); err != nil {
@@ -48,10 +47,10 @@ func (h *Handler) handleListConnections(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func (h *Handler) handleListRecentConnections(w http.ResponseWriter, r *http.Request) {
+func (h *ConnectionHandler) handleListRecentConnections(w http.ResponseWriter, r *http.Request) {
 	const defaultThreshold = "24h"
-	threshold := r.URL.Query().Get("threshold")
 
+	threshold := r.URL.Query().Get("threshold")
 	if threshold == "" {
 		threshold = defaultThreshold
 	}
@@ -62,13 +61,12 @@ func (h *Handler) handleListRecentConnections(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	profiles, err := h.app.SDK.GetManager().GetStore().ListRecentProfiles(r.Context(), duration)
+	profiles, err := h.engine.SDK.GetManager().GetStore().ListRecentProfiles(r.Context(), duration)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(profiles); err != nil {
@@ -76,16 +74,15 @@ func (h *Handler) handleListRecentConnections(w http.ResponseWriter, r *http.Req
 	}
 }
 
-func (h *Handler) handleGetConnection(w http.ResponseWriter, r *http.Request) {
+func (h *ConnectionHandler) handleGetConnection(w http.ResponseWriter, r *http.Request) {
 	name := chi.URLParam(r, "name")
 
-	profile, err := h.app.SDK.GetManager().GetStore().GetProfile(r.Context(), name)
+	profile, err := h.engine.SDK.GetManager().GetStore().GetProfile(r.Context(), name)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(profile); err != nil {
@@ -93,25 +90,24 @@ func (h *Handler) handleGetConnection(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) handleCreateConnection(w http.ResponseWriter, r *http.Request) {
+func (h *ConnectionHandler) handleCreateConnection(w http.ResponseWriter, r *http.Request) {
 	profile := new(db.ConnectionProfile)
 	if err := json.NewDecoder(r.Body).Decode(profile); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if err := h.app.Validator.Validate(profile); err != nil {
+	if err := h.engine.Validator.Validate(profile); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	err := h.app.SDK.GetManager().GetStore().SaveProfile(r.Context(), profile)
+	err := h.engine.SDK.GetManager().GetStore().SaveProfile(r.Context(), profile)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 
 	if err := json.NewEncoder(w).Encode(profile); err != nil {
@@ -119,16 +115,15 @@ func (h *Handler) handleCreateConnection(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-func (h *Handler) handleDeleteConnection(w http.ResponseWriter, r *http.Request) {
+func (h *ConnectionHandler) handleDeleteConnection(w http.ResponseWriter, r *http.Request) {
 	name := chi.URLParam(r, "name")
 
-	err := h.app.SDK.GetManager().GetStore().DeleteProfile(r.Context(), name)
+	err := h.engine.SDK.GetManager().GetStore().DeleteProfile(r.Context(), name)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
 
 	if _, err := w.Write([]byte(name)); err != nil {

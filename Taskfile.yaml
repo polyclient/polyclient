@@ -35,7 +35,9 @@ tasks:
 
   dev:gui:
     desc: Run the CLI in development mode with GUI dependencies
-    cmd: go run ./cmd/polyclient/main.go {{ .CLI_ARGS }}
+    cmds:
+      - go run ./cmd/polyclient/main.go gui --headless {{ .CLI_ARGS }}
+      - bun run --cwd gui dev
     deps:
       - build:gui
 
@@ -83,6 +85,12 @@ tasks:
   test:
     desc: Run the project tests
     cmd: go test ./...
+
+  test:coverage:
+    desc: Run the project tests and generate coverage report
+    cmds:
+      - go test -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out
 
   compose:db:all:
     desc: Run all database containers

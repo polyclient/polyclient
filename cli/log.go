@@ -8,11 +8,11 @@ import (
 	"context"
 	"os/exec"
 
-	"github.com/polyclient/polyclient/internal/application"
+	"github.com/polyclient/polyclient/internal/engine"
 	"github.com/urfave/cli/v3"
 )
 
-func NewLogCommand(app *application.Application) *cli.Command {
+func NewLogCommand(e *engine.Engine) *cli.Command {
 	return &cli.Command{
 		Name:  "log",
 		Usage: "View or manage logs",

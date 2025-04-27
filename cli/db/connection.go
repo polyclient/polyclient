@@ -6,25 +6,25 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/polyclient/polyclient/internal/application"
 	"github.com/polyclient/polyclient/internal/db"
+	"github.com/polyclient/polyclient/internal/engine"
 	"github.com/urfave/cli/v3"
 )
 
-func newConnectionCommand(app *application.Application) *cli.Command {
+func newConnectionCommand(e *engine.Engine) *cli.Command {
 	return &cli.Command{
 		Name:  "connection",
 		Usage: "Manage database connections",
 		Commands: []*cli.Command{
-			newConnectionCreateCommand(app),
-			newConnectionListCommand(app),
-			newConnectionDeleteCommand(app),
-			newConnectionPingCommand(app),
+			newConnectionCreateCommand(e),
+			newConnectionListCommand(e),
+			newConnectionDeleteCommand(e),
+			newConnectionPingCommand(e),
 		},
 	}
 }
 
-func newConnectionCreateCommand(app *application.Application) *cli.Command {
+func newConnectionCreateCommand(e *engine.Engine) *cli.Command {
 	return &cli.Command{
 		Name:  "create",
 		Usage: "Create a new database connection",
@@ -93,7 +93,7 @@ func newConnectionCreateCommand(app *application.Application) *cli.Command {
 				LastUsedAt:           time.Now(),
 			}
 
-			connectionStore := app.SDK.GetManager().GetStore()
+			connectionStore := e.SDK.GetManager().GetStore()
 
 			if err := connectionStore.SaveProfile(ctx, &profile); err != nil {
 				return fmt.Errorf("failed to save profile: %w", err)
@@ -104,7 +104,7 @@ func newConnectionCreateCommand(app *application.Application) *cli.Command {
 	}
 }
 
-func newConnectionListCommand(app *application.Application) *cli.Command {
+func newConnectionListCommand(e *engine.Engine) *cli.Command {
 	return &cli.Command{
 		Name:  "list",
 		Usage: "List all database connections",
@@ -114,7 +114,7 @@ func newConnectionListCommand(app *application.Application) *cli.Command {
 				return errors.New("connection must not be specified when listing connections")
 			}
 
-			profiles, err := app.SDK.GetManager().GetStore().ListProfiles(ctx)
+			profiles, err := e.SDK.GetManager().GetStore().ListProfiles(ctx)
 			if err != nil {
 				return fmt.Errorf("failed to list profiles: %w", err)
 			}
@@ -128,7 +128,7 @@ func newConnectionListCommand(app *application.Application) *cli.Command {
 	}
 }
 
-func newConnectionDeleteCommand(app *application.Application) *cli.Command {
+func newConnectionDeleteCommand(e *engine.Engine) *cli.Command {
 	return &cli.Command{
 		Name:  "delete",
 		Usage: "Delete a database connection",
@@ -138,7 +138,7 @@ func newConnectionDeleteCommand(app *application.Application) *cli.Command {
 				return fmt.Errorf("failed to get connection name: %w", err)
 			}
 
-			if err := app.SDK.GetManager().GetStore().DeleteProfile(ctx, connName); err != nil {
+			if err := e.SDK.GetManager().GetStore().DeleteProfile(ctx, connName); err != nil {
 				return fmt.Errorf("failed to delete profile: %w", err)
 			}
 
@@ -147,7 +147,7 @@ func newConnectionDeleteCommand(app *application.Application) *cli.Command {
 	}
 }
 
-func newConnectionPingCommand(app *application.Application) *cli.Command {
+func newConnectionPingCommand(e *engine.Engine) *cli.Command {
 	return &cli.Command{
 		Name:  "ping",
 		Usage: "Ping a database to check connectivity",
@@ -157,17 +157,17 @@ func newConnectionPingCommand(app *application.Application) *cli.Command {
 				return fmt.Errorf("failed to get connection name: %w", err)
 			}
 
-			err = app.SDK.Ping(ctx, connName)
+			err = e.SDK.Ping(ctx, connName)
 			if err != nil {
 				return fmt.Errorf("failed to open connection: %w", err)
 			}
 
-			infoDB, err := app.SDK.Info().CurrentDatabase(ctx, connName)
+			infoDB, err := e.SDK.Info().CurrentDatabase(ctx, connName)
 			if err != nil {
 				return fmt.Errorf("failed to get current database: %w", err)
 			}
 
-			infoVersion, err := app.SDK.Info().ServerVersion(ctx, connName)
+			infoVersion, err := e.SDK.Info().ServerVersion(ctx, connName)
 			if err != nil {
 				return fmt.Errorf("failed to get server version: %w", err)
 			}

@@ -66,8 +66,8 @@ jobs:
     needs: unit-tests
     permissions:
       contents: read
-      actions: read # needed to download code coverage report
-      pull-requests: write # needed to comment on the PR
+      actions: read # to download code coverage report
+      pull-requests: write # to comment on the PR
     steps:
       - uses: fgrosse/go-coverage-report@v1.1.1
         with:

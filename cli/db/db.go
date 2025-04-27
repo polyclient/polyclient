@@ -12,13 +12,13 @@ import (
 	"os"
 	"path"
 
-	"github.com/polyclient/polyclient/internal/application"
 	"github.com/polyclient/polyclient/internal/datapipe"
+	"github.com/polyclient/polyclient/internal/engine"
 	"github.com/urfave/cli/v3"
 )
 
 // NewDatabaseCommand returns a new database command for managing databases and their connections.
-func NewDatabaseCommand(app *application.Application) *cli.Command {
+func NewDatabaseCommand(e *engine.Engine) *cli.Command {
 	return &cli.Command{
 		Name:  "db",
 		Usage: "Manage databases and their connections",
@@ -31,7 +31,7 @@ func NewDatabaseCommand(app *application.Application) *cli.Command {
 					TrimSpace: true,
 				},
 				Validator: func(connection string) error {
-					profile, err := app.SDK.GetManager().GetStore().GetProfile(context.Background(), connection)
+					profile, err := e.SDK.GetManager().GetStore().GetProfile(context.Background(), connection)
 					if err != nil || profile == nil {
 						return errors.New("connection not found; use 'polyclient db connection list' to see available connections")
 					}
@@ -41,8 +41,8 @@ func NewDatabaseCommand(app *application.Application) *cli.Command {
 			},
 		},
 		Commands: []*cli.Command{
-			newConnectionCommand(app),
-			newTableCommand(app),
+			newConnectionCommand(e),
+			newTableCommand(e),
 		},
 	}
 }
@@ -58,7 +58,7 @@ func getConnectionName(ctx context.Context, cmd *cli.Command) (string, error) {
 }
 
 // newQueryCommand returns a new query command that can be used to query a database from the CLI.
-func newQueryCommand(app *application.Application) *cli.Command {
+func newQueryCommand(e *engine.Engine) *cli.Command {
 	exportFormats := datapipe.GetAvailableExportFormats()
 
 	return &cli.Command{
@@ -129,7 +129,7 @@ func newQueryCommand(app *application.Application) *cli.Command {
 				w = file
 			}
 
-			result, err := app.SDK.Query().Execute(ctx, flagConnection, flagQuery)
+			result, err := e.SDK.Query().Execute(ctx, flagConnection, flagQuery)
 			if err != nil {
 				return fmt.Errorf("failed to execute query: %w", err)
 			}

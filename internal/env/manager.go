@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
-// Package env provides environment configuration for PolyClient.
 package env
 
 import (
@@ -10,23 +9,25 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sync"
 
 	"github.com/polyclient/polyclient/internal/version"
 )
 
 const (
-	// EnvPolyClientConnectionsDir controls the PolyClient connections directory.
-	EnvPolyClientConnectionsDir = "POLYCLIENT_CONNECTIONS_DIR"
+	// PolyClientConnectionsDir controls the PolyClient connections directory.
+	PolyClientConnectionsDir = "POLYCLIENT_CONNECTIONS_DIR"
 
-	// EnvPolyClientPluginsDir controls the PolyClient plugins directory.
-	EnvPolyClientPluginsDir = "POLYCLIENT_PLUGINS_DIR"
+	// PolyClientPluginsDir controls the PolyClient plugins directory.
+	PolyClientPluginsDir = "POLYCLIENT_PLUGINS_DIR"
 
-	// EnvPolyClientSettingsFile controls the PolyClient settings file.
-	EnvPolyClientSettingsFile = "POLYCLIENT_SETTINGS_FILE"
+	// PolyClientSettingsFile controls the PolyClient settings file.
+	PolyClientSettingsFile = "POLYCLIENT_SETTINGS_FILE"
 
-	// EnvPolyClientKeymapFile controls the PolyClient keymap file.
-	EnvPolyClientKeymapFile = "POLYCLIENT_KEYMAP_FILE"
+	// PolyClientKeymapFile controls the PolyClient keymap file.
+	PolyClientKeymapFile = "POLYCLIENT_KEYMAP_FILE"
+
+	// PolyClientLogLevel controls the PolyClient log level.
+	PolyClientLogLevel = "POLYCLIENT_LOG_LEVEL"
 )
 
 // Variable represents a PolyClient environment variable and its configuration.
@@ -35,42 +36,29 @@ type Variable struct {
 	IsDir bool
 }
 
-// Manager manages environment variables and their initialization.
-type Manager struct {
+// Env represents a PolyClient environment manager.
+type Env struct {
 	vars map[string]Variable
 }
 
-var (
-	globalManager *Manager
-	once          sync.Once
-)
+// NewManager creates and returns a new instance Env.
+func NewManager() (*Env, error) {
+	e := &Env{
+		vars: map[string]Variable{
+			PolyClientConnectionsDir: {PolyClientConnectionsDir, true},
+			PolyClientPluginsDir:     {PolyClientPluginsDir, true},
+			PolyClientSettingsFile:   {PolyClientSettingsFile, false},
+			PolyClientKeymapFile:     {PolyClientKeymapFile, false},
+			PolyClientLogLevel:       {PolyClientLogLevel, false},
+		},
+	}
 
-// GetManager returns the singleton instance of Manager, ensuring it is initialized only once.
-func GetManager() *Manager {
-	once.Do(func() {
-		globalManager = &Manager{
-			vars: map[string]Variable{
-				EnvPolyClientConnectionsDir: {EnvPolyClientConnectionsDir, true},
-				EnvPolyClientPluginsDir:     {EnvPolyClientPluginsDir, true},
-				EnvPolyClientSettingsFile:   {EnvPolyClientSettingsFile, false},
-				EnvPolyClientKeymapFile:     {EnvPolyClientKeymapFile, false},
-			},
-		}
-		_ = globalManager.Setup()
-	})
-
-	return globalManager
-}
-
-// Setup initializes environment variables with default values where necessary.
-func (m *Manager) Setup() error {
 	var errs []error
 
-	for name, envVar := range m.vars {
+	for name, envVar := range e.vars {
 		defaultPath, err := getDefaultPath(name)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("failed to get default path for %s: %w", name, err))
-
 			continue
 		}
 
@@ -88,12 +76,12 @@ func (m *Manager) Setup() error {
 		}
 	}
 
-	return errors.Join(errs...)
+	return e, errors.Join(errs...)
 }
 
 // Get retrieves the value of a PolyClient environment variable.
-func (m *Manager) Get(name string) (string, error) {
-	if _, exists := m.vars[name]; !exists {
+func (e *Env) Get(name string) (string, error) {
+	if _, exists := e.vars[name]; !exists {
 		return "", fmt.Errorf("unknown environment variable: %s", name)
 	}
 
@@ -112,14 +100,16 @@ func (m *Manager) Get(name string) (string, error) {
 // getDefaultPath determines the default path based on the environment.
 func getDefaultPath(name string) (string, error) {
 	switch name {
-	case EnvPolyClientConnectionsDir:
+	case PolyClientConnectionsDir:
 		return getUserConfigPath("connections")
-	case EnvPolyClientPluginsDir:
+	case PolyClientPluginsDir:
 		return getUserConfigPath("plugins")
-	case EnvPolyClientSettingsFile:
+	case PolyClientSettingsFile:
 		return getUserConfigPath("settings.json")
-	case EnvPolyClientKeymapFile:
+	case PolyClientKeymapFile:
 		return getUserConfigPath("keymap.json")
+	case PolyClientLogLevel:
+		return "INIT", nil
 	default:
 		return "", fmt.Errorf("unknown environment variable: %s", name)
 	}

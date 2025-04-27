@@ -8,25 +8,22 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
-	"net"
 	"net/http"
 	"net/url"
 	"os"
-	"os/exec"
 	"os/signal"
-	"runtime"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/polyclient/polyclient/api"
-	"github.com/polyclient/polyclient/internal/application"
+	"github.com/polyclient/polyclient/internal/engine"
+	"github.com/polyclient/polyclient/internal/system"
 	"github.com/urfave/cli/v3"
 )
 
 // NewGUICommand creates a CLI command for launching the PolyClient GUI.
-func NewGUICommand(app *application.Application) *cli.Command {
+func NewGUICommand(e *engine.Engine) *cli.Command {
 	return &cli.Command{
 		Name:  "gui",
 		Usage: "Launch the PolyClient GUI",
@@ -68,7 +65,11 @@ func NewGUICommand(app *application.Application) *cli.Command {
 			flagPort := cmd.Int("port")
 			flagHeadless := cmd.Bool("headless")
 
-			server, err := api.NewServer(app,
+			if flagHeadless {
+				e.Settings.GUI.Enabled = false
+			}
+
+			server, err := api.NewServer(ctx, e,
 				api.WithHost(flagHost),
 				api.WithPort(int(flagPort)),
 			)
@@ -96,27 +97,27 @@ func NewGUICommand(app *application.Application) *cli.Command {
 				return fmt.Errorf("failed to wait for server: %w", err)
 			}
 
-			slog.Info("Server is running", "url", guiURL)
+			e.Logger.Info("Server is running", "url", guiURL)
 			if !flagHeadless {
-				if err := openBrowser(guiURL); err != nil {
-					slog.Error("Failed to open browser", "error", err, "url", guiURL)
+				if err := system.OpenBrowser(guiURL); err != nil {
+					e.Logger.Error("Failed to open browser", "error", err, "url", guiURL)
 					fmt.Fprintf(os.Stderr, "Please open your browser at: %s\n", guiURL)
 				}
 			}
 
 			if strings.TrimSpace(flagHost) == "0.0.0.0" {
-				localIP, err := getLocalIP()
+				localIP, err := system.GetLocalIP()
 				if err != nil {
-					slog.Warn("Could not determine local IP address", "error", err)
+					e.Logger.Warn("Could not determine local IP address", "error", err)
 				} else {
 					networkURL := fmt.Sprintf("http://%s:%d", localIP, flagPort)
-					slog.Info("Network access URL", "url", networkURL)
+					e.Logger.Info("Network access URL", "url", networkURL)
 				}
 			}
 
 			select {
 			case <-sigCtx.Done():
-				slog.Info("Shutting down server")
+				e.Logger.Info("Shutting down server")
 				if err := server.Shutdown(sigCtx); err != nil {
 					return fmt.Errorf("failed to shutdown server: %w", err)
 				}
@@ -161,61 +162,9 @@ func waitForServer(ctx context.Context, guiURL string) error {
 		if resp.StatusCode == http.StatusOK {
 			return nil
 		}
+
 		time.Sleep(delay)
 	}
 
 	return fmt.Errorf("server not available after %s", timeout)
-}
-
-// openBrowser opens the specified URL in the default browser for the current platform.
-// It returns an error if the browser cannot be launched.
-func openBrowser(guiURL string) error {
-	parsedURL, err := url.ParseRequestURI(guiURL)
-	if err != nil {
-		return fmt.Errorf("invalid URL: %w", err)
-	}
-
-	guiURL = parsedURL.String()
-
-	if runtime.GOOS == "windows" || isWSL() {
-		return exec.Command("cmd", "/c", "start", guiURL).Start()
-	}
-
-	if runtime.GOOS == "darwin" {
-		return exec.Command("open", guiURL).Start()
-	}
-
-	if err := exec.Command("xdg-open", guiURL).Start(); err != nil {
-		return fmt.Errorf("failed to open browser with xdg-open: %w", err)
-	}
-
-	return nil
-}
-
-// getLocalIP returns the first non-loopback IPv4 address of the machine.
-func getLocalIP() (string, error) {
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		return "", err
-	}
-
-	for _, addr := range addrs {
-		if ipnet, ok := addr.(*net.IPNet); ok && !ipnet.IP.IsLoopback() && ipnet.IP.To4() != nil {
-			if ipnet.IP.To4() != nil {
-				return ipnet.IP.String(), nil
-			}
-		}
-	}
-
-	return "", errors.New("no non-loopback IPv4 address found")
-}
-
-// isWSL checks if the system is running under Windows Subsystem for Linux.
-func isWSL() bool {
-	releaseData, err := exec.Command("uname", "-r").Output()
-	if err != nil {
-		return false
-	}
-
-	return strings.Contains(strings.ToLower(string(releaseData)), "microsoft")
 }

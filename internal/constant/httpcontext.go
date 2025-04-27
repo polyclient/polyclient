@@ -1,9 +1,8 @@
-package config
+// SPDX-FileCopyrightText: 2025 The PolyClient Authors
+//
+// SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
 
-const (
-	// HTTPHeaderConnectionName is the HTTP header for the connection name.
-	HTTPHeaderConnectionName = "X-PolyClient-Connection-Name"
-)
+package constant
 
 // ContextKey is the type for context keys.
 type ContextKey string

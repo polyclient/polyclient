@@ -1,65 +1,43 @@
 {
   "$schema": "./jsonschema/polyclient-settings.json",
-  "theme": "system",
-  "language": "en",
-  "editor": {
-    "vimMode": false,
-    "minimap": false,
-    "lineNumbers": "relative",
-    "cursorStyle": "line",
-    "cursorBlinking": "blink"
+  "drivers": {
+    "sqlite": {
+      "enabled": true
+    },
+    "postgresql": {
+      "enabled": true
+    }
   },
-  "history": {
-    "queries": {
+  "api": {
+    "host": "http://127.0.0.1",
+    "port": 8080,
+    "cors": {
       "enabled": true,
-      "maxItems": 50
-    }
-  },
-  "layout": {
-    "explorer": {
-      "defaultSize": 20,
-      "dockPosition": "left"
+      "allowedOrigins": ["http://localhost:*", "http://127.0.0.1:*"],
+      "allowedMethods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+      "allowedHeaders": ["Content-Type", "Authorization"],
+      "maxAge": 86400
     },
-    "assistant": {
-      "defaultSize": 30,
-      "dockPosition": "right"
+    "rateLimit": {
+      "enabled": false,
+      "requestsPerMinute": 100,
+      "windowLengthDuration": "1m"
     },
-    "output": {
-      "defaultSize": 30,
-      "dockPosition": "bottom"
-    },
-    "rememberSizes": true,
-    "zenMode": false
-  },
-  "erd": {
-    "defaultLayout": "elk",
-    "showPrimaryKeys": true,
-    "showForeignKeys": true,
-    "showColumnTypes": true,
-    "zoomLevel": 1.0
-  },
-  "backup": {
-    "storage": {
-      "directoryPath": "/path/to/backup"
-    },
-    "scheduling": {
+    "compression": {
       "enabled": true,
-      "cronExpression": "0 0 1 * * *",
-      "keepLastN": 10
-    }
-  },
-  "a11y": {
-    "screenReaderEnabled": false
-  },
-  "system": {
-    "performance": {
-      "hardwareAccelerationEnabled": false,
-      "throttleInactiveTabQueries": true
+      "level": 6
     },
-    "updates": {
-      "checkAutomatically": true,
-      "downloadAutomatically": false,
-      "channel": "stable"
+    "timeouts": {
+      "enabled": true,
+      "readSeconds": 30,
+      "writeSeconds": 30,
+      "idleSeconds": 60
     }
+  },
+  "gui": {
+    "enabled": true,
+    "path": "/*",
+    "theme": "system",
+    "locale": "en-US"
   }
 }

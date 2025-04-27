@@ -5,73 +5,117 @@
 package api
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
+	"github.com/go-chi/httprate"
+	"github.com/polyclient/polyclient/api/handler"
 	pMiddleware "github.com/polyclient/polyclient/api/middleware"
-	"github.com/polyclient/polyclient/api/resources/connection"
-	"github.com/polyclient/polyclient/api/resources/table"
 	"github.com/polyclient/polyclient/gui"
-	"github.com/polyclient/polyclient/internal/application"
+	"github.com/polyclient/polyclient/internal/engine"
 )
 
+// Router is the main API router for the API.
+type Router struct {
+	*chi.Mux
+	engine *engine.Engine
+}
+
 // NewRouter creates a new router for the API.
-func NewRouter(app *application.Application) (http.Handler, error) {
+func NewRouter(ctx context.Context, e *engine.Engine) *Router {
 	r := chi.NewRouter()
 
-	// Middleware setup
-	r.Use(middleware.Recoverer)
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
-	r.Use(func(next http.Handler) http.Handler {
-		return http.MaxBytesHandler(next, 1<<20) // 1MB body limit
-	})
+	r.Use(middleware.Recoverer)
 
-	// Remove trailing slash
-	r.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path != "/" && r.URL.Path[len(r.URL.Path)-1] == '/' {
-				http.Redirect(w, r, r.URL.Path[:len(r.URL.Path)-1], http.StatusMovedPermanently)
-				return
-			}
-			next.ServeHTTP(w, r)
-		})
-	})
+	if e.Settings.API.CORS.Enabled {
+		r.Use(cors.Handler(cors.Options{
+			AllowedOrigins: e.Settings.API.CORS.AllowedOrigins,
+			AllowedMethods: e.Settings.API.CORS.AllowedMethods,
+			AllowedHeaders: e.Settings.API.CORS.AllowedHeaders,
+			MaxAge:         e.Settings.API.CORS.MaxAge,
+		}))
+	}
 
-	registerStaticRoutes(r)
-	registerAPIRoutes(r, app)
+	if e.Settings.API.RateLimit.Enabled {
+		r.Use(httprate.Limit(
+			e.Settings.API.RateLimit.RequestsPerMinute,
+			e.Settings.API.RateLimit.WindowLength,
+		))
+	}
 
-	return r, nil
+	r.Use(middleware.CleanPath)
+	r.Use(middleware.StripSlashes)
+
+	if e.Settings.API.Compression.Enabled {
+		r.Use(middleware.Compress(e.Settings.API.Compression.Level))
+	}
+
+	r.Use(middleware.AllowContentType("application/json", "application/x-www-form-urlencoded"))
+
+	return &Router{r, e}
 }
 
-// registerStaticRoutes registers the static routes for the API.
-func registerStaticRoutes(r *chi.Mux) {
-	r.Get("/*", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodGet {
-			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			return
-		}
+// RegisterGUIRoutes configures the router for the GUI.
+func (r *Router) RegisterGUIRoutes() {
+	staticFileServer := http.FileServer(http.FS(gui.DistDirFS))
 
-		fs := http.FileServer(http.FS(gui.DistDirFS))
-		fs.ServeHTTP(w, r)
+	r.Mux.Get(r.engine.Settings.GUI.Path, func(w http.ResponseWriter, r *http.Request) {
+		// TODO: Need to add caching headers here
+		staticFileServer.ServeHTTP(w, r)
 	})
 }
 
-// registerAPIRoutes registers the API routes.
-func registerAPIRoutes(router *chi.Mux, app *application.Application) {
-	router.Route("/api", func(api chi.Router) {
-		// Connection routes
-		api.Route("/connections", func(r chi.Router) {
-			connectionHandler := connection.NewHandler(app)
-			connectionHandler.RegisterRoutes(r)
+// RegisterAPIRoutesV1 configures the routing for the v1 API endpoints (/api/v1).
+func (r *Router) RegisterAPIV1Routes() {
+	r.Mux.Route("/api/v1", func(apiRouter chi.Router) {
+		apiRouter.Use(middleware.SetHeader("Content-Type", "application/json"))
+
+		apiRouter.Route("/health", func(apiRouter chi.Router) {
+			h := handler.NewHealthHandler(r.engine)
+			h.RegisterRoutes(apiRouter)
 		})
 
-		// Table routes with middleware
-		api.Route("/tables", func(r chi.Router) {
-			r.Use(pMiddleware.ConnectionName)
-			tableHandler := table.NewHandler(app)
-			tableHandler.RegisterRoutes(r)
+		apiRouter.Route("/settings", func(apiRouter chi.Router) {
+			h := handler.NewSettingsHandler(r.engine)
+			h.RegisterRoutes(apiRouter)
+		})
+
+		apiRouter.Route("/keymap", func(apiRouter chi.Router) {
+			h := handler.NewKeymapHandler(r.engine)
+			h.RegisterRoutes(apiRouter)
+		})
+
+		apiRouter.Route("/connections", func(apiRouter chi.Router) {
+			h := handler.NewConnectionHandler(r.engine)
+			h.RegisterRoutes(apiRouter)
+		})
+
+		apiRouter.Route("/databases", func(apiRouter chi.Router) {
+			apiRouter.Use(pMiddleware.ConnectionName)
+
+			h := handler.NewDatabaseHandler(r.engine)
+			h.RegisterRoutes(apiRouter)
+		})
+
+		apiRouter.Route("/tables", func(apiRouter chi.Router) {
+			apiRouter.Use(pMiddleware.ConnectionName)
+
+			h := handler.NewTableHandler(r.engine)
+			h.RegisterRoutes(apiRouter)
+		})
+
+		apiRouter.Route("/queries", func(apiRouter chi.Router) {
+			// TODO: analyze the best way to implement a custom middleware for query timeouts
+
+			apiRouter.Use(pMiddleware.ConnectionName)
+
+			h := handler.NewQueryHandler(r.engine)
+			h.RegisterRoutes(apiRouter)
 		})
 	})
 }
