@@ -13,17 +13,18 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/polyclient/polyclient/internal/application"
+	"github.com/polyclient/polyclient/internal/engine"
 )
 
 // Server is the HTTP server for the API.
 type Server struct {
 	Host       string
 	Port       int
+	Router     *Router
 	HTTPServer *http.Server
 }
 
-// ServerOption configures the API server.
+// ServerOption is a function that modifies Server.
 type ServerOption func(*Server)
 
 // WithHost sets the host for the API server.
@@ -41,54 +42,55 @@ func WithPort(port int) ServerOption {
 }
 
 // defaultOptions returns the default options for the API server.
-var defaultOptions = func() *Server {
+var defaultServerOptions = func(e *engine.Engine) *Server {
 	return &Server{
-		Host: "127.0.0.1",
-		Port: 8080,
+		Host: e.Settings.API.Host,
+		Port: e.Settings.API.Port,
 	}
 }
 
 // NewServer creates a new HTTP server for the API.
-func NewServer(app *application.Application, options ...ServerOption) (*Server, error) {
-	if app == nil {
-		return nil, errors.New("application cannot be nil")
-	}
-
-	config := defaultOptions()
+func NewServer(ctx context.Context, e *engine.Engine, options ...ServerOption) (*Server, error) {
+	opts := defaultServerOptions(e)
 	for _, opt := range options {
-		opt(config)
-	}
-
-	router, err := NewRouter(app)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create router: %w", err)
+		opt(opts)
 	}
 
 	var port int
-	if !isPortAvailable(config.Port) {
-		foundPort, err := findAvailablePort(config.Host)
+	if !isPortAvailable(opts.Port) {
+		foundPort, err := findAvailablePort(opts.Host)
 		if err != nil {
 			return nil, fmt.Errorf("failed to find an available port: %w", err)
 		}
 
 		port = foundPort
 	} else {
-		port = config.Port
+		port = opts.Port
+	}
+
+	router := NewRouter(ctx, e)
+	router.RegisterAPIV1Routes()
+
+	if e.Settings.GUI.Enabled {
+		router.RegisterGUIRoutes()
 	}
 
 	httpServer := &http.Server{
-		Addr:              fmt.Sprintf("%s:%d", config.Host, port),
+		Addr:              fmt.Sprintf("%s:%d", opts.Host, port),
 		Handler:           router,
-		ReadTimeout:       5 * time.Second,
-		WriteTimeout:      10 * time.Second,
-		IdleTimeout:       15 * time.Second,
 		ReadHeaderTimeout: 5 * time.Second,
-		MaxHeaderBytes:    1 << 20,
+	}
+
+	if e.Settings.API.Timeouts.Enabled {
+		httpServer.ReadTimeout = time.Duration(e.Settings.API.Timeouts.ReadSeconds)
+		httpServer.WriteTimeout = time.Duration(e.Settings.API.Timeouts.WriteSeconds)
+		httpServer.IdleTimeout = time.Duration(e.Settings.API.Timeouts.IdleSeconds)
 	}
 
 	return &Server{
-		Host:       config.Host,
+		Host:       opts.Host,
 		Port:       port,
+		Router:     router,
 		HTTPServer: httpServer,
 	}, nil
 }

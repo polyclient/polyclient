@@ -1,4 +1,4 @@
-package table
+package handler
 
 import (
 	"encoding/json"
@@ -6,29 +6,29 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/polyclient/polyclient/api/config"
-	"github.com/polyclient/polyclient/internal/application"
+	"github.com/polyclient/polyclient/internal/constant"
 	"github.com/polyclient/polyclient/internal/db"
+	"github.com/polyclient/polyclient/internal/engine"
 )
 
-// Handler is the HTTP handler for the table endpoint.
-type Handler struct {
-	app *application.Application
+// TableHandler is the HTTP handler for the table resource.
+type TableHandler struct {
+	engine *engine.Engine
 }
 
-// NewHandler creates a new HTTP handler for the table endpoint.
-func NewHandler(app *application.Application) *Handler {
-	return &Handler{app: app}
+// NewTableHandler creates a new instance of TableHandler.
+func NewTableHandler(e *engine.Engine) *TableHandler {
+	return &TableHandler{engine: e}
 }
 
-// RegisterRoutes registers the routes for the table endpoint.
-func (h *Handler) RegisterRoutes(r chi.Router) {
+// RegisterRoutes registers the routes for the TableHandler.
+func (h *TableHandler) RegisterRoutes(r chi.Router) {
 	r.Get("/", h.handleListTables)
 	r.Get("/{name}", h.handleGetTable)
 }
 
-func (h *Handler) handleListTables(w http.ResponseWriter, r *http.Request) {
-	connName := r.Context().Value(config.ContextKeyConnectionName).(string)
+func (h *TableHandler) handleListTables(w http.ResponseWriter, r *http.Request) {
+	connName := r.Context().Value(constant.ContextKeyConnectionName).(string)
 
 	schema := r.URL.Query().Get("schema")
 	filter := r.URL.Query().Get("filter")
@@ -47,7 +47,7 @@ func (h *Handler) handleListTables(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tables, err := h.app.SDK.Inspector().ListTables(r.Context(), connName,
+	tables, err := h.engine.SDK.Inspector().ListTables(r.Context(), connName,
 		db.WithTablesSchema(schema),
 		db.WithTablesFilter(filter),
 		db.WithTablesLimit(limitInt),
@@ -58,7 +58,6 @@ func (h *Handler) handleListTables(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(tables); err != nil {
@@ -66,11 +65,11 @@ func (h *Handler) handleListTables(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) handleGetTable(w http.ResponseWriter, r *http.Request) {
-	connName := r.Context().Value(config.ContextKeyConnectionName).(string)
+func (h *TableHandler) handleGetTable(w http.ResponseWriter, r *http.Request) {
+	connName := r.Context().Value(constant.ContextKeyConnectionName).(string)
 	name := chi.URLParam(r, "name")
 
-	table, err := h.app.SDK.Inspector().GetTable(r.Context(), connName, name)
+	table, err := h.engine.SDK.Inspector().GetTable(r.Context(), connName, name)
 	if err != nil {
 		// TODO: implement error constants
 		// if errors.Is(err, db.ErrTableNotFound) {
@@ -81,7 +80,6 @@ func (h *Handler) handleGetTable(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(table); err != nil {

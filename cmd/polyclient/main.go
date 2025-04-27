@@ -12,14 +12,14 @@ import (
 
 	pCli "github.com/polyclient/polyclient/cli"
 	pCliDB "github.com/polyclient/polyclient/cli/db"
-	"github.com/polyclient/polyclient/internal/application"
+	"github.com/polyclient/polyclient/internal/engine"
 	"github.com/polyclient/polyclient/internal/version"
 	"github.com/urfave/cli/v3"
 )
 
 // main initializes and runs the PolyClient CLI application.
 func main() {
-	app, err := application.NewApplication(context.Background())
+	e, err := engine.NewEngine(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -30,12 +30,12 @@ func main() {
 		Version:               version.Version(),
 		EnableShellCompletion: true,
 		Commands: []*cli.Command{
-			pCli.NewVersionCommand(app),
-			pCli.NewDocsCommand(app),
-			pCli.NewPluginCommand(app),
-			pCli.NewGUICommand(app),
-			pCli.NewLogCommand(app),
-			pCliDB.NewDatabaseCommand(app),
+			pCli.NewVersionCommand(e),
+			pCli.NewDocsCommand(e),
+			pCli.NewPluginCommand(e),
+			pCli.NewGUICommand(e),
+			pCli.NewLogCommand(e),
+			pCliDB.NewDatabaseCommand(e),
 		},
 	}
 
