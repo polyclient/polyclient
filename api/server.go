@@ -9,11 +9,11 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"net"
 	"net/http"
 	"time"
 
 	"github.com/polyclient/polyclient/internal/engine"
+	"github.com/polyclient/polyclient/internal/netutil"
 )
 
 // Server is the HTTP server for the API.
@@ -57,15 +57,16 @@ func NewServer(ctx context.Context, e *engine.Engine, options ...ServerOption) (
 	}
 
 	var port int
-	if !isPortAvailable(opts.Port) {
-		foundPort, err := findAvailablePort(opts.Host)
+
+	if netutil.IsPortAvailable(opts.Port) {
+		port = opts.Port
+	} else {
+		foundPort, err := netutil.GetAvailablePort()
 		if err != nil {
 			return nil, fmt.Errorf("failed to find an available port: %w", err)
 		}
 
 		port = foundPort
-	} else {
-		port = opts.Port
 	}
 
 	router := NewRouter(ctx, e)
@@ -119,41 +120,4 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	slog.Info("Shutting down server", "addr", s.HTTPServer.Addr)
 
 	return s.HTTPServer.Shutdown(ctx)
-}
-
-// isPortAvailable checks if a TCP port is available for use.
-func isPortAvailable(port int) bool {
-	if port < 1 || port > 65535 {
-		return false
-	}
-
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-	if err != nil {
-		return false
-	}
-
-	_ = listener.Close()
-
-	return true
-}
-
-// findAvailablePort finds an available port.
-func findAvailablePort(host string) (int, error) {
-	addr := ":0"
-	if host != "" {
-		addr = host + ":0"
-	}
-
-	listener, err := net.Listen("tcp", addr)
-	if err != nil {
-		return 0, fmt.Errorf("failed to listen on %s: %w", addr, err)
-	}
-	defer listener.Close()
-
-	tcpAddr, ok := listener.Addr().(*net.TCPAddr)
-	if !ok {
-		return 0, fmt.Errorf("unexpected address type: %T", listener.Addr())
-	}
-
-	return tcpAddr.Port, nil
 }

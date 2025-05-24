@@ -7,8 +7,9 @@ package cli
 import (
 	"context"
 
+	"github.com/polyclient/polyclient/internal/constant"
 	"github.com/polyclient/polyclient/internal/engine"
-	"github.com/polyclient/polyclient/internal/system"
+	"github.com/polyclient/polyclient/internal/webbrowser"
 	"github.com/urfave/cli/v3"
 )
 
@@ -17,10 +18,8 @@ func NewDocsCommand(e *engine.Engine) *cli.Command {
 	return &cli.Command{
 		Name:  "docs",
 		Usage: "Open documentation website",
-		Action: func(context.Context, *cli.Command) error {
-			const url = "https://polyclient.pages.dev"
-
-			return system.OpenBrowser(url)
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			return webbrowser.OpenURL(ctx, constant.DocsURL)
 		},
 	}
 }

@@ -220,7 +220,7 @@
         "format": {
           "description": "Specifies the log format.",
           "type": "string",
-          "enum": ["json", "text"],
+          "enum": ["json", "text", "tinted"],
           "default": "json"
         },
         "level": {

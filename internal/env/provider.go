@@ -1,9 +1,12 @@
+// SPDX-FileCopyrightText: 2025 The PolyClient Authors
+//
+// SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
+
 package env
 
 import (
 	"errors"
 	"fmt"
-	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -25,10 +28,12 @@ const (
 
 	// VariableKeymapFile controls the PolyClient keymap file.
 	VariableKeymapFile Variable = "POLYCLIENT_KEYMAP_FILE"
-
-	// VariableLogLevel controls the PolyClient log level.
-	VariableLogLevel Variable = "POLYCLIENT_LOG_LEVEL"
 )
+
+// String returns the string representation of the variable.
+func (v Variable) String() string {
+	return string(v)
+}
 
 const (
 	// PolyClientProdConfigDir controls the PolyClient production configuration directory.
@@ -70,59 +75,37 @@ func (p *SystemProvider) Get(envVar Variable) (string, error) {
 func resolveDefault(envVar Variable) (string, error) {
 	switch envVar {
 	case VariableConnectionsDir:
-		return getConfigBaseSubpath("connections")
+		return getConfigPath("connections")
 	case VariablePluginsDir:
-		return getConfigBaseSubpath("plugins")
+		return getConfigPath("plugins")
 	case VariableSettingsFile:
-		return getConfigBaseSubpath("settings.json")
+		return getConfigPath("settings.json")
 	case VariableKeymapFile:
-		return getConfigBaseSubpath("keymap.json")
-	case VariableLogLevel:
-		return slog.LevelInfo.String(), nil
+		return getConfigPath("keymap.json")
 	default:
 		return "", nil
 	}
 }
 
-// getConfigBaseSubpath returns the base path joined with the given subpath.
-func getConfigBaseSubpath(subpath string) (string, error) {
+// getConfigPath returns the configuration path for the given subpath.
+func getConfigPath(subpath string) (string, error) {
 	if subpath == "" {
-		return "", errors.New("invalid empty config subpath")
+		return "", errors.New("subpath cannot be empty")
 	}
 
-	basePath, err := getConfigBasePath()
-	if err != nil {
-		return "", err
-	}
-
-	return filepath.Join(basePath, subpath), nil
-}
-
-// getConfigBasePath returns the base path for PolyClient configuration.
-func getConfigBasePath() (string, error) {
 	if version.IsProd() {
-		return getProdConfigBasePath()
+		userConfigDir, err := os.UserConfigDir()
+		if err != nil {
+			return "", fmt.Errorf("failed to get user config directory: %w", err)
+		}
+
+		return filepath.Join(userConfigDir, PolyClientProdConfigDir, subpath), nil
 	}
 
-	return getDevConfigBasePath()
-}
-
-// getProdConfigBasePath returns the base path for PolyClient production environments.
-func getProdConfigBasePath() (string, error) {
-	userConfigDir, err := os.UserConfigDir()
-	if err != nil {
-		return "", fmt.Errorf("failed to get user config directory: %w", err)
-	}
-
-	return filepath.Join(userConfigDir, PolyClientProdConfigDir), nil
-}
-
-// getDevConfigBasePath returns the base path for PolyClient development environments.
-func getDevConfigBasePath() (string, error) {
 	cwd, err := os.Getwd()
 	if err != nil {
 		return "", fmt.Errorf("failed to get current working directory: %w", err)
 	}
 
-	return filepath.Join(cwd, PolyClientDevConfigDir), nil
+	return filepath.Join(cwd, PolyClientDevConfigDir, subpath), nil
 }

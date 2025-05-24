@@ -97,19 +97,17 @@ type GUI struct {
 type Logging struct {
 	Format   string          `json:"format"`
 	Level    string          `json:"level"`
-	Path     string          `json:"path"`
 	Rotation LoggingRotation `json:"rotation"`
 }
 
 // LoggingRotation holds the settings for log rotation.
 type LoggingRotation struct {
-	Enabled    bool   `json:"enabled"`
-	Filename   string `json:"filename"`
-	MaxSizeMB  int    `json:"maxSizeMB"`
-	MaxAgeDays int    `json:"maxAgeDays"`
-	MaxBackups int    `json:"maxBackups"`
-	LocalTime  bool   `json:"localTime"`
-	Compress   bool   `json:"compress"`
+	Enabled    bool `json:"enabled"`
+	MaxSizeMB  int  `json:"maxSizeMB"`
+	MaxAgeDays int  `json:"maxAgeDays"`
+	MaxBackups int  `json:"maxBackups"`
+	LocalTime  bool `json:"localTime"`
+	Compress   bool `json:"compress"`
 }
 
 // Validate validates the settings.

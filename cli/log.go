@@ -12,12 +12,13 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+// NewLogCommand creates a new command for viewing or managing logs.
 func NewLogCommand(e *engine.Engine) *cli.Command {
 	return &cli.Command{
 		Name:  "log",
 		Usage: "View or manage logs",
 		Action: func(context.Context, *cli.Command) error {
-			return exec.Command("less", "/tmp/polyclient.log").Start()
+			return exec.Command("less", "/tmp/polyclient.log").Start() // TODO: improve this
 		},
 	}
 }

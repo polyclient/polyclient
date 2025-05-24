@@ -27,7 +27,6 @@ type Engine struct {
 	DriversRegistry *db.Registry[db.Driver]    // Registry for database drivers
 	PluginsRegistry *plugin.Registry           // Registry for plugins
 	SDK             *db.SDK                    // SDK for database interactions
-	Logger          *logger.Logger             // Logger for application logs
 	Validator       *validator.CustomValidator // Validator for custom validation logic
 }
 
@@ -43,7 +42,7 @@ func NewEngine(ctx context.Context) (*Engine, error) {
 		return nil, fmt.Errorf("failed to load settings: %w", err)
 	}
 
-	logger, err := logger.NewLogger(
+	l, err := logger.NewLogger(
 		logger.WithFormat(parseLoggerFormat(stgs.Logging.Format)),
 		logger.WithLevel(parseLoggerLevel(stgs.Logging.Level)),
 		logger.WithRotationEnabled(stgs.Logging.Rotation.Enabled),
@@ -56,9 +55,9 @@ func NewEngine(ctx context.Context) (*Engine, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize logger: %w", err)
 	}
-	slog.SetDefault(logger.Logger)
 
-	logger.Info("Initializing PolyClient engine")
+	slog.SetDefault(l.Logger)
+	slog.Info("Initializing PolyClient engine")
 
 	driversRegistry, err := initDrivers(stgs)
 	if err != nil {
@@ -88,7 +87,6 @@ func NewEngine(ctx context.Context) (*Engine, error) {
 		DriversRegistry: driversRegistry,
 		PluginsRegistry: nil,
 		SDK:             sdk,
-		Logger:          logger,
 		Validator:       val,
 	}, nil
 }

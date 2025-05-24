@@ -1,130 +1,104 @@
+// SPDX-FileCopyrightText: 2025 The PolyClient Authors
+//
+// SPDX-License-Identifier: GPL-3.0-or-later WITH LicenseRef-PolyClient-Plugin-Exception
+
 package env
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
-	"log/slog"
-
-	"github.com/polyclient/polyclient/internal/version"
+	"github.com/polyclient/polyclient/internal/version/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestSystemProvider_Get(t *testing.T) {
-	t.Run("WhenVariableIsSet", func(t *testing.T) {
+	t.Run("returns env var when a value is set", func(t *testing.T) {
+		expected := "/tmp/custom-connections-dir"
+
+		t.Setenv(VariableConnectionsDir.String(), expected)
+
 		provider := NewSystemProvider()
-		key := string(VariableConnectionsDir)
-		expected := "/tmp/polyclient/connections"
 
-		t.Setenv(key, expected)
-
-		val, err := provider.Get(VariableConnectionsDir)
-
+		value, err := provider.Get(VariableConnectionsDir)
 		require.NoError(t, err)
-		assert.Equal(t, expected, val)
+		assert.Equal(t, expected, value)
 	})
 
-	t.Run("WithUnknownVariable", func(t *testing.T) {
+	t.Run("returns default value when env var is not set - dev mode", func(t *testing.T) {
+		testutil.MockVersionDev(t)
+
 		provider := NewSystemProvider()
 
-		_ = os.Unsetenv("NON_EXISTENT_VAR")
+		cwd, _ := os.Getwd()
 
-		val, err := provider.Get(Variable("NON_EXISTENT_VAR"))
-
+		expectedConnectionsDir := filepath.Join(cwd, PolyClientDevConfigDir, "connections")
+		connectionsDir, err := provider.Get(VariableConnectionsDir)
 		require.NoError(t, err)
-		assert.Empty(t, val)
+		assert.Equal(t, expectedConnectionsDir, connectionsDir)
+
+		expectedPluginsDir := filepath.Join(cwd, PolyClientDevConfigDir, "plugins")
+		pluginsDir, err := provider.Get(VariablePluginsDir)
+		require.NoError(t, err)
+		assert.Equal(t, expectedPluginsDir, pluginsDir)
+	})
+
+	t.Run("returns default value when env var is not set - prod mode", func(t *testing.T) {
+		testutil.MockVersionProd(t)
+
+		provider := NewSystemProvider()
+
+		configDir, _ := os.UserConfigDir()
+
+		expectedConnectionsDir := filepath.Join(configDir, PolyClientProdConfigDir, "connections")
+		connectionsDir, err := provider.Get(VariableConnectionsDir)
+		require.NoError(t, err)
+		assert.Equal(t, expectedConnectionsDir, connectionsDir)
+
+		expectedPluginsDir := filepath.Join(configDir, PolyClientProdConfigDir, "plugins")
+		pluginsDir, err := provider.Get(VariablePluginsDir)
+		require.NoError(t, err)
+		assert.Equal(t, expectedPluginsDir, pluginsDir)
+	})
+
+	t.Run("returns empty string for unknown variable", func(t *testing.T) {
+		provider := NewSystemProvider()
+
+		value, err := provider.Get("UNKNOWN_VARIABLE")
+		require.NoError(t, err)
+		assert.Equal(t, "", value)
 	})
 }
 
-func TestSystemProvider_DefaultValues(t *testing.T) {
-	t.Run("ConnectionsDir", func(t *testing.T) {
-		provider := NewSystemProvider()
-		_ = os.Unsetenv(string(VariableConnectionsDir))
-
-		val, err := provider.Get(VariableConnectionsDir)
-
-		require.NoError(t, err)
-		assert.NotEmpty(t, val)
-		assert.Contains(t, val, "connections")
-	})
-
-	t.Run("PluginsDir", func(t *testing.T) {
-		provider := NewSystemProvider()
-		_ = os.Unsetenv(string(VariablePluginsDir))
-
-		val, err := provider.Get(VariablePluginsDir)
-
-		require.NoError(t, err)
-		assert.NotEmpty(t, val)
-		assert.Contains(t, val, "plugins")
-	})
-
-	t.Run("SettingsFile", func(t *testing.T) {
-		provider := NewSystemProvider()
-		_ = os.Unsetenv(string(VariableSettingsFile))
-
-		val, err := provider.Get(VariableSettingsFile)
-
-		require.NoError(t, err)
-		assert.NotEmpty(t, val)
-		assert.Contains(t, val, "settings.json")
-	})
-
-	t.Run("KeymapFile", func(t *testing.T) {
-		provider := NewSystemProvider()
-		_ = os.Unsetenv(string(VariableKeymapFile))
-
-		val, err := provider.Get(VariableKeymapFile)
-
-		require.NoError(t, err)
-		assert.NotEmpty(t, val)
-		assert.Contains(t, val, "keymap.json")
-	})
-
-	t.Run("LogLevel", func(t *testing.T) {
-		provider := NewSystemProvider()
-		_ = os.Unsetenv(string(VariableLogLevel))
-
-		val, err := provider.Get(VariableLogLevel)
-
-		require.NoError(t, err)
-		assert.Equal(t, slog.LevelInfo.String(), val)
-	})
-}
-
-func TestConfigBasePath(t *testing.T) {
-	t.Run("WhenVersionIsDev", func(t *testing.T) {
-		oldVersion := version.Version()
-		defer func() { version.SetVersion(oldVersion) }()
-
-		version.SetVersion("dev")
-
-		path, err := getConfigBasePath()
-
-		require.NoError(t, err)
-		assert.Contains(t, path, PolyClientDevConfigDir)
-	})
-
-	t.Run("WhenVersionIsProd", func(t *testing.T) {
-		oldVersion := version.Version()
-		defer func() { version.SetVersion(oldVersion) }()
-
-		version.SetVersion("v1.2.3")
-
-		path, err := getConfigBasePath()
-
-		require.NoError(t, err)
-		assert.Contains(t, path, PolyClientProdConfigDir)
-	})
-}
-
-func TestConfigBaseSubpath(t *testing.T) {
-	t.Run("WhenSubpathIsEmpty", func(t *testing.T) {
-		path, err := getConfigBaseSubpath("")
-
+func TestGetConfigPath(t *testing.T) {
+	t.Run("returns error on empty subpath", func(t *testing.T) {
+		_, err := getConfigPath("")
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "invalid empty config subpath")
-		assert.Empty(t, path)
+	})
+
+	t.Run("returns correct path in dev mode", func(t *testing.T) {
+		testutil.MockVersionDev(t)
+
+		cwd, _ := os.Getwd()
+
+		expected := filepath.Join(cwd, PolyClientDevConfigDir, "connections")
+
+		path, err := getConfigPath("connections")
+		require.NoError(t, err)
+		assert.Equal(t, expected, path)
+	})
+
+	t.Run("returns correct path in prod mode", func(t *testing.T) {
+		testutil.MockVersionProd(t)
+
+		configDir, _ := os.UserConfigDir()
+
+		expected := filepath.Join(configDir, PolyClientProdConfigDir, "connections")
+
+		path, err := getConfigPath("connections")
+		require.NoError(t, err)
+		assert.Equal(t, expected, path)
 	})
 }

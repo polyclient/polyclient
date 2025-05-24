@@ -22,6 +22,9 @@ const (
 
 	// TextFormat makes the logger output plain text.
 	TextFormat Format = "text"
+
+	// TintedFormat makes the logger output colored text.
+	TintedFormat Format = "tinted"
 )
 
 // String returns the string representation of the format.
@@ -164,7 +167,7 @@ func NewLogger(opts ...Option) (*Logger, error) {
 	}
 
 	writers := make([]io.Writer, 0, 2)
-	if version.Version() != "dev" {
+	if version.Version() == "dev" {
 		writers = append(writers, os.Stdout)
 	}
 

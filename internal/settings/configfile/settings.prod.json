@@ -1,5 +1,5 @@
 {
-  "$schema": "../../jsonschema/settings.schema.json",
+  "$schema": "jsonschema/settings.schema.json",
   "drivers": {
     "sqlite": {
       "enabled": true
@@ -41,7 +41,7 @@
     "locale": "en"
   },
   "logging": {
-    "format": "json",
+    "format": "tinted",
     "level": "info",
     "rotation": {
       "enabled": true,

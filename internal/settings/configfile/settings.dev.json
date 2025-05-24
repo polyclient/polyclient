@@ -1,4 +1,5 @@
 {
+  "$schema": "jsonschema/settings.schema.json",
   "drivers": {
     "sqlite": {
       "enabled": true
